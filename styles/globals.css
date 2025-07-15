@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+body {
+  background: #18181b;
+  color: #f3f3f3;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.2s, color 0.2s;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: #18181b;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+header {
+  background: #18181b !important;
+}
+nav {
+  background: #18181b !important;
+}
+
+/* Светлая иконка календаря для input[type=datetime-local] на тёмном фоне */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2);
+}
+input[type="datetime-local"]::-webkit-input-placeholder {
+  color: #f3f3f3;
+}
+input[type="datetime-local"]::-moz-placeholder {
+  color: #f3f3f3;
+}
+input[type="datetime-local"]:-ms-input-placeholder {
+  color: #f3f3f3;
+}
+input[type="datetime-local"]::placeholder {
+  color: #f3f3f3;
+}
+
+input:focus, textarea:focus, input[type="datetime-local"]:focus {
+  outline: none;
+  border: 1px solid #fff !important;
+  box-shadow: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} 
