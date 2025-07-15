@@ -12,6 +12,9 @@ const s3 = new S3Client({
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    return res.status(401).end('Unauthorized');
+  }
   if (req.method !== 'POST') return res.status(405).end();
 
   try {
