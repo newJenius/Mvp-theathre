@@ -290,55 +290,47 @@ export default function Profile() {
   if (!user) {
     return (
       <div style={{ 
-        padding: 32,
+        minHeight: '100vh',
+        background: '#111114',
+        color: '#d1d5db',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '60vh',
-        background: '#18181b',
-        color: '#fff'
+        padding: 0
       }}>
-        <h1 style={{ marginBottom: 32, fontSize: 28 }}>Профиль</h1>
-        <p style={{ marginBottom: 32, fontSize: 16, color: '#bdbdbd' }}>Вы не авторизованы.</p>
-        <div style={{ display: 'flex', gap: 16 }}>
-          <button 
-            onClick={() => window.location.href = '/login'}
-            style={{
-              padding: '12px 24px',
-              background: 'linear-gradient(90deg, #2196f3, #1769aa)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              fontWeight: 600,
-              fontSize: 16,
-              cursor: 'pointer',
-              transition: 'opacity 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-          >
-            Войти
-          </button>
-          <button 
-            onClick={() => window.location.href = '/register'}
-            style={{
-              padding: '12px 24px',
-              background: 'linear-gradient(90deg, #22c55e, #16a34a)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              fontWeight: 600,
-              fontSize: 16,
-              cursor: 'pointer',
-              transition: 'opacity 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-          >
-            Зарегистрироваться
-          </button>
-        </div>
+        <h1 style={{ marginBottom: 18, fontSize: 22, fontWeight: 600, letterSpacing: 0.2 }}>Профиль</h1>
+        <p style={{ fontSize: 15, color: '#6b7280', textAlign: 'center', margin: 0, marginBottom: 22 }}>Вы не авторизованы</p>
+        <button 
+          onClick={() => window.location.href = '/login'}
+          style={{
+            padding: '10px 32px',
+            background: '#18181b',
+            color: '#d1d5db',
+            border: '1.5px solid #23232a',
+            borderRadius: 0,
+            fontWeight: 500,
+            fontSize: 15,
+            cursor: 'pointer',
+            transition: 'background 0.2s, color 0.2s, border 0.2s',
+            boxShadow: 'none',
+            outline: 'none',
+            letterSpacing: 0.2,
+            fontFamily: `'JetBrains Mono', monospace`
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = '#23232a';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.style.border = '1.5px solid #393a3f';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = '#18181b';
+            e.currentTarget.style.color = '#d1d5db';
+            e.currentTarget.style.border = '1.5px solid #23232a';
+          }}
+        >
+          Войти
+        </button>
       </div>
     );
   }
