@@ -1,0 +1,12 @@
+{
+  "cron": [
+    {
+      "path": "/api/cleanup-videos",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/auto-premiere-push",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+} 
