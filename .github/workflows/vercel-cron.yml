@@ -1,0 +1,17 @@
+name: Call Vercel Cron Endpoints
+
+on:
+  schedule:
+    - cron: '*/5 * * * *' # каждые 5 минут (можно изменить)
+  workflow_dispatch: # позволяет запускать вручную
+
+jobs:
+  call-endpoints:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call cleanup-videos
+        run: |
+          curl -X POST "https://your-vercel-app.vercel.app/api/cleanup-videos" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+      - name: Call auto-premiere-push
+        run: |
+          curl -X POST "https://your-vercel-app.vercel.app/api/auto-premiere-push" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
