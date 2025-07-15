@@ -5,7 +5,7 @@
       "schedule": "0 * * * *"
     },
     {
-      "path": "/api/auto-premiush",
+      "path": "/api/auto-premiere-push",
       "schedule": "*/5 * * * *"
     }
   ]
