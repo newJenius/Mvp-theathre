@@ -6,6 +6,11 @@ import EmotionCarousel from '../../components/EmotionCarousel';
 import { NextPageContext } from 'next';
 import WatchSubscribePush from '../../components/WatchSubscribePush';
 import React from 'react';
+// Хелпер для определения мобильного устройства
+function isMobileDevice() {
+  if (typeof navigator === 'undefined') return false;
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+}
 
 type Video = {
   id: string;
@@ -525,16 +530,36 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         ref={videoRef}
         src={videoUrl}
         autoPlay
+        playsInline
         controls={false}
         disablePictureInPicture
         controlsList="nodownload nofullscreen noremoteplayback noplaybackrate nofullscreen"
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        style={{ width: '100%', height: '100%', objectFit: isFullscreen ? 'contain' : 'cover' }}
         onContextMenu={e => e.preventDefault()}
         onPlay={e => { e.currentTarget.play(); }}
         onPause={e => { e.currentTarget.play(); }}
         onSeeking={e => { e.currentTarget.currentTime = startOffset; }}
         onEnded={e => { e.currentTarget.currentTime = startOffset; e.currentTarget.play(); }}
+        onTouchStart={e => e.preventDefault()}
       />
+      {/* Блокируем взаимодействие с видео на мобильных, кроме полноэкранного режима */}
+      {isMobileDevice() && !isFullscreen && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 9,
+            background: 'transparent',
+            pointerEvents: 'auto',
+            touchAction: 'none',
+          }}
+          onTouchStart={e => e.preventDefault()}
+          onClick={e => e.preventDefault()}
+        />
+      )}
       <button
         onClick={handleFullscreen}
         style={{
@@ -611,7 +636,7 @@ function ShareButton() {
       }}
       title="Поделиться премьерой"
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle'}}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
         <circle cx="18" cy="5" r="3" />
         <circle cx="6" cy="12" r="3" />
         <circle cx="18" cy="19" r="3" />
