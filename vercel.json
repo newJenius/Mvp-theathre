@@ -1,5 +1,5 @@
 {
-  "cron": [
+  "crons": [
     {
       "path": "/api/cleanup-videos",
       "schedule": "0 * * * *"
