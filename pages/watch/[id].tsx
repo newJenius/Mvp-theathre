@@ -252,7 +252,7 @@ export default function Watch(props: any) {
           
           {canWatch && (
             <>
-              <VideoPlayerWithFullscreen videoUrl={video.video_url} />
+              <VideoPlayerWithFullscreen videoUrl={video.video_url} premiereAt={video.premiere_at} />
               <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0 0 0' }}>
                 <ShareButton />
               </div>
@@ -438,10 +438,37 @@ Watch.getInitialProps = async (ctx: NextPageContext) => {
 };
 
 // Кастомный плеер с кнопкой полноэкранного режима (динамическая иконка)
-function VideoPlayerWithFullscreen({ videoUrl }: { videoUrl: string }) {
+function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string, premiereAt: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Вычисляем, сколько секунд прошло с начала премьеры
+  const [startOffset, setStartOffset] = useState(0);
+  useEffect(() => {
+    if (!premiereAt) return;
+    const premiereDate = new Date(premiereAt);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - premiereDate.getTime()) / 1000); // в секундах
+    setStartOffset(diff > 0 ? diff : 0);
+  }, [premiereAt]);
+
+  // Устанавливаем currentTime при готовности видео
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const setTime = () => {
+      if (startOffset > 0 && video.duration && startOffset < video.duration) {
+        video.currentTime = startOffset;
+      }
+    };
+    video.addEventListener('loadedmetadata', setTime);
+    // Если metadata уже загружены
+    if (video.readyState >= 1) setTime();
+    return () => {
+      video.removeEventListener('loadedmetadata', setTime);
+    };
+  }, [startOffset, videoUrl]);
 
   // Обработчик смены состояния полноэкранного режима
   const handleFullscreenChange = useCallback(() => {
@@ -505,8 +532,8 @@ function VideoPlayerWithFullscreen({ videoUrl }: { videoUrl: string }) {
         onContextMenu={e => e.preventDefault()}
         onPlay={e => { e.currentTarget.play(); }}
         onPause={e => { e.currentTarget.play(); }}
-        onSeeking={e => { e.currentTarget.currentTime = 0; }}
-        onEnded={e => { e.currentTarget.currentTime = 0; e.currentTarget.play(); }}
+        onSeeking={e => { e.currentTarget.currentTime = startOffset; }}
+        onEnded={e => { e.currentTarget.currentTime = startOffset; e.currentTarget.play(); }}
       />
       <button
         onClick={handleFullscreen}
