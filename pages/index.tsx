@@ -133,11 +133,23 @@ export default function Home() {
     videosByHour[hour].push(video);
   });
 
-  // Для раздела 'Сейчас': только видео, у которых премьера уже наступила и ещё не закончилась
+  // Для раздела 'Сейчас': все видео текущего часа
   const nowVideos = todayVideos.filter(v => {
     const d = new Date(v.premiere_at);
-    const end = v.duration ? new Date(d.getTime() + v.duration * 1000) : null;
-    return d <= now && (!end || now <= end);
+    return d.getHours() === nowHour;
+  }).sort((a, b) => {
+    // Сортируем: сначала те, что уже начались, потом те, что еще не начались
+    const now = new Date();
+    const aTime = new Date(a.premiere_at);
+    const bTime = new Date(b.premiere_at);
+    const aStarted = aTime <= now;
+    const bStarted = bTime <= now;
+    if (aStarted === bStarted) {
+      // Если оба начались или оба не начались — сортируем по времени премьеры
+      return aTime.getTime() - bTime.getTime();
+    }
+    // Сначала те, что уже начались
+    return aStarted ? -1 : 1;
   });
 
   // Остальные часы (без текущего)
