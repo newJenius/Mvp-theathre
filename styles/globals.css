@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 body {
   background: #18181b;
   color: #f3f3f3;
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   transition: background 0.2s, color 0.2s;
   margin: 0;
   padding: 0;

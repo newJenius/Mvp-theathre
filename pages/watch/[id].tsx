@@ -21,13 +21,13 @@ export default function Watch(props: any) {
   const router = useRouter();
   const { id } = router.query;
   const [video, setVideo] = useState<Video | null>(null);
+  const [authorUsername, setAuthorUsername] = useState<string | null>(null);
   const [isWaiting, setIsWaiting] = useState(false);
   const [waitingCount, setWaitingCount] = useState(0);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInfoExpanded, setIsInfoExpanded] = useState(false);
-  // Новое состояние для стартовой позиции
-  const [startPosition, setStartPosition] = useState(0);
+  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     // Получаем текущего пользователя
@@ -45,14 +45,16 @@ export default function Watch(props: any) {
       .select('*')
       .eq('id', id)
       .single()
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         setVideo(data);
-        if (data) {
-          // Вычисляем, сколько секунд прошло с начала премьеры
-          const now = new Date();
-          const premiere = new Date(data.premiere_at);
-          const elapsed = Math.floor((now.getTime() - premiere.getTime()) / 1000);
-          setStartPosition(elapsed > 0 ? elapsed : 0);
+        if (data?.user_id) {
+          // Загружаем username автора
+          const { data: userData } = await supabase
+            .from('users')
+            .select('username')
+            .eq('id', data.user_id)
+            .single();
+          setAuthorUsername(userData?.username || null);
         }
       });
 
@@ -165,9 +167,10 @@ export default function Watch(props: any) {
       maxWidth: canWatch ? '100%' : '1200px',
       margin: '0 auto',
       paddingBottom: canWatch ? '60px' : '8px',
-      background: '#18181b',
+      background: '#111114',
       minHeight: '100vh',
       color: '#f3f3f3',
+      fontFamily: `'JetBrains Mono', monospace`
     }}>
       {!canWatch && (
         <h1 style={{ fontSize: '24px', marginBottom: '20px', color: '#fff', fontWeight: 700 }}>{video.title}</h1>
@@ -182,7 +185,8 @@ export default function Watch(props: any) {
               </div>
               
               <div style={{ marginBottom: '20px', marginTop: '10px' }}>
-                <div style={{ fontSize: '18px', marginBottom: '10px', color: '#e0e0e0' }}>Автор: {video.user_id}</div>
+                <div style={{ fontSize: '18px', marginBottom: '2px', color: '#e0e0e0', fontWeight: 700 }}>{video.title}</div>
+                <div style={{ fontSize: '15px', marginBottom: '10px', color: '#bdbdbd' }}>{authorUsername ? `@${authorUsername}` : ''}</div>
                 <SubscribeAuthorButton 
                   authorId={video.user_id} 
                   currentUser={currentUser} 
@@ -248,7 +252,7 @@ export default function Watch(props: any) {
           
           {canWatch && (
             <>
-              <VideoPlayerWithFullscreen videoUrl={video.video_url} startPosition={startPosition} />
+              <VideoPlayerWithFullscreen videoUrl={video.video_url} />
               <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0 0 0' }}>
                 <ShareButton />
               </div>
@@ -284,7 +288,7 @@ export default function Watch(props: any) {
                       width: '40px',
                       height: '40px',
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #23232a 80%, #1769aa 100%)',
+                      background: '#23232a',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -292,14 +296,14 @@ export default function Watch(props: any) {
                       fontWeight: 'bold',
                       fontSize: '16px',
                     }}>
-                      {video.user_id.charAt(0).toUpperCase()}
+                      {authorUsername ? authorUsername.charAt(0).toUpperCase() : ''}
                     </div>
                     <div>
                       <div style={{ fontWeight: '600', fontSize: '16px', color: '#fff' }}>
-                        {video.user_id}
+                        {video.title}
                       </div>
                       <div style={{ fontSize: '14px', color: '#bdbdbd' }}>
-                        Автор видео
+                        {authorUsername ? `@${authorUsername}` : ''}
                       </div>
                     </div>
                   </div>
@@ -365,7 +369,36 @@ export default function Watch(props: any) {
                   </div>
                 )}
               </div>
-              <SubscribeAuthorButton authorId={video.user_id} currentUser={currentUser} />
+              <div style={{ display: 'flex', gap: 12, margin: '18px 10px 18px 10px', justifyContent: 'center', alignItems: 'center' }}>
+                <button
+                  onClick={() => setShowChat((v) => !v)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    background: '#23232a', color: '#e5e7eb', border: 'none', borderRadius: 7,
+                    padding: '0 0', fontWeight: 700, fontSize: 16, cursor: 'pointer',
+                    transition: 'background 0.2s, color 0.2s', boxShadow: '0 1px 8px #0002',
+                    letterSpacing: 0.2, minWidth: 140, maxWidth: 180, width: '100%', justifyContent: 'center',
+                    height: 48,
+                    fontFamily: `'JetBrains Mono', monospace`
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-1.9 5.4A8.5 8.5 0 0 1 12 21.5a8.38 8.38 0 0 1-5.4-1.9L3 21l1.4-3.6A8.38 8.38 0 0 1 2.5 12a8.5 8.5 0 1 1 17 0z"/></svg>
+                  Чат
+                </button>
+                <button
+                  style={{
+                    background: '#d1d5db', color: '#18181b', border: 'none', borderRadius: 7,
+                    padding: '0 0', fontWeight: 700, fontSize: 16, cursor: 'pointer',
+                    transition: 'background 0.2s, color 0.2s', boxShadow: '0 1px 8px #0002',
+                    letterSpacing: 0.2, minWidth: 120, maxWidth: 180, width: '100%', justifyContent: 'center',
+                    height: 48,
+                    fontFamily: `'JetBrains Mono', monospace`
+                  }}
+                  disabled
+                >
+                  Подписаться на автора
+                </button>
+              </div>
             </>
           )}
         </div>
@@ -373,14 +406,11 @@ export default function Watch(props: any) {
       {/* Живой чат снизу - только для активных премьер */}
       {canWatch && video && (
         <>
-          <div style={{ 
-            marginTop: '0',
-            padding: '0',
-            maxWidth: '100%',
-            margin: '0',
-          }}>
-            <LiveChat videoId={video.id} currentUser={currentUser} />
-          </div>
+          {showChat && (
+            <div style={{ margin: '18px 0 0 0' }}>
+              <LiveChat videoId={video.id} currentUser={currentUser} />
+            </div>
+          )}
           
           {/* Карусель эмоций */}
           <EmotionCarousel onEmotionClick={sendEmotionToChat} />
@@ -407,8 +437,8 @@ Watch.getInitialProps = async (ctx: NextPageContext) => {
   return { hideHeader: now < premiere };
 };
 
-// Модифицируем VideoPlayerWithFullscreen для поддержки стартовой позиции
-function VideoPlayerWithFullscreen({ videoUrl, startPosition = 0 }: { videoUrl: string; startPosition?: number }) {
+// Кастомный плеер с кнопкой полноэкранного режима (динамическая иконка)
+function VideoPlayerWithFullscreen({ videoUrl }: { videoUrl: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -429,23 +459,6 @@ function VideoPlayerWithFullscreen({ videoUrl, startPosition = 0 }: { videoUrl: 
       document.removeEventListener('msfullscreenchange', handleFullscreenChange);
     };
   }, [handleFullscreenChange]);
-
-  // Устанавливаем стартовую позицию при загрузке видео
-  useEffect(() => {
-    const video = videoRef.current;
-    if (video && startPosition > 0) {
-      const setTime = () => {
-        video.currentTime = startPosition;
-        video.removeEventListener('loadedmetadata', setTime);
-      };
-      // Если метаданные уже загружены
-      if (video.readyState >= 1) {
-        video.currentTime = startPosition;
-      } else {
-        video.addEventListener('loadedmetadata', setTime);
-      }
-    }
-  }, [videoUrl, startPosition]);
 
   const handleFullscreen = () => {
     if (!isFullscreen) {
@@ -488,7 +501,7 @@ function VideoPlayerWithFullscreen({ videoUrl, startPosition = 0 }: { videoUrl: 
         controls={false}
         disablePictureInPicture
         controlsList="nodownload nofullscreen noremoteplayback noplaybackrate nofullscreen"
-        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         onContextMenu={e => e.preventDefault()}
         onPlay={e => { e.currentTarget.play(); }}
         onPause={e => { e.currentTarget.play(); }}
@@ -561,16 +574,17 @@ function ShareButton() {
         gap: 6,
         background: 'none',
         border: 'none',
-        color: '#2196f3',
+        color: '#2563eb',
         fontSize: 15,
         cursor: 'pointer',
         padding: '4px 10px',
-        borderRadius: 6,
+        borderRadius: 0,
         transition: 'background 0.2s',
+        fontFamily: `'JetBrains Mono', monospace`
       }}
       title="Поделиться премьерой"
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2196f3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle'}}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle'}}>
         <circle cx="18" cy="5" r="3" />
         <circle cx="6" cy="12" r="3" />
         <circle cx="18" cy="19" r="3" />
@@ -587,7 +601,6 @@ function SubscribeAuthorButton({ authorId, currentUser }: { authorId: string, cu
   const [subscribed, setSubscribed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Кнопка не показывается только если это свой канал
   if (currentUser && currentUser.id === authorId) return null;
 
   async function handleSubscribe() {
@@ -598,7 +611,6 @@ function SubscribeAuthorButton({ authorId, currentUser }: { authorId: string, cu
     setLoading(true);
     setError(null);
     try {
-      // Подписка на автора
       const res = await fetch('/api/subscribe-author', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -606,7 +618,6 @@ function SubscribeAuthorButton({ authorId, currentUser }: { authorId: string, cu
       });
       if (!res.ok) throw new Error('Ошибка при подписке');
       setSubscribed(true);
-      // Проверка пушей
       if ('Notification' in window) {
         if (Notification.permission !== 'granted') {
           const permission = await Notification.requestPermission();
@@ -625,22 +636,29 @@ function SubscribeAuthorButton({ authorId, currentUser }: { authorId: string, cu
   }
 
   return (
-    <div style={{ marginBottom: 10 }}>
+    <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'center' }}>
       <button
         onClick={handleSubscribe}
         disabled={subscribed || loading}
         style={{
-          background: subscribed ? '#222' : 'linear-gradient(90deg, #22c55e, #16a34a)',
-          color: '#fff',
+          background: subscribed ? '#e5e7eb' : '#e5e7eb',
+          color: '#18181b',
           border: 'none',
-          borderRadius: 8,
-          padding: '8px 20px',
-          fontWeight: 600,
+          borderRadius: 7,
+          padding: '12px 0',
+          paddingLeft: 10,
+          paddingRight: 10,
+          fontWeight: 700,
           fontSize: 16,
           cursor: subscribed ? 'default' : 'pointer',
           opacity: loading ? 0.7 : 1,
-          marginTop: 4,
-          marginBottom: 4
+          marginTop: 10,
+          marginBottom: 4,
+          width: 'calc(100% - 20px)',
+          letterSpacing: 0.2,
+          boxShadow: '0 1px 8px #0002',
+          transition: 'background 0.2s, color 0.2s',
+          display: 'block',
         }}
       >
         {subscribed ? 'Вы подписаны на автора' : loading ? 'Подписка...' : 'Подписаться на автора'}

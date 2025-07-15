@@ -344,287 +344,115 @@ export default function Profile() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#18181b',
-      color: '#fff',
-      padding: isMobile ? '16px' : '40px',
-      paddingTop: isMobile ? '70px' : '100px',
-    }}>
-      <div style={{
-        maxWidth: '600px',
-        margin: '0 auto',
-        background: '#23232a',
-        borderRadius: isMobile ? '8px' : '12px',
-        padding: isMobile ? '20px' : '40px',
-        border: '1px solid #2a2a2a',
-      }}>
-        <h1 style={{ 
-          fontSize: isMobile ? '20px' : '28px', 
-          fontWeight: '700',
-          marginBottom: isMobile ? '24px' : '32px',
-          textAlign: 'center'
-        }}>
-          Профиль
-        </h1>
-
-        {/* Аватарка */}
-        <div style={{ textAlign: 'center', marginBottom: isMobile ? '24px' : '32px' }}>
-          <div style={{
-            width: isMobile ? '70px' : '120px',
-            height: isMobile ? '70px' : '120px',
-            borderRadius: '50%',
-            margin: '0 auto 12px',
-            background: (previewUrl || profile?.avatar_url) ? 'none' : 'linear-gradient(135deg, #23232a 80%, #1769aa 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: isMobile ? '28px' : '48px',
-            fontWeight: 'bold',
-            color: 'white',
-            overflow: 'hidden',
-            border: '3px solid #2a2a2a',
-          }}>
-            {previewUrl ? (
-              <img 
-                src={previewUrl} 
-                alt="Предварительный просмотр" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : profile?.avatar_url ? (
-              <img 
-                src={profile.avatar_url} 
-                alt="Аватар" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                onError={(e) => {
-                  console.error('Ошибка загрузки аватарки:', profile.avatar_url);
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
+    <div style={{ minHeight: '100vh', background: '#111114', color: '#e0e0e0', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 12px' }}>
+      <div style={{ width: '100%', maxWidth: 400, margin: '0 auto', marginTop: 48, background: 'none', borderRadius: 0, boxShadow: 'none', padding: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28 }}>
+        {/* Аватар */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden', border: '2px solid #23232a', background: '#18181b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {previewUrl || profile?.avatar_url ? (
+              <img src={previewUrl || profile?.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
-              (profile?.username || user.email || 'U').charAt(0).toUpperCase()
+              <div style={{ color: '#888a92', fontSize: 38 }}>?</div>
             )}
           </div>
-          
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            style={{ display: 'none' }}
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            style={{
-              padding: isMobile ? '10px 14px' : '8px 16px',
-              background: 'linear-gradient(90deg, #2196f3, #1769aa)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: isMobile ? '13px' : '14px',
-              cursor: 'pointer',
-              fontWeight: '500',
-            }}
-          >
-            {selectedFile ? 'Фото выбрано' : 'Выбрать фото'}
-          </button>
-          {selectedFile && (
-            <p style={{ 
-              fontSize: '11px', 
-              color: '#22c55e', 
-              marginTop: '6px',
-              marginBottom: 0,
-              wordBreak: 'break-word'
-            }}>
-              Выбрано: {selectedFile.name}
-            </p>
-          )}
+          <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
+          <button onClick={() => fileInputRef.current?.click()} style={{ background: 'none', color: '#bdbdbd', border: 'none', fontSize: 15, cursor: 'pointer', marginTop: 2, padding: 0, textDecoration: 'underline', letterSpacing: 0.2 }}>Изменить аватар</button>
         </div>
-
-        {/* Никнейм */}
-        <div style={{ marginBottom: isMobile ? '24px' : '32px' }}>
-          <label style={{ 
-            display: 'block', 
-            color: '#fff', 
-            fontSize: isMobile ? '13px' : '14px', 
-            fontWeight: '500',
-            marginBottom: '6px'
-          }}>
-            Никнейм
-          </label>
+        {/* Никнейм и подписчики */}
+        <div style={{ width: '100%', textAlign: 'center', marginBottom: 8 }}>
+          <div style={{ fontSize: 22, fontWeight: 600, color: '#e0e0e0', marginBottom: 2 }}>{username || '...'}</div>
+          <div style={{ fontSize: 15, color: '#bdbdbd', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888a92" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="4"/><circle cx="17" cy="8.5" r="3.5"/><ellipse cx="8" cy="17" rx="7" ry="4"/><ellipse cx="17" cy="17.5" rx="5" ry="2.5"/></svg>
+            {subscribersCount} подписчиков
+          </div>
+        </div>
+        {/* Форма редактирования */}
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 18 }}>
           <input
             type="text"
-            placeholder="Введите никнейм"
             value={username}
-            onChange={(e) => handleUsernameChange(e.target.value)}
+            onChange={e => handleUsernameChange(e.target.value)}
+            maxLength={24}
+            placeholder="Никнейм"
             style={{
-              width: '100%',
-              padding: isMobile ? '10px 12px' : '12px 16px',
-              fontSize: isMobile ? '15px' : '16px',
-              borderRadius: '8px',
-              border: usernameError ? '1px solid #dc2626' : '1px solid #2a2a2a',
               background: '#18181b',
-              color: '#fff',
-              boxSizing: 'border-box',
-            }}
-          />
-          {isCheckingUsername && (
-            <p style={{ 
-              fontSize: '11px', 
-              color: '#2196f3', 
-              marginTop: '6px',
-              marginBottom: 0 
-            }}>
-              Проверяем доступность никнейма...
-            </p>
-          )}
-          {usernameError && (
-            <p style={{ 
-              fontSize: '11px', 
-              color: '#dc2626', 
-              marginTop: '6px',
-              marginBottom: 0 
-            }}>
-              {usernameError}
-            </p>
-          )}
-        </div>
-
-        {/* Кнопка сохранения изменений */}
-        <div style={{ marginBottom: isMobile ? '24px' : '32px' }}>
-          {!canUpdateProfile && (
-            <div style={{ 
-              padding: isMobile ? '6px 10px' : '8px 12px',
-              borderRadius: '6px',
-              fontSize: isMobile ? '11px' : '12px',
+              border: 'none',
+              borderBottom: '1.5px solid #23232a',
+              color: '#e0e0e0',
+              fontSize: 18,
+              padding: '12px 8px',
+              outline: 'none',
+              borderRadius: 0,
+              marginBottom: 0,
+              transition: 'border 0.2s',
               textAlign: 'center',
-              background: '#2a2a2a',
-              color: '#bdbdbd',
-              border: '1px solid #3a3a3a',
-              marginBottom: '12px',
-              opacity: 0.8,
-              lineHeight: '1.3'
-            }}>
-              Профиль можно обновлять раз в 3 недели. Следующее обновление: {nextUpdateDate}
-            </div>
-          )}
+            }}
+            disabled={!canUpdateProfile}
+          />
+          {usernameError && <div style={{ color: '#ff5252', fontSize: 14, textAlign: 'center' }}>{usernameError}</div>}
           <button
             onClick={handleSaveChanges}
-            disabled={loading || !hasChanges()}
+            disabled={loading || !!usernameError || !canUpdateProfile}
             style={{
-              width: '100%',
-              padding: isMobile ? '12px 20px' : '14px 24px',
-              background: !hasChanges() ? '#2a2a2a' : 'linear-gradient(90deg, #3b82f6, #1d4ed8)',
-              color: '#fff',
+              background: loading ? '#23232a' : '#18181b',
+              color: loading ? '#888' : '#e0e0e0',
               border: 'none',
-              borderRadius: '8px',
-              fontWeight: '600',
-              fontSize: isMobile ? '15px' : '16px',
-              cursor: !hasChanges() ? 'default' : 'pointer',
-              opacity: loading ? 0.7 : 1,
-              transition: 'opacity 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              if (hasChanges() && !loading) {
-                e.currentTarget.style.opacity = '0.8';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (hasChanges() && !loading) {
-                e.currentTarget.style.opacity = '1';
-              }
+              borderRadius: 6,
+              fontSize: 17,
+              fontWeight: 600,
+              padding: '12px 0',
+              marginTop: 0,
+              cursor: loading || !!usernameError || !canUpdateProfile ? 'not-allowed' : 'pointer',
+              transition: 'background 0.2s, color 0.2s',
+              boxShadow: 'none',
+              letterSpacing: '0.5px',
+              width: '100%',
             }}
           >
             {loading ? 'Сохранение...' : 'Сохранить изменения'}
           </button>
+          {message && <div style={{ color: '#ff5252', fontSize: 14, textAlign: 'center' }}>{message}</div>}
+          {!canUpdateProfile && (
+            <div style={{ color: '#bdbdbd', fontSize: 13, textAlign: 'center', marginTop: 2 }}>
+              Профиль можно обновлять раз в 3 недели.<br />Следующее обновление: {nextUpdateDate}
+            </div>
+          )}
         </div>
-
-        {/* Email */}
-        <div style={{ marginBottom: isMobile ? '20px' : '24px' }}>
-          <label style={{ 
-            display: 'block', 
-            color: '#fff', 
-            fontSize: isMobile ? '13px' : '14px', 
-            fontWeight: '500',
-            marginBottom: '6px'
-          }}>
-            Email
-          </label>
-          <div style={{
-            padding: isMobile ? '10px 12px' : '12px 16px',
-            fontSize: isMobile ? '15px' : '16px',
-            borderRadius: '8px',
-            border: '1px solid #2a2a2a',
-            background: '#18181b',
-            color: '#bdbdbd',
-            wordBreak: 'break-all'
-          }}>
-            {user.email}
-          </div>
-        </div>
-
-        {/* Количество подписчиков */}
-        <div style={{ marginBottom: isMobile ? '24px' : '32px' }}>
-          <label style={{ 
-            display: 'block', 
-            color: '#fff', 
-            fontSize: isMobile ? '13px' : '14px', 
-            fontWeight: '500',
-            marginBottom: '6px'
-          }}>
-            Подписчики
-          </label>
-          <div style={{
-            padding: isMobile ? '10px 12px' : '12px 16px',
-            fontSize: isMobile ? '15px' : '16px',
-            borderRadius: '8px',
-            border: '1px solid #2a2a2a',
-            background: '#18181b',
-            color: '#fff',
-            fontWeight: '600',
-          }}>
-            {subscribersCount} подписчиков
-          </div>
-        </div>
-
-        {/* Сообщения */}
-        {message && (
-          <div style={{ 
-            padding: isMobile ? '10px 12px' : '12px 16px',
-            borderRadius: '8px',
-            fontSize: isMobile ? '13px' : '14px',
-            textAlign: 'center',
-            background: message.includes('Ошибка') ? '#fef2f2' : '#f0fdf4',
-            color: message.includes('Ошибка') ? '#dc2626' : '#16a34a',
-            border: `1px solid ${message.includes('Ошибка') ? '#fecaca' : '#bbf7d0'}`,
-            marginBottom: isMobile ? '20px' : '24px',
-            lineHeight: '1.4'
-          }}>
-            {message}
-          </div>
-        )}
-
-        {/* Кнопка выхода */}
         <button
           onClick={handleLogout}
           style={{
-            width: '100%',
-            padding: isMobile ? '12px 20px' : '14px 24px',
-            background: 'linear-gradient(90deg, #dc2626, #b91c1c)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            fontWeight: '600',
-            fontSize: isMobile ? '15px' : '16px',
+            background: 'rgba(36,40,48,0.85)',
+            color: '#ff5252',
+            border: '1.5px solid #23232a',
+            borderRadius: 8,
+            fontSize: 15,
             cursor: 'pointer',
-            transition: 'opacity 0.2s',
+            marginTop: 18,
+            padding: '12px 0',
+            width: '100%',
+            fontWeight: 500,
+            letterSpacing: 0.2,
+            transition: 'background 0.2s, color 0.2s, border 0.2s',
+            boxShadow: 'none',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          onMouseOver={e => {
+            e.currentTarget.style.background = '#23232a';
+            e.currentTarget.style.color = '#ff7676';
+            e.currentTarget.style.border = '1.5px solid #393a3f';
+          }}
+          onMouseOut={e => {
+            e.currentTarget.style.background = 'rgba(36,40,48,0.85)';
+            e.currentTarget.style.color = '#ff5252';
+            e.currentTarget.style.border = '1.5px solid #23232a';
+          }}
         >
           Выйти из аккаунта
         </button>
       </div>
     </div>
   );
+} 
+
+export async function getServerSideProps() {
+  return { props: { hideHeader: true } };
 } 

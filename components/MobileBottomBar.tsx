@@ -38,23 +38,35 @@ export default function MobileBottomBar() {
       paddingBottom: 'env(safe-area-inset-bottom)',
       margin: 0,
     }}>
-      <Link href="/" style={{ textAlign: 'center', color: '#2196f3', textDecoration: 'none', flex: 1 }}>
+      <Link href="/" style={{ textAlign: 'center', color: '#bdbdbd', textDecoration: 'none', flex: 1 }}>
         <div style={{ lineHeight: 1, display: 'flex', justifyContent: 'center', paddingTop: 2 }}>
-          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11.5L12 4l9 7.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V11.5z"/><path d="M9 22V12h6v10"/></svg>
+          {/* Минималистичный домик */}
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#bdbdbd" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="7,20 7,12 17,12 17,20" />
+            <polyline points="3,12 12,4 21,12" />
+          </svg>
         </div>
-        <div style={{ fontSize: 11, marginTop: 2, color: '#fff' }}>Главная</div>
+        <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Главная</div>
       </Link>
-      <Link href="/upload" style={{ textAlign: 'center', color: '#2196f3', textDecoration: 'none', flex: 1 }}>
+      <Link href="/upload" style={{ textAlign: 'center', color: '#bdbdbd', textDecoration: 'none', flex: 1 }}>
         <div style={{ lineHeight: 1, display: 'flex', justifyContent: 'center', paddingTop: 2 }}>
-          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          {/* Минималистичная загрузка — стрелка вверх в круге */}
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#bdbdbd" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <line x1="12" y1="16" x2="12" y2="8" />
+            <polyline points="9,11 12,8 15,11" />
+          </svg>
         </div>
-        <div style={{ fontSize: 11, marginTop: 2, color: '#fff' }}>Загрузить</div>
+        <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Загрузить</div>
       </Link>
-      <Link href="/profile" style={{ textAlign: 'center', color: '#2196f3', textDecoration: 'none', flex: 1 }}>
+      <Link href="/profile" style={{ textAlign: 'center', color: '#bdbdbd', textDecoration: 'none', flex: 1 }}>
         <div style={{ lineHeight: 1, display: 'flex', justifyContent: 'center', paddingTop: 2 }}>
-          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+          {/* Минималистичный профиль — только круг */}
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#bdbdbd" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="8" />
+          </svg>
         </div>
-        <div style={{ fontSize: 11, marginTop: 2, color: '#fff' }}>Профиль</div>
+        <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Профиль</div>
       </Link>
     </nav>
   );

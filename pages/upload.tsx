@@ -65,8 +65,7 @@ export default function Upload() {
         fontSize: isMobile ? 18 : 22,
         color: '#fff',
         textAlign: 'center',
-        background: '#18181b',
-        borderRadius: 10,
+        background: '#111114',
         margin: isMobile ? '20px auto' : '40px auto',
         maxWidth: isMobile ? '90%' : 500,
         boxShadow: '0 2px 16px #0004',
@@ -81,22 +80,35 @@ export default function Upload() {
   if (!user) {
     return (
       <div style={{
-        minHeight: '60vh',
+        minHeight: '100vh',
+        width: '100vw',
+        background: '#111114',
+        color: '#e0e0e0',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: isMobile ? 18 : 22,
-        color: '#fff',
+        fontSize: isMobile ? 17 : 20,
         textAlign: 'center',
-        background: '#18181b',
-        borderRadius: 10,
-        margin: isMobile ? '20px auto' : '40px auto',
-        maxWidth: isMobile ? '90%' : 500,
-        boxShadow: '0 2px 16px #0004',
-        padding: isMobile ? '20px' : '40px',
-        paddingTop: isMobile ? '80px' : '40px',
+        margin: 0,
+        padding: 0,
+        boxShadow: 'none',
+        borderRadius: 0,
+        letterSpacing: 0.2,
+        fontWeight: 500
       }}>
-        Зарегистрируйтесь, чтобы загружать премьеры!
+        <div style={{
+          maxWidth: 340,
+          width: '100%',
+          background: 'none',
+          borderRadius: 0,
+          padding: isMobile ? '24px 12px' : '36px 0',
+          margin: '0 auto',
+          border: 'none',
+          boxShadow: 'none',
+        }}>
+          <h1 style={{ color: '#e0e0e0', fontSize: isMobile ? 20 : 22, fontWeight: 600, marginBottom: 10, letterSpacing: 0.2 }}>Требуется вход</h1>
+          <p style={{ color: '#6b7280', fontSize: isMobile ? 13 : 14, margin: 0, marginBottom: 0 }}>Войдите или зарегистрируйтесь, чтобы загружать премьеры</p>
+        </div>
       </div>
     );
   }
@@ -158,185 +170,148 @@ export default function Upload() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#18181b',
-      padding: isMobile ? '70px 10px 16px 10px' : '80px 20px 20px 20px',
-    }}>
+    <div style={{ minHeight: '100vh', background: '#111114', padding: isMobile ? '16px' : '40px', paddingTop: isMobile ? '56px' : '48px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
       <form onSubmit={handleUpload} style={{
-        maxWidth: isMobile ? '95%' : 400,
-        margin: '0 auto',
-        padding: isMobile ? '24px 16px' : '32px 24px',
+        width: '100%',
+        maxWidth: 400,
+        background: 'none',
+        borderRadius: 0,
+        boxShadow: 'none',
+        padding: isMobile ? '0' : '0',
         display: 'flex',
         flexDirection: 'column',
-        gap: isMobile ? 16 : 12,
-        background: '#23232a',
-        borderRadius: isMobile ? 8 : 10,
-        boxShadow: 'none',
-        boxSizing: 'border-box',
-        color: '#f3f3f3',
-        border: '1px solid #2a2a2a',
+        gap: 20,
       }}>
-        <label style={{ fontWeight: 500, fontSize: isMobile ? 14 : 15 }}>Название:
-          <input
-            type="text"
-            placeholder="Название"
-            value={title}
-            onChange={e => {
-              if (e.target.value.length <= TITLE_LIMIT) setTitle(e.target.value);
-            }}
-            required
-            maxLength={TITLE_LIMIT}
-            style={{ 
-              width: '100%', 
-              padding: isMobile ? 10 : 8, 
-              fontSize: isMobile ? 14 : 15, 
-              marginTop: 4, 
-              borderRadius: 6, 
-              border: '1px solid #23232a', 
-              background: '#18181b', 
-              color: '#f3f3f3',
-              boxSizing: 'border-box'
-            }}
-          />
-          <div style={{ fontSize: isMobile ? 11 : 12, color: title.length >= TITLE_LIMIT ? '#e57373' : '#bdbdbd', textAlign: 'right', marginTop: 4 }}>
-            {title.length} / {TITLE_LIMIT}
-          </div>
-        </label>
-        <label style={{ fontWeight: 500, fontSize: isMobile ? 14 : 15 }}>Описание:
-          <textarea
-            ref={descriptionRef}
-            placeholder="Описание"
-            value={description}
-            onChange={e => {
-              if (e.target.value.length <= DESCRIPTION_LIMIT) setDescription(e.target.value);
-            }}
-            required
-            maxLength={DESCRIPTION_LIMIT}
-            style={{ 
-              width: '100%', 
-              padding: isMobile ? 10 : 8, 
-              fontSize: isMobile ? 14 : 15, 
-              marginTop: 4, 
-              borderRadius: 6, 
-              border: '1px solid #23232a', 
-              background: '#18181b', 
-              color: '#f3f3f3', 
-              resize: 'none', 
-              minHeight: isMobile ? 80 : 60, 
-              overflow: 'hidden',
-              boxSizing: 'border-box'
-            }}
-          />
-          <div style={{ fontSize: isMobile ? 11 : 12, color: description.length >= DESCRIPTION_LIMIT ? '#e57373' : '#bdbdbd', textAlign: 'right', marginTop: 4 }}>
-            {description.length} / {DESCRIPTION_LIMIT}
-          </div>
-        </label>
-        {/* Авто-рост textarea */}
-        {typeof window !== 'undefined' && (
-          <AutoResizeTextarea textareaRef={descriptionRef} value={description} />
-        )}
-        <label style={{ fontWeight: 500, fontSize: isMobile ? 14 : 15 }}>Дата и время премьеры:
-          <input
-            type="datetime-local"
-            value={premiereAt}
-            onChange={e => setPremiereAt(e.target.value)}
-            required
-            style={{ 
-              width: '100%', 
-              padding: isMobile ? 10 : 8, 
-              fontSize: isMobile ? 14 : 15, 
-              marginTop: 4, 
-              borderRadius: 6, 
-              border: '1px solid #23232a', 
-              background: '#18181b', 
-              color: '#f3f3f3',
-              boxSizing: 'border-box'
-            }}
-          />
-          <div style={{ fontSize: isMobile ? 12 : 13, color: '#ffb300', marginTop: 6 }}>
-            Важно: время указывается в UTC!
-          </div>
-        </label>
-        <label style={{ fontWeight: 500, fontSize: isMobile ? 14 : 15 }}>Обложка:
-          <input
-            type="file"
-            accept="image/*"
-            onChange={e => setCover(e.target.files?.[0] || null)}
-            required
-            ref={coverInputRef}
-            style={{ 
-              width: '100%', 
-              marginTop: 4, 
-              background: '#18181b', 
-              color: '#f3f3f3', 
-              border: '1px solid #23232a', 
-              borderRadius: 6,
-              padding: isMobile ? 8 : 4,
-              fontSize: isMobile ? 13 : 14
-            }}
-          />
-        </label>
-        <label style={{ fontWeight: 500, fontSize: isMobile ? 14 : 15 }}>Видео:
-          <input
-            type="file"
-            accept="video/*"
-            onChange={e => setVideo(e.target.files?.[0] || null)}
-            required
-            ref={videoInputRef}
-            style={{ 
-              width: '100%', 
-              marginTop: 4, 
-              background: '#18181b', 
-              color: '#f3f3f3', 
-              border: '1px solid #23232a', 
-              borderRadius: 6,
-              padding: isMobile ? 8 : 4,
-              fontSize: isMobile ? 13 : 14
-            }}
-          />
-        </label>
-        
-        {/* Предупреждение о том, что видео исчезают после премьеры */}
+        <h1 style={{
+          fontSize: 15,
+          fontWeight: 400,
+          color: '#888a92',
+          margin: 0,
+          marginBottom: 18,
+          letterSpacing: '0',
+          textAlign: 'left',
+        }}>Загрузка премьеры</h1>
         <div style={{
-          background: '#2a2a2a',
+          background: 'none',
           color: '#bdbdbd',
-          padding: isMobile ? '8px 12px' : '10px 16px',
-          marginTop: isMobile ? '8px' : '12px',
-          borderRadius: '6px',
-          border: '1px solid #3a3a3a',
+          fontSize: 14,
+          marginBottom: 12,
           textAlign: 'center',
-          fontSize: isMobile ? '11px' : '12px',
-          lineHeight: '1.3',
-          opacity: 0.7
+          lineHeight: 1.4,
         }}>
-          Видео удаляются сразу после окончания премьеры
+          Внимание: видео будет автоматически удалено сразу после окончания премьеры!
         </div>
-        
-        <button type="submit" style={{
-          padding: isMobile ? '14px 0' : '10px 0',
-          background: 'linear-gradient(90deg, #2196f3, #1769aa)',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 6,
-          fontWeight: 'bold',
-          fontSize: isMobile ? 15 : 16,
-          cursor: 'pointer',
-          marginTop: isMobile ? 12 : 8,
-          transition: 'background 0.2s',
-          opacity: loading ? 0.6 : 1,
-          pointerEvents: loading ? 'none' : 'auto',
-        }} disabled={loading}>
-        {loading ? (
-          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <svg style={{ width: 18, height: 18, verticalAlign: 'middle', animation: 'spin 1s linear infinite' }} viewBox="0 0 50 50">
-              <circle cx="25" cy="25" r="20" fill="none" stroke="#fff" strokeWidth="5" strokeLinecap="round" strokeDasharray="31.4 31.4"/>
-            </svg>
-            Загрузка...
-          </span>
-        ) : 'Загрузить видео'}
+        <input
+          type="text"
+          placeholder="Название видео"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          maxLength={TITLE_LIMIT}
+          style={{
+            background: '#18181b',
+            border: 'none',
+            borderBottom: '1.5px solid #23232a',
+            color: '#e0e0e0',
+            fontSize: 18,
+            padding: '12px 8px',
+            outline: 'none',
+            borderRadius: 0,
+            marginBottom: 0,
+            transition: 'border 0.2s',
+          }}
+        />
+        <textarea
+          ref={descriptionRef}
+          placeholder="Описание (необязательно)"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          maxLength={DESCRIPTION_LIMIT}
+          style={{
+            background: '#18181b',
+            border: 'none',
+            borderBottom: '1.5px solid #23232a',
+            color: '#bdbdbd',
+            fontSize: 16,
+            padding: '12px 8px',
+            outline: 'none',
+            borderRadius: 0,
+            minHeight: 60,
+            resize: 'vertical',
+            marginBottom: 0,
+            transition: 'border 0.2s',
+          }}
+        />
+        <input
+          type="datetime-local"
+          value={premiereAt}
+          onChange={e => setPremiereAt(e.target.value)}
+          style={{
+            background: '#18181b',
+            border: 'none',
+            borderBottom: '1.5px solid #23232a',
+            color: '#e0e0e0',
+            fontSize: 16,
+            padding: '12px 8px',
+            outline: 'none',
+            borderRadius: 0,
+            marginBottom: 0,
+            transition: 'border 0.2s',
+          }}
+        />
+        <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>Обложка (обязательно)</label>
+        <input
+          type="file"
+          accept="image/*"
+          ref={coverInputRef}
+          onChange={e => setCover(e.target.files?.[0] || null)}
+          required
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#bdbdbd',
+            fontSize: 15,
+            padding: 0,
+            marginBottom: 0,
+          }}
+        />
+        <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>Видео</label>
+        <input
+          type="file"
+          accept="video/*"
+          ref={videoInputRef}
+          onChange={e => setVideo(e.target.files?.[0] || null)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#bdbdbd',
+            fontSize: 15,
+            padding: 0,
+            marginBottom: 0,
+          }}
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            background: loading ? '#23232a' : '#18181b',
+            color: loading ? '#888' : '#e0e0e0',
+            border: 'none',
+            borderRadius: 6,
+            fontSize: 18,
+            fontWeight: 600,
+            padding: '14px 0',
+            marginTop: 8,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            transition: 'background 0.2s, color 0.2s',
+            boxShadow: 'none',
+            letterSpacing: '0.5px',
+          }}
+        >
+          {loading ? 'Загрузка...' : 'Загрузить'}
         </button>
-        <div style={{ fontSize: isMobile ? 13 : 14, color: '#e57373', minHeight: isMobile ? 24 : 20, textAlign: 'center' }}>{message}</div>
+        {message && (
+          <div style={{ color: '#ff5252', fontSize: 15, marginTop: 4, textAlign: 'left' }}>{message}</div>
+        )}
       </form>
     </div>
   );
@@ -352,4 +327,8 @@ function AutoResizeTextarea({ textareaRef, value }: { textareaRef: React.RefObje
     }
   }, [value, textareaRef]);
   return null;
+}
+
+export async function getServerSideProps() {
+  return { props: { hideHeader: true } };
 }

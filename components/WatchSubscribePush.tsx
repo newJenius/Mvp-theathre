@@ -55,10 +55,10 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
         onClick={handleSubscribe}
         disabled={subscribed || loading}
         style={{
-          background: subscribed ? '#222' : 'linear-gradient(90deg, #2563eb, #1e40af)',
-          color: '#fff',
+          background: subscribed ? '#23232a' : '#23232a',
+          color: '#e0e0e0',
           border: 'none',
-          borderRadius: 8,
+          borderRadius: 0,
           padding: '8px 20px',
           fontWeight: 600,
           fontSize: 16,

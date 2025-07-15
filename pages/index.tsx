@@ -164,10 +164,10 @@ export default function Home() {
   }
 
   return (
-    <div style={{ padding: '64px 12px 60px 12px', background: '#18181b', minHeight: '100vh', color: '#f3f3f3', boxSizing: 'border-box' }}>
+    <div style={{ padding: '64px 12px 60px 12px', background: '#111114', minHeight: '100vh', color: '#e0e0e0', boxSizing: 'border-box' }}>
       {/* Предупреждение о том, что видео исчезают после премьеры */}
       <div style={{
-        background: '#23232a',
+        background: '#18181b',
         color: '#bdbdbd',
         padding: '12px 16px',
         margin: '0 0 16px 0',
