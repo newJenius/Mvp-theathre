@@ -133,10 +133,11 @@ export default function Home() {
     videosByHour[hour].push(video);
   });
 
-  // Для раздела 'Сейчас': только видео, у которых премьера уже наступила и час совпадает
+  // Для раздела 'Сейчас': только видео, у которых премьера уже наступила и ещё не закончилась
   const nowVideos = todayVideos.filter(v => {
     const d = new Date(v.premiere_at);
-    return d.getHours() === nowHour && d <= now;
+    const end = v.duration ? new Date(d.getTime() + v.duration * 1000) : null;
+    return d <= now && (!end || now <= end);
   });
 
   // Остальные часы (без текущего)
