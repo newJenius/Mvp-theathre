@@ -118,52 +118,36 @@ export default function Upload() {
     setMessage('');
     setLoading(true);
 
-    let coverUrl = '';
-    let videoUrl = '';
-
-    // Используем raw base URL для Storj
-    const STORJ_PUBLIC_BASE = 'https://link.storjshare.io/raw/jw5fmzy4nkrs4kbu7gofbnwdllmq/videos';
+    if (!video) {
+      setMessage('Не выбрано видео для загрузки.');
+      setLoading(false);
+      return;
+    }
 
     try {
-      if (cover) {
-        const coverPresignedUrl = await getPresignedUrl(cover, 'covers', 'videos');
-        await uploadToStorj(cover, coverPresignedUrl.url);
-        coverUrl = `${STORJ_PUBLIC_BASE}/${coverPresignedUrl.fileName}`;
-      }
-      if (video) {
-        const { url: videoPresignedUrl, fileName: videoFileName } = await getPresignedUrl(video, 'videos', 'videos');
-        await uploadToStorj(video, videoPresignedUrl);
-        videoUrl = `${STORJ_PUBLIC_BASE}/${videoFileName}`;
-      }
-      if (!videoUrl) {
-        setMessage('Не выбрано видео для загрузки.');
-        return;
-      }
-      // Сохраняем ссылку и метаданные в Supabase
-      const { error } = await supabase.from('videos').insert([
-        {
-          title,
-          description,
-          video_url: videoUrl,
-          cover_url: coverUrl,
-          premiere_at: premiereAt,
-          user_id: (await supabase.auth.getUser()).data.user?.id,
-        },
-      ]);
-      if (error) {
-        setMessage('Ошибка сохранения в базу: ' + error.message);
+      const formData = new FormData();
+      formData.append('video', video);
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('user_id', user?.id || '');
+      formData.append('premiere_at', premiereAt);
+      // Если нужно добавить cover, раскомментируй следующую строку:
+      // if (cover) formData.append('cover', cover);
+
+      const response = await fetch('http://143.198.121.243:4000/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage('Видео успешно загружено! Ссылка: ' + data.video_url);
       } else {
-        setMessage('Видео успешно загружено!');
-        setTitle('');
-        setDescription('');
-        setPremiereAt('');
-        setCover(null);
-        setVideo(null);
-        if (coverInputRef.current) coverInputRef.current.value = '';
-        if (videoInputRef.current) videoInputRef.current.value = '';
+        setMessage('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
       }
-    } catch (err) {
-      setMessage('Ошибка загрузки: ' + (err as Error).message);
+    } catch (err: any) {
+      setMessage('Ошибка загрузки: ' + err.message);
     } finally {
       setLoading(false);
     }
