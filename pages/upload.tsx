@@ -40,6 +40,7 @@ export default function Upload() {
   const TITLE_LIMIT = 150;
   const [user, setUser] = useState<any>(null);
   const [checkedAuth, setCheckedAuth] = useState(false);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 600px)').matches);
@@ -134,7 +135,7 @@ export default function Upload() {
       // Если нужно добавить cover, раскомментируй следующую строку:
       // if (cover) formData.append('cover', cover);
 
-      const response = await fetch('http://143.198.121.243:4000/upload', {
+      const response = await fetch(`${apiUrl}/upload`, {
         method: 'POST',
         body: formData,
       });
