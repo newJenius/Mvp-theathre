@@ -26,13 +26,19 @@ export default function Profile() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-      if (data.user) {
-        loadProfile(data.user.id);
-        loadSubscribersCount(data.user.id);
-      }
-    });
+    try {
+      supabase.auth.getUser().then(({ data }: any) => {
+        setUser(data.user);
+        if (data.user) {
+          loadProfile(data.user.id);
+          loadSubscribersCount(data.user.id);
+        }
+      }).catch((error: any) => {
+        console.error('Ошибка при получении пользователя:', error);
+      });
+    } catch (error) {
+      console.error('Ошибка инициализации Supabase:', error);
+    }
   }, []);
 
   useEffect(() => {
@@ -78,33 +84,41 @@ export default function Profile() {
   }, [profile]);
 
   const loadProfile = async (userId: string) => {
-    console.log('Загружаем профиль для пользователя:', userId);
-    
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    
-    console.log('Данные профиля из базы:', data);
-    console.log('Ошибка загрузки профиля:', error);
-    
-    if (!error && data) {
-      setProfile(data);
-      console.log('Профиль установлен:', data);
-    } else {
-      console.error('Не удалось загрузить профиль:', error);
+    try {
+      console.log('Загружаем профиль для пользователя:', userId);
+      
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      console.log('Данные профиля из базы:', data);
+      console.log('Ошибка загрузки профиля:', error);
+      
+      if (!error && data) {
+        setProfile(data);
+        console.log('Профиль установлен:', data);
+      } else {
+        console.error('Не удалось загрузить профиль:', error);
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке профиля:', error);
     }
   };
 
   const loadSubscribersCount = async (userId: string) => {
-    const { count, error } = await supabase
-      .from('author_subscriptions')
-      .select('*', { count: 'exact', head: true })
-      .eq('author_id', userId);
-    
-    if (!error && count !== null) {
-      setSubscribersCount(count);
+    try {
+      const { count, error } = await supabase
+        .from('author_subscriptions')
+        .select('*', { count: 'exact', head: true })
+        .eq('author_id', userId);
+      
+      if (!error && count !== null) {
+        setSubscribersCount(count);
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке количества подписчиков:', error);
     }
   };
 

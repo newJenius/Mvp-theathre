@@ -54,10 +54,18 @@ export default function Upload() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
+    try {
+      supabase.auth.getUser().then(({ data }: any) => {
+        setUser(data.user);
+        setCheckedAuth(true);
+      }).catch((error: any) => {
+        console.error('Ошибка при получении пользователя:', error);
+        setCheckedAuth(true);
+      });
+    } catch (error) {
+      console.error('Ошибка инициализации Supabase:', error);
       setCheckedAuth(true);
-    });
+    }
   }, []);
 
   if (!checkedAuth) {

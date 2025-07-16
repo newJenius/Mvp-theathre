@@ -100,14 +100,18 @@ export default function Home() {
   useEffect(() => {
     let isMounted = true;
     async function fetchVideos() {
-      const { data, error } = await supabase
-        .from('videos')
-        .select('id, title, cover_url, premiere_at, user_id');
-      if (!error && isMounted) {
-        const videosData = data || [];
-        // Загружаем количество ожидающих и аватарки
-        const videoIds = videosData.map(v => v.id);
-        await loadWaitingCounts(videoIds, videosData);
+      try {
+        const { data, error } = await supabase
+          .from('videos')
+          .select('id, title, cover_url, premiere_at, user_id');
+        if (!error && isMounted) {
+          const videosData = data || [];
+          // Загружаем количество ожидающих и аватарки
+          const videoIds = videosData.map((v: any) => v.id);
+          await loadWaitingCounts(videoIds, videosData);
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке видео:', error);
       }
     }
     fetchVideos();

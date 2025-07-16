@@ -58,6 +58,8 @@ export default function Header() {
           }
         } catch (error) {
           console.error('Ошибка при проверке статуса видео:', error);
+          // Не скрываем хедер в случае ошибки
+          setShouldHide(false);
         }
       } else {
         setShouldHide(false);

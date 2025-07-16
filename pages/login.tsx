@@ -25,21 +25,27 @@ export default function Login() {
     setLoading(true);
     setMessage('');
     
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (error) {
-      setMessage('Ошибка входа: ' + error.message);
-    } else {
-      setMessage('Вход выполнен!');
-      // Редирект на главную после успешного входа
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1000);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        setMessage('Ошибка входа: ' + error.message);
+      } else {
+        setMessage('Вход выполнен!');
+        // Редирект на главную после успешного входа
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Ошибка при входе:', error);
+      setMessage('Ошибка подключения к серверу');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

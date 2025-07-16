@@ -29,24 +29,28 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
     loadMessages();
     
     // Подписка на новые сообщения через Supabase Realtime
-    const channel = supabase
-      .channel(`chat:${videoId}`)
-      .on('postgres_changes', 
-        { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'video_chat_messages',
-          filter: `video_id=eq.${videoId}`
-        }, 
-        (payload) => {
-          setMessages(prev => [...prev, payload.new as ChatMessage]);
-        }
-      )
-      .subscribe();
+    try {
+      const channel = supabase
+        .channel(`chat:${videoId}`)
+        .on('postgres_changes', 
+          { 
+            event: 'INSERT', 
+            schema: 'public', 
+            table: 'video_chat_messages',
+            filter: `video_id=eq.${videoId}`
+          }, 
+          (payload: any) => {
+            setMessages(prev => [...prev, payload.new as ChatMessage]);
+          }
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (error) {
+      console.error('Ошибка подписки на чат:', error);
+    }
   }, [videoId]);
 
   useEffect(() => {
@@ -62,15 +66,19 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
   }, [messages]);
 
   const loadMessages = async () => {
-    const { data, error } = await supabase
-      .from('video_chat_messages')
-      .select('*')
-      .eq('video_id', videoId)
-      .order('created_at', { ascending: true })
-      .limit(100);
+    try {
+      const { data, error } = await supabase
+        .from('video_chat_messages')
+        .select('*')
+        .eq('video_id', videoId)
+        .order('created_at', { ascending: true })
+        .limit(100);
 
-    if (!error && data) {
-      setMessages(data);
+      if (!error && data) {
+        setMessages(data);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки сообщений:', error);
     }
   };
 

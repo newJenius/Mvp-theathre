@@ -36,9 +36,15 @@ export default function Watch(props: any) {
 
   useEffect(() => {
     // Получаем текущего пользователя
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setCurrentUser(user);
-    });
+    try {
+      supabase.auth.getUser().then(({ data: { user } }: any) => {
+        setCurrentUser(user);
+      }).catch((error: any) => {
+        console.error('Ошибка при получении пользователя:', error);
+      });
+    } catch (error) {
+      console.error('Ошибка инициализации Supabase:', error);
+    }
   }, []);
 
   useEffect(() => {
@@ -50,7 +56,7 @@ export default function Watch(props: any) {
       .select('*')
       .eq('id', id)
       .single()
-      .then(async ({ data }) => {
+      .then(async ({ data }: any) => {
         setVideo(data);
         if (data?.user_id) {
           // Загружаем username автора
@@ -75,27 +81,35 @@ export default function Watch(props: any) {
   const loadWaitingCount = async () => {
     if (!id) return;
     
-    const { count, error } = await supabase
-      .from('video_expected_users')
-      .select('*', { count: 'exact', head: true })
-      .eq('video_id', id);
-    
-    if (!error && count !== null) {
-      setWaitingCount(count);
+    try {
+      const { count, error } = await supabase
+        .from('video_expected_users')
+        .select('*', { count: 'exact', head: true })
+        .eq('video_id', id);
+      
+      if (!error && count !== null) {
+        setWaitingCount(count);
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке количества ожидающих:', error);
     }
   };
 
   const checkIfWaiting = async () => {
     if (!id || !currentUser) return;
     
-    const { data, error } = await supabase
-      .from('video_expected_users')
-      .select('*')
-      .eq('video_id', id)
-      .eq('user_id', currentUser.id)
-      .single();
-    
-    setIsWaiting(!!data);
+    try {
+      const { data, error } = await supabase
+        .from('video_expected_users')
+        .select('*')
+        .eq('video_id', id)
+        .eq('user_id', currentUser.id)
+        .single();
+      
+      setIsWaiting(!!data);
+    } catch (error) {
+      console.error('Ошибка при проверке статуса ожидания:', error);
+    }
   };
 
   const toggleWaiting = async () => {

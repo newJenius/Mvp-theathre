@@ -7,10 +7,19 @@ export default function MobileBottomBar() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
     const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 600px)').matches);
     checkMobile();
     window.addEventListener('resize', checkMobile);
+    
+    // Безопасная проверка пользователя
+    try {
+      supabase.auth.getUser().then(({ data }: any) => setUser(data.user)).catch((error: any) => {
+        console.error('Ошибка при получении пользователя:', error);
+      });
+    } catch (error) {
+      console.error('Ошибка инициализации Supabase:', error);
+    }
+    
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 

@@ -22,38 +22,44 @@ export default function Register() {
     setLoading(true);
     setMessage('');
     
-    // Проверка инвайта
-    const { data: invites, error } = await supabase
-      .from('invites')
-      .select('*')
-      .eq('code', invite)
-      .eq('used', false);
+    try {
+      // Проверка инвайта
+      const { data: invites, error } = await supabase
+        .from('invites')
+        .select('*')
+        .eq('code', invite)
+        .eq('used', false);
 
-    if (error || !invites || invites.length === 0) {
-      setMessage('Инвайт не найден или уже использован');
+      if (error || !invites || invites.length === 0) {
+        setMessage('Инвайт не найден или уже использован');
+        setLoading(false);
+        return;
+      }
+
+      // Регистрация через Supabase Auth
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (signUpError) {
+        setMessage('Ошибка регистрации: ' + signUpError.message);
+        setLoading(false);
+        return;
+      }
+
+      // Пометить инвайт как использованный
+      await supabase
+        .from('invites')
+        .update({ used: true })
+        .eq('id', invites[0].id);
+
+      setMessage('Проверьте почту для подтверждения!');
+    } catch (error) {
+      console.error('Ошибка при регистрации:', error);
+      setMessage('Ошибка подключения к серверу');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Регистрация через Supabase Auth
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (signUpError) {
-      setMessage('Ошибка регистрации: ' + signUpError.message);
-      setLoading(false);
-      return;
-    }
-
-    // Пометить инвайт как использованный
-    await supabase
-      .from('invites')
-      .update({ used: true })
-      .eq('id', invites[0].id);
-
-    setMessage('Проверьте почту для подтверждения!');
-    setLoading(false);
   };
 
   return (
