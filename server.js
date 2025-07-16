@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { createClient } = require('@supabase/supabase-js');
+const cors = require('cors');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
@@ -26,6 +27,16 @@ const s3 = new S3Client({
   },
   forcePathStyle: true,
 });
+
+app.use(cors({
+  origin: [
+    'https://143.198.121.243', // твой VPS (если вдруг фронт будет на этом домене)
+    'http://localhost:3000',   // для локальной разработки
+    'https://*.vercel.app',    // все поддомены Vercel (универсально)
+    'https://vercel.app',      // основной домен Vercel
+  ],
+  credentials: true,
+}));
 
 app.use(express.json());
 
