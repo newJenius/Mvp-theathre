@@ -35,6 +35,10 @@ export default function Upload() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [processingStatus, setProcessingStatus] = useState<string>('');
+  const [queuePosition, setQueuePosition] = useState<number | null>(null);
+  const [estimatedTime, setEstimatedTime] = useState<number | null>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const TITLE_LIMIT = 150;
@@ -114,10 +118,51 @@ export default function Upload() {
     );
   }
 
+  // Функция для проверки статуса обработки
+  const checkStatus = async (jobId: string) => {
+    try {
+      const response = await fetch(`${apiUrl}/status/${jobId}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setProcessingStatus(data.state);
+        
+        if (data.state === 'completed') {
+          setMessage(`Видео успешно обработано! Ссылка: ${data.result.video_url}`);
+          setJobId(null);
+          setProcessingStatus('');
+          setQueuePosition(null);
+          setEstimatedTime(null);
+        } else if (data.state === 'failed') {
+          setMessage(`Ошибка обработки: ${data.failedReason}`);
+          setJobId(null);
+          setProcessingStatus('');
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка проверки статуса:', error);
+    }
+  };
+
+  // Проверяем статус каждые 10 секунд, если есть jobId
+  useEffect(() => {
+    if (!jobId) return;
+    
+    const interval = setInterval(() => {
+      checkStatus(jobId);
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [jobId]);
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('');
     setLoading(true);
+    setJobId(null);
+    setProcessingStatus('');
+    setQueuePosition(null);
+    setEstimatedTime(null);
 
     if (!video) {
       setMessage('Не выбрано видео для загрузки.');
@@ -132,8 +177,6 @@ export default function Upload() {
       formData.append('description', description);
       formData.append('user_id', user?.id || '');
       formData.append('premiere_at', premiereAt);
-      // Если нужно добавить cover, раскомментируй следующую строку:
-      // if (cover) formData.append('cover', cover);
 
       const response = await fetch(`${apiUrl}/upload`, {
         method: 'POST',
@@ -143,7 +186,11 @@ export default function Upload() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('Видео успешно загружено! Ссылка: ' + data.video_url);
+        setJobId(data.jobId);
+        setQueuePosition(data.queuePosition);
+        setEstimatedTime(data.estimatedTime);
+        setProcessingStatus('waiting');
+        setMessage(`Видео добавлено в очередь! Позиция: ${data.queuePosition}, Примерное время: ${data.estimatedTime} минут`);
       } else {
         setMessage('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
       }
@@ -152,6 +199,46 @@ export default function Upload() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Добавляем отображение статуса обработки
+  const renderProcessingStatus = () => {
+    if (!jobId) return null;
+    
+    const statusText = {
+      'waiting': 'Ожидает обработки',
+      'active': 'Обрабатывается',
+      'completed': 'Завершено',
+      'failed': 'Ошибка'
+    };
+    
+    return (
+      <div style={{
+        background: '#1f2937',
+        padding: '16px',
+        borderRadius: '8px',
+        marginTop: '16px',
+        border: '1px solid #374151'
+      }}>
+        <h3 style={{ color: '#e5e7eb', marginBottom: '8px' }}>Статус обработки</h3>
+        <p style={{ color: '#9ca3af', marginBottom: '4px' }}>
+          ID задачи: {jobId}
+        </p>
+        <p style={{ color: '#9ca3af', marginBottom: '4px' }}>
+          Статус: {statusText[processingStatus as keyof typeof statusText] || processingStatus}
+        </p>
+        {queuePosition && (
+          <p style={{ color: '#9ca3af', marginBottom: '4px' }}>
+            Позиция в очереди: {queuePosition}
+          </p>
+        )}
+        {estimatedTime && (
+          <p style={{ color: '#9ca3af', marginBottom: '4px' }}>
+            Примерное время: {estimatedTime} минут
+          </p>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -297,6 +384,8 @@ export default function Upload() {
         {message && (
           <div style={{ color: '#ff5252', fontSize: 15, marginTop: 4, textAlign: 'left' }}>{message}</div>
         )}
+        {/* Добавляем отображение статуса после формы */}
+        {renderProcessingStatus()}
       </form>
     </div>
   );

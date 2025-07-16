@@ -1,120 +1,134 @@
 require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
-const ffmpeg = require('fluent-ffmpeg');
-const fs = require('fs');
-const path = require('path');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
-const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
+const Queue = require('bull');
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
 
-// Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
-// Storj S3 client
-const s3 = new S3Client({
-  endpoint: process.env.STORJ_ENDPOINT,
-  region: 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.STORJ_ACCESS_KEY,
-    secretAccessKey: process.env.STORJ_SECRET_KEY,
-  },
-  forcePathStyle: true,
-});
-
+// CORS настройки
 app.use(cors({
   origin: [
-    'https://143.198.121.243', // твой VPS (если вдруг фронт будет на этом домене)
-    'http://localhost:3000',   // для локальной разработки
-    'https://*.vercel.app',    // все поддомены Vercel (универсально)
-    'https://vercel.app',      // основной домен Vercel
+    'https://143.198.121.243',
+    'http://localhost:3000',
+    'https://*.vercel.app',
+    'https://vercel.app',
   ],
   credentials: true,
 }));
 
 app.use(express.json());
 
+// Создаём очередь для обработки видео
+const videoQueue = new Queue('video-processing', {
+  redis: { 
+    port: 6379, 
+    host: '127.0.0.1',
+    maxRetriesPerRequest: null
+  }
+});
+
+const upload = multer({ dest: 'uploads/' });
+
 // API для загрузки видео
 app.post('/upload', upload.single('video'), async (req, res) => {
-  const inputPath = req.file.path;
-  const outputPath = path.join('processed', `${Date.now()}_output.mp4`);
+  try {
+    const inputPath = req.file.path;
+    const { title, description, user_id, premiere_at } = req.body;
 
-  if (!fs.existsSync('processed')) fs.mkdirSync('processed');
-
-  // Получаем метаданные из запроса (title, description, user_id, premiere_at)
-  const { title, description, user_id, premiere_at } = req.body;
-
-  // Обработка видео через ffmpeg
-  ffmpeg(inputPath)
-    .outputOptions('-vf', 'fps=30')
-    .outputOptions('-c:v', 'libx264')
-    .outputOptions('-preset', 'fast')
-    .outputOptions('-crf', '23')
-    .outputOptions('-c:a', 'aac')
-    .outputOptions('-b:a', '128k')
-    .save(outputPath)
-    .on('end', async () => {
-      try {
-        // Получаем длительность видео
-        let duration = 0;
-        await new Promise((resolve, reject) => {
-          ffmpeg.ffprobe(outputPath, (err, metadata) => {
-            if (!err && metadata && metadata.format && metadata.format.duration) {
-              duration = Math.round(metadata.format.duration);
-            }
-            resolve();
-          });
-        });
-
-        // Загружаем обработанный файл на Storj
-        const fileStream = fs.createReadStream(outputPath);
-        const storjKey = `videos/${Date.now()}_${req.file.originalname}`;
-        await s3.send(new PutObjectCommand({
-          Bucket: process.env.STORJ_BUCKET,
-          Key: storjKey,
-          Body: fileStream,
-          ContentType: req.file.mimetype,
-        }));
-        const video_url = `${process.env.STORJ_ENDPOINT.replace(/\/$/, '')}/${process.env.STORJ_BUCKET}/${storjKey}`;
-
-        // Сохраняем ссылку и метаданные в Supabase
-        const { data, error } = await supabase.from('videos').insert([
-          {
-            user_id: user_id || null,
-            title: title || null,
-            description: description || null,
-            cover_url: null, // Можно реализовать позже
-            video_url,
-            premiere_at: premiere_at || null,
-            created_At: new Date().toISOString(),
-            duration,
-          },
-        ]);
-        // Удаляем временные файлы
-        fs.unlinkSync(inputPath);
-        fs.unlinkSync(outputPath);
-        if (error) {
-          return res.status(500).json({ error: 'Ошибка сохранения в Supabase', details: error.message });
-        }
-        res.json({ message: 'Видео обработано и загружено!', video_url });
-      } catch (err) {
-        fs.unlinkSync(inputPath);
-        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
-        res.status(500).json({ error: 'Ошибка обработки или загрузки видео', details: err.message });
+    // Добавляем задачу в очередь
+    const job = await videoQueue.add({
+      inputPath,
+      title,
+      description,
+      user_id,
+      premiere_at,
+      originalName: req.file.originalname
+    }, {
+      attempts: 3, // Количество попыток при ошибке
+      backoff: {
+        type: 'exponential',
+        delay: 2000
       }
-    })
-    .on('error', (err) => {
-      fs.unlinkSync(inputPath);
-      res.status(500).json({ error: 'Ошибка обработки видео', details: err.message });
     });
+
+    // Получаем информацию о позиции в очереди
+    const waitingJobs = await videoQueue.getWaiting();
+    const position = waitingJobs.findIndex(j => j.id === job.id) + 1;
+
+    console.log(`Видео добавлено в очередь. ID: ${job.id}, Позиция: ${position}`);
+
+    res.json({ 
+      message: 'Видео добавлено в очередь обработки',
+      jobId: job.id,
+      queuePosition: position,
+      estimatedTime: position * 10 // примерное время в минутах (10 мин на видео)
+    });
+
+  } catch (error) {
+    console.error('Ошибка добавления в очередь:', error);
+    res.status(500).json({ 
+      error: 'Ошибка добавления видео в очередь', 
+      details: error.message 
+    });
+  }
+});
+
+// API для проверки статуса обработки
+app.get('/status/:jobId', async (req, res) => {
+  try {
+    const job = await videoQueue.getJob(req.params.jobId);
+    
+    if (!job) {
+      return res.status(404).json({ error: 'Задача не найдена' });
+    }
+
+    const state = await job.getState();
+    const progress = job._progress;
+    const result = job.returnvalue;
+
+    res.json({
+      jobId: job.id,
+      state: state, // 'waiting', 'active', 'completed', 'failed'
+      progress: progress,
+      result: result,
+      failedReason: job.failedReason
+    });
+
+  } catch (error) {
+    console.error('Ошибка получения статуса:', error);
+    res.status(500).json({ 
+      error: 'Ошибка получения статуса', 
+      details: error.message 
+    });
+  }
+});
+
+// API для получения информации об очереди
+app.get('/queue-info', async (req, res) => {
+  try {
+    const waiting = await videoQueue.getWaiting();
+    const active = await videoQueue.getActive();
+    const completed = await videoQueue.getCompleted();
+    const failed = await videoQueue.getFailed();
+
+    res.json({
+      waiting: waiting.length,
+      active: active.length,
+      completed: completed.length,
+      failed: failed.length,
+      total: waiting.length + active.length + completed.length + failed.length
+    });
+
+  } catch (error) {
+    console.error('Ошибка получения информации об очереди:', error);
+    res.status(500).json({ 
+      error: 'Ошибка получения информации об очереди', 
+      details: error.message 
+    });
+  }
 });
 
 app.listen(4000, () => {
-  console.log('Backend сервер запущен на порту 4000');
+  console.log('Backend сервер с очередью запущен на порту 4000');
 }); 
