@@ -84,6 +84,7 @@ videoQueue.process(async (job) => {
 
     // Загружаем обработанный файл на Storj
     const fileStream = fs.createReadStream(outputPath);
+    const { size } = fs.statSync(outputPath);
     const storjKey = `videos/${Date.now()}_${originalName}`;
     
     await s3.send(new PutObjectCommand({
@@ -91,6 +92,7 @@ videoQueue.process(async (job) => {
       Key: storjKey,
       Body: fileStream,
       ContentType: 'video/mp4',
+      ContentLength: size, // <--- обязательно!
     }));
 
     const video_url = `${process.env.STORJ_ENDPOINT.replace(/\/$/, '')}/${process.env.STORJ_BUCKET}/${storjKey}`;
