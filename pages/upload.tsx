@@ -21,7 +21,7 @@ export default function Upload() {
   const TITLE_LIMIT = 150;
   const [user, setUser] = useState<any>(null);
   const [checkedAuth, setCheckedAuth] = useState(false);
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.nermes.xyz';
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 600px)').matches);

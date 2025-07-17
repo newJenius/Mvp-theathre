@@ -56,7 +56,7 @@ videoQueue.process(async (job) => {
       ffmpeg(inputPath)
         .outputOptions('-vf', 'fps=30')
         .outputOptions('-c:v', 'libx264')
-        .outputOptions('-preset', 'fast')
+        .outputOptions('-preset', 'ultrafast')
         .outputOptions('-crf', '23')
         .outputOptions('-c:a', 'aac')
         .outputOptions('-b:a', '128k')

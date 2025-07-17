@@ -9,7 +9,7 @@ const app = express();
 // CORS настройки
 app.use(cors({
   origin: [
-    'https://143.198.121.243',
+    'https://api.nermes.xyz',
     'http://localhost:3000',
     'https://mvp-theathre.vercel.app',
     'https://vercel.app'
