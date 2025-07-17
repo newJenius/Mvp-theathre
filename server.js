@@ -33,19 +33,27 @@ const videoQueue = new Queue('video-processing', {
 const upload = multer({ dest: 'uploads/' });
 
 // API для загрузки видео
-app.post('/upload', upload.single('video'), async (req, res) => {
+app.post('/upload', upload.fields([
+  { name: 'video', maxCount: 1 },
+  { name: 'cover', maxCount: 1 }
+]), async (req, res) => {
   try {
-    const inputPath = req.file.path;
+    const videoFile = req.files['video'][0];
+    const coverFile = req.files['cover'][0];
+    const inputPath = videoFile.path;
+    const coverPath = coverFile.path;
     const { title, description, user_id, premiere_at } = req.body;
 
     // Добавляем задачу в очередь
     const job = await videoQueue.add({
       inputPath,
+      coverPath,
       title,
       description,
       user_id,
       premiere_at,
-      originalName: req.file.originalname
+      originalName: videoFile.originalname,
+      originalNameCover: coverFile.originalname
     }, {
       attempts: 3, // Количество попыток при ошибке
       backoff: {

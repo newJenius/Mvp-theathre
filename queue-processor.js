@@ -38,11 +38,13 @@ videoQueue.process(async (job) => {
   
   const { 
     inputPath, 
+    coverPath,
     title, 
     description, 
     user_id, 
     premiere_at, 
-    originalName 
+    originalName, 
+    originalNameCover
   } = job.data;
 
   const outputPath = path.join('processed', `${Date.now()}_output.mp4`);
@@ -94,8 +96,22 @@ videoQueue.process(async (job) => {
       ContentType: 'video/mp4',
       ContentLength: size,
     }));
-
     const video_url = `${process.env.STORJ_ENDPOINT.replace(/\/$/, '')}/${process.env.STORJ_BUCKET}/${storjKey}`;
+
+    // Загружаем обложку на Storj
+    let cover_url = null;
+    if (coverPath && fs.existsSync(coverPath)) {
+      const coverBuffer = fs.readFileSync(coverPath);
+      const coverStorjKey = `covers/${Date.now()}_${originalNameCover}`;
+      await s3.send(new PutObjectCommand({
+        Bucket: process.env.STORJ_BUCKET,
+        Key: coverStorjKey,
+        Body: coverBuffer,
+        ContentType: 'image/jpeg', // Можно доработать определение типа
+        ContentLength: coverBuffer.length,
+      }));
+      cover_url = `${process.env.STORJ_ENDPOINT.replace(/\/$/, '')}/${process.env.STORJ_BUCKET}/${coverStorjKey}`;
+    }
 
     // Сохраняем ссылку и метаданные в Supabase
     const { error } = await supabase.from('videos').insert([
@@ -103,7 +119,7 @@ videoQueue.process(async (job) => {
         user_id: user_id || null,
         title: title || null,
         description: description || null,
-        cover_url: null,
+        cover_url,
         video_url,
         premiere_at: premiere_at || null,
         created_at: new Date().toISOString(),
