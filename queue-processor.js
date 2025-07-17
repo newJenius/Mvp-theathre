@@ -84,8 +84,9 @@ videoQueue.process(async (job) => {
       });
     });
 
-    // Публичный Storj Share Link для raw доступа
-    const publicBase = 'https://link.storjshare.io/raw/jw6y2rkfrmhnkrux5m2dw5ia36bq/videos';
+    // Публичные Storj Share Links для raw доступа
+    const publicCoverBase = 'https://link.storjshare.io/raw/judrk6hc7dlop7hhrmgritboufvq/videos';
+    const publicVideoBase = 'https://link.storjshare.io/raw/jwcvcrmthwoglod7mln56oown5xq/videos';
 
     // Загружаем обработанный файл на Storj
     const fileBuffer = fs.readFileSync(outputPath);
@@ -99,7 +100,7 @@ videoQueue.process(async (job) => {
       ContentType: 'video/mp4',
       ContentLength: size,
     }));
-    const video_url = `${publicBase}/${storjKey}`;
+    const video_url = `${publicVideoBase}/${storjKey}`;
 
     // Загружаем обложку на Storj
     let cover_url = null;
@@ -113,7 +114,7 @@ videoQueue.process(async (job) => {
         ContentType: 'image/jpeg',
         ContentLength: coverBuffer.length,
       }));
-      cover_url = `${publicBase}/${coverStorjKey}`;
+      cover_url = `${publicCoverBase}/${coverStorjKey}`;
     }
 
     // Сохраняем ссылку и метаданные в Supabase
