@@ -84,8 +84,8 @@ videoQueue.process(async (job) => {
       });
     });
 
-    // Публичный Storj Share Link
-    const publicBase = 'https://link.storjshare.io/s/jvtz24lhjp5nt7e7op5jnzk4amha/videos';
+    // Публичный Storj Share Link для raw доступа
+    const publicBase = 'https://link.storjshare.io/raw/jw6y2rkfrmhnkrux5m2dw5ia36bq/videos';
 
     // Загружаем обработанный файл на Storj
     const fileBuffer = fs.readFileSync(outputPath);
