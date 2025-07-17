@@ -100,6 +100,9 @@ export default function Upload() {
     try {
       const formData = new FormData();
       formData.append('video', video);
+      if (cover) {
+        formData.append('cover', cover);
+      }
       formData.append('title', title);
       formData.append('description', description);
       formData.append('user_id', user?.id || '');
