@@ -106,7 +106,7 @@ videoQueue.process(async (job) => {
         cover_url: null,
         video_url,
         premiere_at: premiere_at || null,
-        created_At: new Date().toISOString(),
+        created_at: new Date().toISOString(),
         duration,
       },
     ]);
