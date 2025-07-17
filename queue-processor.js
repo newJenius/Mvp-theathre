@@ -83,16 +83,16 @@ videoQueue.process(async (job) => {
     });
 
     // Загружаем обработанный файл на Storj
-    const fileStream = fs.createReadStream(outputPath);
+    const fileBuffer = fs.readFileSync(outputPath);
     const { size } = fs.statSync(outputPath);
     const storjKey = `videos/${Date.now()}_${originalName}`;
     
     await s3.send(new PutObjectCommand({
       Bucket: process.env.STORJ_BUCKET,
       Key: storjKey,
-      Body: fileStream,
+      Body: fileBuffer,
       ContentType: 'video/mp4',
-      ContentLength: size, // <--- обязательно!
+      ContentLength: size,
     }));
 
     const video_url = `${process.env.STORJ_ENDPOINT.replace(/\/$/, '')}/${process.env.STORJ_BUCKET}/${storjKey}`;
@@ -128,10 +128,7 @@ videoQueue.process(async (job) => {
     };
 
   } catch (error) {
-    // Очищаем временные файлы в случае ошибки
-    if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
-    if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
-    
+    // Не удаляем временные файлы в catch, чтобы задача могла быть повторно обработана
     console.error(`Ошибка обработки видео ${job.id}:`, error);
     throw error;
   }
