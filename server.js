@@ -11,10 +11,12 @@ app.use(cors({
   origin: [
     'https://143.198.121.243',
     'http://localhost:3000',
-    'https://*.vercel.app',
-    'https://vercel.app',
+    'https://mvp-theathre.vercel.app',
+    'https://vercel.app'
   ],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(express.json());
