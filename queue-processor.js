@@ -85,13 +85,13 @@ videoQueue.process(async (job) => {
     });
 
     // Публичные Storj Share Links для raw доступа
-    const publicCoverBase = 'https://link.storjshare.io/raw/judbg4xbc27q3ranmwehy6gxrpqa/videos';
-    const publicVideoBase = 'https://link.storjshare.io/raw/jxfoojvkbauwsoefyw55faohahxq/videos';
+    const publicCoverBase = 'https://link.storjshare.io/raw/jxj2acs5rzznak3duyrymzh2kwya/videos/videos';
+    const publicVideoBase = 'https://link.storjshare.io/raw/jxhdowy5aqta7qav6ysj7h3erwxq/videos/videos';
 
     // Загружаем обработанный файл на Storj
     const fileBuffer = fs.readFileSync(outputPath);
     const { size } = fs.statSync(outputPath);
-    const storjKey = `videos/${Date.now()}_${originalName}`;
+    const storjKey = `videos/videos/${Date.now()}_${originalName}`;
     
     await s3.send(new PutObjectCommand({
       Bucket: process.env.STORJ_BUCKET,
@@ -106,7 +106,7 @@ videoQueue.process(async (job) => {
     let cover_url = null;
     if (coverPath && fs.existsSync(coverPath)) {
       const coverBuffer = fs.readFileSync(coverPath);
-      const coverStorjKey = `covers/${Date.now()}_${originalNameCover}`;
+      const coverStorjKey = `videos/covers/${Date.now()}_${originalNameCover}`;
       await s3.send(new PutObjectCommand({
         Bucket: process.env.STORJ_BUCKET,
         Key: coverStorjKey,
