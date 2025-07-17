@@ -85,8 +85,8 @@ videoQueue.process(async (job) => {
     });
 
     // Публичные Storj Share Links для raw доступа
-    const publicCoverBase = 'https://link.storjshare.io/raw/judrk6hc7dlop7hhrmgritboufvq/videos';
-    const publicVideoBase = 'https://link.storjshare.io/raw/jwcvcrmthwoglod7mln56oown5xq/videos';
+    const publicCoverBase = 'https://link.storjshare.io/raw/judbg4xbc27q3ranmwehy6gxrpqa/videos';
+    const publicVideoBase = 'https://link.storjshare.io/raw/jxfoojvkbauwsoefyw55faohahxq/videos';
 
     // Загружаем обработанный файл на Storj
     const fileBuffer = fs.readFileSync(outputPath);
