@@ -470,6 +470,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
 
   // Вычисляем, сколько секунд прошло с начала премьеры
   const [startOffset, setStartOffset] = useState(0);
@@ -545,11 +546,15 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
     <div
       ref={containerRef}
       style={{
-        position: 'relative',
-        width: '100%',
-        aspectRatio: '16/11',
+        position: isPseudoFullscreen ? 'fixed' : 'relative',
+        top: isPseudoFullscreen ? 0 : undefined,
+        left: isPseudoFullscreen ? 0 : undefined,
+        width: isPseudoFullscreen ? '100vw' : '100%',
+        height: isPseudoFullscreen ? '100vh' : undefined,
+        zIndex: isPseudoFullscreen ? 9999 : undefined,
+        background: isPseudoFullscreen ? '#000' : (isFullscreen ? '#000' : '#111'),
+        aspectRatio: isPseudoFullscreen ? undefined : '16/11',
         overflow: 'hidden',
-        background: isFullscreen ? '#000' : '#111',
         transition: 'background 0.2s',
       }}
     >
@@ -562,11 +567,48 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         controls={false}
         disablePictureInPicture
         controlsList="nodownload nofullscreen noremoteplayback noplaybackrate nofullscreen"
-        style={{ width: '100%', height: '100%', objectFit: isFullscreen ? 'contain' : 'cover' }}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: isPseudoFullscreen ? 'contain' : (isFullscreen ? 'contain' : 'cover'),
+        }}
         onContextMenu={e => e.preventDefault()}
       />
+      <button
+        onClick={() => setIsPseudoFullscreen(!isPseudoFullscreen)}
+        style={{
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          background: 'rgba(24,24,27,0.85)',
+          border: 'none',
+          borderRadius: 6,
+          padding: 6,
+          cursor: 'pointer',
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'background 0.2s',
+        }}
+        title={isPseudoFullscreen ? 'Выйти из полноэкранного режима' : 'На весь экран'}
+      >
+        {isPseudoFullscreen ? (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="5" y1="5" x2="19" y2="19" />
+            <line x1="19" y1="5" x2="5" y2="19" />
+          </svg>
+        ) : (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 7 3 3 7 3" />
+            <polyline points="17 3 21 3 21 7" />
+            <polyline points="21 17 21 21 17 21" />
+            <polyline points="7 21 3 21 3 17" />
+          </svg>
+        )}
+      </button>
       {/* Блокируем взаимодействие с видео на мобильных, кроме полноэкранного режима */}
-      {isMobileDevice() && !isFullscreen && (
+      {isMobileDevice() && !isFullscreen && !isPseudoFullscreen && (
         <div
           style={{
             position: 'absolute',
@@ -583,41 +625,6 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
           onClick={e => e.preventDefault()}
         />
       )}
-      <button
-        onClick={handleFullscreen}
-        style={{
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          background: 'rgba(24,24,27,0.85)',
-          border: 'none',
-          borderRadius: 6,
-          padding: 6,
-          cursor: 'pointer',
-          zIndex: 10,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'background 0.2s',
-        }}
-        title={isFullscreen ? 'Выйти из полноэкранного режима' : 'Полноэкранный режим'}
-      >
-        {isFullscreen ? (
-          // Иконка выхода из fullscreen — крестик (X), очень тонкая
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="5" y1="5" x2="19" y2="19" />
-            <line x1="19" y1="5" x2="5" y2="19" />
-          </svg>
-        ) : (
-          // Минималистичная иконка входа в fullscreen (только углы, Pinterest style)
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 7 3 3 7 3" />
-            <polyline points="17 3 21 3 21 7" />
-            <polyline points="21 17 21 21 17 21" />
-            <polyline points="7 21 3 21 3 17" />
-          </svg>
-        )}
-      </button>
     </div>
   );
 }
