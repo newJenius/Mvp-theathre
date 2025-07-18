@@ -516,15 +516,6 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
     };
   }, [handleFullscreenChange]);
 
-  useEffect(() => {
-    const orientation = (window.screen.orientation || (window.screen as any).msOrientation || (window.screen as any).mozOrientation) as any;
-    if (isPseudoFullscreen && orientation && orientation.lock) {
-      orientation.lock('landscape').catch(() => {});
-    } else if (!isPseudoFullscreen && orientation && orientation.unlock) {
-      orientation.unlock();
-    }
-  }, [isPseudoFullscreen]);
-
   const handleFullscreen = () => {
     const video = videoRef.current;
     if (!isFullscreen) {
@@ -550,6 +541,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
 
   // ,kf ,k
 
+  const isMobile = isMobileDevice();
 
   return (
     <div
@@ -558,13 +550,17 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         position: isPseudoFullscreen ? 'fixed' : 'relative',
         top: isPseudoFullscreen ? 0 : undefined,
         left: isPseudoFullscreen ? 0 : undefined,
-        width: isPseudoFullscreen ? '100vw' : '100%',
-        height: isPseudoFullscreen ? '100vh' : undefined,
+        width: isPseudoFullscreen ? (isMobile ? '100vh' : '100vw') : '100%',
+        height: isPseudoFullscreen ? (isMobile ? '100vw' : '100vh') : undefined,
         zIndex: isPseudoFullscreen ? 9999 : undefined,
         background: isPseudoFullscreen ? '#000' : (isFullscreen ? '#000' : '#111'),
         aspectRatio: isPseudoFullscreen ? undefined : '16/11',
         overflow: 'hidden',
         transition: 'background 0.2s',
+        ...(isPseudoFullscreen && isMobile ? {
+          transform: 'rotate(90deg)',
+          transformOrigin: 'center center',
+        } : {}),
       }}
     >
       <video
@@ -577,9 +573,9 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         disablePictureInPicture
         controlsList="nodownload nofullscreen noremoteplayback noplaybackrate nofullscreen"
         style={{
-          width: '100%',
-          height: '100%',
-          objectFit: isPseudoFullscreen ? 'contain' : (isFullscreen ? 'contain' : 'cover'),
+          width: isPseudoFullscreen && isMobile ? '100vh' : '100%',
+          height: isPseudoFullscreen && isMobile ? '100vw' : '100%',
+          objectFit: 'contain',
         }}
         onContextMenu={e => e.preventDefault()}
       />
@@ -617,7 +613,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         )}
       </button>
       {/* Блокируем взаимодействие с видео на мобильных, кроме полноэкранного режима */}
-      {isMobileDevice() && !isFullscreen && !isPseudoFullscreen && (
+      {isMobile && !isFullscreen && !isPseudoFullscreen && (
         <div
           style={{
             position: 'absolute',
