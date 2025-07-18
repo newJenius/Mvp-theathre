@@ -516,6 +516,15 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
     };
   }, [handleFullscreenChange]);
 
+  useEffect(() => {
+    const orientation = (window.screen.orientation || (window.screen as any).msOrientation || (window.screen as any).mozOrientation) as any;
+    if (isPseudoFullscreen && orientation && orientation.lock) {
+      orientation.lock('landscape').catch(() => {});
+    } else if (!isPseudoFullscreen && orientation && orientation.unlock) {
+      orientation.unlock();
+    }
+  }, [isPseudoFullscreen]);
+
   const handleFullscreen = () => {
     const video = videoRef.current;
     if (!isFullscreen) {
