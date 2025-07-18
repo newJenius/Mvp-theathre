@@ -467,10 +467,28 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
   useEffect(() => {
     if (!premiereAt) return;
     const premiereDate = new Date(premiereAt);
-    const now = new Date();
-    const diff = Math.floor((now.getTime() - premiereDate.getTime()) / 1000); // в секундах
-    setStartOffset(diff > 0 ? diff : 0);
+    const updateOffset = () => {
+      const now = new Date();
+      const diff = Math.floor((now.getTime() - premiereDate.getTime()) / 1000);
+      setStartOffset(diff > 0 ? diff : 0);
+    };
+    updateOffset();
+    const interval = setInterval(updateOffset, 1000); // обновлять каждую секунду
+    return () => clearInterval(interval);
   }, [premiereAt]);
+
+  // Следим за startOffset и обновляем позицию видео, если оно играет
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.readyState >= 1) {
+      if (startOffset > 0 && video.duration && startOffset < video.duration) {
+        if (Math.abs(video.currentTime - startOffset) > 1) {
+          video.currentTime = startOffset;
+        }
+      }
+    }
+  }, [startOffset]);
 
   // Устанавливаем currentTime при готовности видео
   useEffect(() => {
