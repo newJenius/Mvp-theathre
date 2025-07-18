@@ -22,8 +22,7 @@ const supabase = createClient(
     const { data: videos, error } = await supabase
       .from('videos')
       .select('*')
-      .not('duration', 'is', null)
-      .lt('premiere_at', new Date(now.getTime() - 1000 * 60 * 60 * 24 * 365).toISOString());
+      .not('duration', 'is', null);
     if (error) throw error;
     if (!videos || videos.length === 0) {
       console.log('Нет завершённых видео.');
