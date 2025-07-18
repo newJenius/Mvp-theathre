@@ -39,13 +39,17 @@ const supabase = createClient(
     const errors = [];
     for (const video of finished) {
       try {
-        const urlParts = video.video_url.split('/');
-        const fileName = urlParts[urlParts.length - 1].split('?')[0]; // только имя файла без query string
-        await s3.send(new DeleteObjectCommand({
-          Bucket: process.env.STORJ_BUCKET,
-          Key: `videos/${fileName}`,
-        }));
-        console.log(`Удалено из Storj: ${fileName}`);
+        if (video.video_url) {
+          const urlParts = video.video_url.split('/');
+          const fileName = urlParts[urlParts.length - 1].split('?')[0];
+          await s3.send(new DeleteObjectCommand({
+            Bucket: process.env.STORJ_BUCKET,
+            Key: `videos/${fileName}`,
+          }));
+          console.log(`Удалено из Storj: ${fileName}`);
+        } else {
+          console.log(`video_url уже null для видео: ${video.id}, пропускаю удаление из Storj`);
+        }
       } catch (e) {
         errors.push({ id: video.id, error: 'Ошибка удаления из Storj', details: e });
       }
