@@ -489,6 +489,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
       if (startOffset > 0 && video.duration && startOffset < video.duration) {
         if (Math.abs(video.currentTime - startOffset) > 1) {
           video.currentTime = startOffset;
+          video.play(); // обязательно вызываем play после установки currentTime
         }
       }
     }
@@ -570,13 +571,12 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         src={videoUrl}
         autoPlay
         playsInline
+        muted // теперь видео всегда muted для автозапуска
         controls={false}
         disablePictureInPicture
         controlsList="nodownload nofullscreen noremoteplayback noplaybackrate nofullscreen"
         style={{ width: '100%', height: '100%', objectFit: isFullscreen ? 'contain' : 'cover' }}
         onContextMenu={e => e.preventDefault()}
-        onPlay={e => { e.currentTarget.play(); }}
-        onPause={e => { e.currentTarget.play(); }}
         onSeeking={e => { e.currentTarget.currentTime = startOffset; }}
         onEnded={e => { e.currentTarget.currentTime = startOffset; e.currentTarget.play(); }}
         onTouchStart={e => e.preventDefault()}
