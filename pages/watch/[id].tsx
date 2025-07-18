@@ -33,6 +33,11 @@ export default function Watch(props: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [isInfoExpanded, setIsInfoExpanded] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     // Получаем текущего пользователя
@@ -175,7 +180,6 @@ export default function Watch(props: any) {
 
   if (!video) return <div>Загрузка...</div>;
 
-  const now = new Date();
   const premiere = new Date(video.premiere_at);
   const canWatch = now >= premiere;
   const timeUntilPremiere = Math.floor((premiere.getTime() - now.getTime()) / 60000);
