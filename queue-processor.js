@@ -124,7 +124,15 @@ videoQueue.process(async (job) => {
         ContentType: 'image/jpeg',
         ContentLength: coverBuffer.length,
       }));
-      cover_url = `${publicCoverBase}/${coverStorjKey}`;
+      // Получаем presigned URL на 7 дней для обложки
+      cover_url = await getSignedUrl(
+        s3,
+        new GetObjectCommand({
+          Bucket: process.env.STORJ_BUCKET,
+          Key: coverStorjKey,
+        }),
+        { expiresIn: 60 * 60 * 24 * 7 }
+      );
     }
 
     // Сохраняем ссылку и метаданные в Supabase
