@@ -39,39 +39,7 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Проверяем, нужно ли скрыть хедер (на странице видео во время активной премьеры)
-  useEffect(() => {
-    const checkIfShouldHide = async () => {
-      if (router.pathname === '/watch/[id]' && router.query.id) {
-        try {
-          const { data: video } = await supabase
-            .from('videos')
-            .select('premiere_at')
-            .eq('id', router.query.id)
-            .single();
-          
-          if (video) {
-            const now = new Date();
-            const premiere = new Date(video.premiere_at);
-            const canWatch = now >= premiere;
-            setShouldHide(canWatch);
-          }
-        } catch (error) {
-          console.error('Ошибка при проверке статуса видео:', error);
-          // Не скрываем хедер в случае ошибки
-          setShouldHide(false);
-        }
-      } else {
-        setShouldHide(false);
-      }
-    };
-
-    checkIfShouldHide();
-  }, [router.pathname, router.query.id]);
-
-  if (shouldHide) {
-    return null;
-  }
+  // Удаляю useEffect, который вычисляет shouldHide
 
   return (
     <header style={{
@@ -88,7 +56,7 @@ export default function Header() {
       width: '100vw',
       zIndex: 100,
       boxSizing: 'border-box',
-      boxShadow: '0 2px 8px #000a',
+      // boxShadow: '0 2px 8px #000a', // убираем тень
       transition: 'transform 0.3s cubic-bezier(.4,0,.2,1)',
       transform: hideOnScroll ? 'translateY(-100%)' : 'translateY(0)',
     }}>

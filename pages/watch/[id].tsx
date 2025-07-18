@@ -196,7 +196,8 @@ export default function Watch(props: any) {
         background: '#111114',
         minHeight: '100vh',
         color: '#f3f3f3',
-        fontFamily: `'JetBrains Mono', monospace`
+        fontFamily: `'JetBrains Mono', monospace`,
+        paddingTop: 40 // уменьшен отступ сверху для Header
       }}>
       {!canWatch && (
         <h1 style={{ fontSize: '24px', marginBottom: '20px', color: '#fff', fontWeight: 700 }}>{video.title}</h1>
@@ -515,14 +516,15 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
   }, [handleFullscreenChange]);
 
   const handleFullscreen = () => {
+    const video = videoRef.current;
     if (!isFullscreen) {
-      if (containerRef.current) {
-        if (containerRef.current.requestFullscreen) {
-          containerRef.current.requestFullscreen();
-        } else if ((containerRef.current as any).webkitRequestFullscreen) {
-          (containerRef.current as any).webkitRequestFullscreen();
-        } else if ((containerRef.current as any).msRequestFullscreen) {
-          (containerRef.current as any).msRequestFullscreen();
+      if (video) {
+        if (video.requestFullscreen) {
+          video.requestFullscreen();
+        } else if ((video as any).webkitRequestFullscreen) {
+          (video as any).webkitRequestFullscreen();
+        } else if ((video as any).msRequestFullscreen) {
+          (video as any).msRequestFullscreen();
         }
       }
     } else {
