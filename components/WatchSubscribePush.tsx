@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const VAPID_PUBLIC_KEY = 'BDYWw2muyYWNSnroP2SEtO13aQtSps9Z-h4KRJrtQafHFsZADry3PIBF_KYMIgZtpV5C4UQZDMGRvw4dmlxWjy4';
 
@@ -13,6 +13,13 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unsupported, setUnsupported] = useState(false);
+
+  useEffect(() => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      setUnsupported(true);
+    }
+  }, []);
 
   if (!visible) return null;
 
@@ -51,9 +58,15 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
 
   return (
     <>
+      {unsupported && (
+        <div style={{ color: '#f87171', marginTop: 8, fontSize: 14 }}>
+          Уведомления не поддерживаются в вашем браузере или на этом устройстве.<br/>
+          Попробуйте открыть сайт на компьютере или установить его на главный экран, если используете iPhone (iOS 16.4+).
+        </div>
+      )}
       <button
         onClick={handleSubscribe}
-        disabled={subscribed || loading}
+        disabled={subscribed || loading || unsupported}
         style={{
           background: subscribed ? '#23232a' : '#23232a',
           color: '#e0e0e0',
@@ -62,8 +75,8 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
           padding: '8px 20px',
           fontWeight: 600,
           fontSize: 16,
-          cursor: subscribed ? 'default' : 'pointer',
-          opacity: loading ? 0.7 : 1,
+          cursor: subscribed || unsupported ? 'default' : 'pointer',
+          opacity: loading || unsupported ? 0.7 : 1,
           marginTop: 12
         }}
       >
