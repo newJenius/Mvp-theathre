@@ -100,14 +100,7 @@ videoQueue.process(async (job) => {
       ContentType: 'video/mp4',
       ContentLength: size,
     }));
-
-    // Получаем presigned URL для видео (на 7 дней)
-    const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
-    const { GetObjectCommand } = require('@aws-sdk/client-s3');
-    const videoPresignedUrl = await getSignedUrl(s3, new GetObjectCommand({
-      Bucket: process.env.STORJ_BUCKET,
-      Key: storjKey,
-    }), { expiresIn: 60 * 60 * 24 * 7 }); // 7 дней
+    const video_url = `${publicVideoBase}/${storjKey}`;
 
     // Загружаем обложку на Storj
     let cover_url = null;
@@ -121,11 +114,7 @@ videoQueue.process(async (job) => {
         ContentType: 'image/jpeg',
         ContentLength: coverBuffer.length,
       }));
-      // Получаем presigned URL для обложки (на 7 дней)
-      cover_url = await getSignedUrl(s3, new GetObjectCommand({
-        Bucket: process.env.STORJ_BUCKET,
-        Key: coverStorjKey,
-      }), { expiresIn: 60 * 60 * 24 * 7 });
+      cover_url = `${publicCoverBase}/${coverStorjKey}`;
     }
 
     // Сохраняем ссылку и метаданные в Supabase
@@ -135,7 +124,7 @@ videoQueue.process(async (job) => {
         title: title || null,
         description: description || null,
         cover_url,
-        video_url: videoPresignedUrl,
+        video_url,
         premiere_at: premiere_at || null,
         created_at: new Date().toISOString(),
         duration,
@@ -154,7 +143,7 @@ videoQueue.process(async (job) => {
     
     return {
       success: true,
-      video_url: videoPresignedUrl,
+      video_url,
       duration
     };
 

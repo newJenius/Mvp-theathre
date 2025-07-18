@@ -188,17 +188,17 @@ export default function Watch(props: any) {
   return (
     <>
       <Header />
-      <div style={{ 
-        padding: canWatch ? '0' : '8px',
-        maxWidth: canWatch ? '100%' : '1200px',
-        margin: '0 auto',
-        paddingBottom: canWatch ? '60px' : '8px',
-        background: '#111114',
-        minHeight: '100vh',
-        color: '#f3f3f3',
+    <div style={{ 
+      padding: canWatch ? '0' : '8px',
+      maxWidth: canWatch ? '100%' : '1200px',
+      margin: '0 auto',
+      paddingBottom: canWatch ? '60px' : '8px',
+      background: '#111114',
+      minHeight: '100vh',
+      color: '#f3f3f3',
         fontFamily: `'JetBrains Mono', monospace`,
         paddingTop: 40 // уменьшен отступ сверху для Header
-      }}>
+    }}>
       {!canWatch && (
         <h1 style={{ fontSize: '24px', marginBottom: '20px', color: '#fff', fontWeight: 700 }}>{video.title}</h1>
       )}
