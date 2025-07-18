@@ -6,6 +6,7 @@ import EmotionCarousel from '../../components/EmotionCarousel';
 import { NextPageContext } from 'next';
 import WatchSubscribePush from '../../components/WatchSubscribePush';
 import React from 'react';
+import Header from '../../components/Header';
 // Хелпер для определения мобильного устройства
 function isMobileDevice() {
   if (typeof navigator === 'undefined') return false;
@@ -185,16 +186,18 @@ export default function Watch(props: any) {
   const timeUntilPremiere = Math.floor((premiere.getTime() - now.getTime()) / 60000);
 
   return (
-    <div style={{ 
-      padding: canWatch ? '0' : '8px',
-      maxWidth: canWatch ? '100%' : '1200px',
-      margin: '0 auto',
-      paddingBottom: canWatch ? '60px' : '8px',
-      background: '#111114',
-      minHeight: '100vh',
-      color: '#f3f3f3',
-      fontFamily: `'JetBrains Mono', monospace`
-    }}>
+    <>
+      <Header />
+      <div style={{ 
+        padding: canWatch ? '0' : '8px',
+        maxWidth: canWatch ? '100%' : '1200px',
+        margin: '0 auto',
+        paddingBottom: canWatch ? '60px' : '8px',
+        background: '#111114',
+        minHeight: '100vh',
+        color: '#f3f3f3',
+        fontFamily: `'JetBrains Mono', monospace`
+      }}>
       {!canWatch && (
         <h1 style={{ fontSize: '24px', marginBottom: '20px', color: '#fff', fontWeight: 700 }}>{video.title}</h1>
       )}
@@ -440,6 +443,7 @@ export default function Watch(props: any) {
         </>
       )}
     </div>
+    </>
   );
 }
 
