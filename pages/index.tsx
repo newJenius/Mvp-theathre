@@ -232,8 +232,10 @@ export default function Home() {
                 {(() => {
                   const now = new Date();
                   const premiere = new Date(video.premiere_at);
+                  const durationMs = (video.duration || 0) * 1000;
+                  const extraMs = 3 * 60 * 1000;
                   let status = '';
-                  if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
+                  if (premiere <= now && now.getTime() - premiere.getTime() < durationMs + extraMs) {
                     status = 'live';
                   } else if (premiere > now && premiere.getTime() - now.getTime() < 30 * 60 * 1000) {
                     status = 'soon';
@@ -302,8 +304,10 @@ export default function Home() {
                   {(() => {
                     const now = new Date();
                     const premiere = new Date(video.premiere_at);
-                    if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
-                      // В эфире (до 2 часов после премьеры)
+                    const durationMs = (video.duration || 0) * 1000;
+                    const extraMs = 3 * 60 * 1000;
+                    if (premiere <= now && now.getTime() - premiere.getTime() < durationMs + extraMs) {
+                      // В эфире (длительность видео + 3 минуты)
                       return 'В эфире';
                     } else if (premiere > now && premiere.getTime() - now.getTime() < 30 * 60 * 1000) {
                       // Скоро (меньше 30 минут до премьеры)
