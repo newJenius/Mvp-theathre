@@ -40,7 +40,7 @@ const supabase = createClient(
     for (const video of finished) {
       try {
         const urlParts = video.video_url.split('/');
-        const fileName = urlParts[urlParts.length - 1];
+        const fileName = urlParts[urlParts.length - 1].split('?')[0]; // только имя файла без query string
         await s3.send(new DeleteObjectCommand({
           Bucket: process.env.STORJ_BUCKET,
           Key: `videos/${fileName}`,
