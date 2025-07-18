@@ -226,7 +226,7 @@ export default function Home() {
                     border: 'none',
                     boxShadow: 'none',
                   }}
-                  onError={e => { e.currentTarget.src = '/placeholder.jpg'; }}
+                  onError={e => { e.currentTarget.src = '/placeholder.png'; }}
                 />
                 {/* Статус для углов */}
                 {(() => {
@@ -396,7 +396,7 @@ export default function Home() {
                       border: 'none',
                       boxShadow: 'none',
                     }}
-                    onError={e => { e.currentTarget.src = '/placeholder.jpg'; }}
+                    onError={e => { e.currentTarget.src = '/placeholder.png'; }}
                   />
                   {/* Статус для углов */}
                   {(() => {
