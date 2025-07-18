@@ -471,41 +471,22 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
   useEffect(() => {
     if (!premiereAt) return;
     const premiereDate = new Date(premiereAt);
-    const updateOffset = () => {
-      const now = new Date();
-      const diff = Math.floor((now.getTime() - premiereDate.getTime()) / 1000);
-      setStartOffset(diff > 0 ? diff : 0);
-    };
-    updateOffset();
-    const interval = setInterval(updateOffset, 1000); // обновлять каждую секунду
-    return () => clearInterval(interval);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - premiereDate.getTime()) / 1000); // в секундах
+    setStartOffset(diff > 0 ? diff : 0);
   }, [premiereAt]);
 
-  // Следим за startOffset и обновляем позицию видео, если оно играет
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.readyState >= 1) {
-      if (startOffset > 0 && video.duration && startOffset < video.duration) {
-        if (Math.abs(video.currentTime - startOffset) > 1) {
-          video.currentTime = startOffset;
-          video.play(); // обязательно вызываем play после установки currentTime
-        }
-      }
-    }
-  }, [startOffset]);
-
-  // Устанавливаем currentTime при готовности видео
+  // Выставляем currentTime только один раз при загрузке метаданных
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
     const setTime = () => {
       if (startOffset > 0 && video.duration && startOffset < video.duration) {
         video.currentTime = startOffset;
+        video.play();
       }
     };
     video.addEventListener('loadedmetadata', setTime);
-    // Если metadata уже загружены
     if (video.readyState >= 1) setTime();
     return () => {
       video.removeEventListener('loadedmetadata', setTime);
@@ -571,15 +552,12 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         src={videoUrl}
         autoPlay
         playsInline
-        muted // теперь видео всегда muted для автозапуска
+        muted
         controls={false}
         disablePictureInPicture
         controlsList="nodownload nofullscreen noremoteplayback noplaybackrate nofullscreen"
         style={{ width: '100%', height: '100%', objectFit: isFullscreen ? 'contain' : 'cover' }}
         onContextMenu={e => e.preventDefault()}
-        onSeeking={e => { e.currentTarget.currentTime = startOffset; }}
-        onEnded={e => { e.currentTarget.currentTime = startOffset; e.currentTarget.play(); }}
-        onTouchStart={e => e.preventDefault()}
       />
       {/* Блокируем взаимодействие с видео на мобильных, кроме полноэкранного режима */}
       {isMobileDevice() && !isFullscreen && (
