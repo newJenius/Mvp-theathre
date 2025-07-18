@@ -516,6 +516,15 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
     };
   }, [handleFullscreenChange]);
 
+  useEffect(() => {
+    if (isPseudoFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isPseudoFullscreen]);
+
   const handleFullscreen = () => {
     const video = videoRef.current;
     if (!isFullscreen) {
@@ -550,17 +559,15 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         position: isPseudoFullscreen ? 'fixed' : 'relative',
         top: isPseudoFullscreen ? 0 : undefined,
         left: isPseudoFullscreen ? 0 : undefined,
-        width: isPseudoFullscreen ? (isMobile ? '100vh' : '100vw') : '100%',
-        height: isPseudoFullscreen ? (isMobile ? '100vw' : '100vh') : undefined,
+        width: isPseudoFullscreen ? '100vw' : '100%',
+        height: isPseudoFullscreen ? '100vh' : '100%',
         zIndex: isPseudoFullscreen ? 9999 : undefined,
-        background: isPseudoFullscreen ? '#000' : (isFullscreen ? '#000' : '#111'),
-        aspectRatio: isPseudoFullscreen ? undefined : '16/11',
-        overflow: 'hidden',
-        transition: 'background 0.2s',
-        ...(isPseudoFullscreen && isMobile ? {
-          transform: 'rotate(90deg)',
-          transformOrigin: 'center center',
-        } : {}),
+        background: '#000',
+        overflow: isPseudoFullscreen ? 'hidden' : 'visible',
+        aspectRatio: isPseudoFullscreen ? undefined : '4/2.8',
+        display: isPseudoFullscreen ? 'flex' : undefined,
+        alignItems: isPseudoFullscreen ? 'center' : undefined,
+        justifyContent: isPseudoFullscreen ? 'center' : undefined,
       }}
     >
       <video
@@ -575,7 +582,12 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         style={{
           width: isPseudoFullscreen && isMobile ? '100vh' : '100%',
           height: isPseudoFullscreen && isMobile ? '100vw' : '100%',
-          objectFit: 'contain',
+          objectFit: isPseudoFullscreen && isMobile ? 'contain' : 'cover',
+          position: isPseudoFullscreen && isMobile ? 'absolute' : 'static',
+          top: isPseudoFullscreen && isMobile ? '50%' : undefined,
+          left: isPseudoFullscreen && isMobile ? '50%' : undefined,
+          transform: isPseudoFullscreen && isMobile ? 'translate(-50%, -50%) rotate(90deg)' : undefined,
+          background: '#000',
         }}
         onContextMenu={e => e.preventDefault()}
       />
