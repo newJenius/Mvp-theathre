@@ -66,7 +66,7 @@ export default function Upload() {
         setProcessingStatus(data.state);
         
         if (data.state === 'completed') {
-          setMessage(`Видео успешно обработано! Ссылка: ${data.result.video_url}`);
+          setMessage('Видео успешно обработано и загружено!');
           setJobId(null);
           setProcessingStatus('');
           setQueuePosition(null);
@@ -90,6 +90,18 @@ export default function Upload() {
     setProcessingStatus('');
     setQueuePosition(null);
     setEstimatedTime(null);
+
+    // Проверка: дата премьеры не дальше 6 дней
+    if (premiereAt) {
+      const premiereDate = new Date(premiereAt);
+      const now = new Date();
+      const maxDate = new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000);
+      if (premiereDate > maxDate) {
+        setMessage('Премьера не может быть назначена дальше, чем через 6 дней.');
+        setLoading(false);
+        return;
+      }
+    }
 
     if (!video) {
       setMessage('Не выбрано видео для загрузки.');
@@ -318,6 +330,9 @@ export default function Upload() {
             transition: 'border 0.2s',
           }}
         />
+        <div style={{ color: '#666', fontSize: 13, marginTop: 2, marginBottom: 8, textAlign: 'right', opacity: 0.7 }}>
+          Время указывается в UTC
+        </div>
         <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>Обложка (обязательно)</label>
         <input
           type="file"
