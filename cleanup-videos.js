@@ -50,10 +50,10 @@ const supabase = createClient(
       } catch (e) {
         errors.push({ id: video.id, error: 'Ошибка удаления из Storj', details: e });
       }
-      // Не удаляем запись из Supabase
-      // const { error: delError } = await supabase.from('videos').delete().eq('id', video.id);
-      // if (delError) errors.push({ id: video.id, error: 'Ошибка удаления из Supabase', details: delError });
-      // else console.log(`Удалено из Supabase: ${video.id}`);
+      // После удаления из Storj, обнуляем ссылку на видео в Supabase
+      const { error: updError } = await supabase.from('videos').update({ video_url: null }).eq('id', video.id);
+      if (updError) errors.push({ id: video.id, error: 'Ошибка обновления video_url в Supabase', details: updError });
+      else console.log(`Обнулена ссылка video_url в Supabase: ${video.id}`);
     }
     if (errors.length > 0) {
       console.error('Ошибки при удалении:', errors);
