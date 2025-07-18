@@ -4,6 +4,8 @@ const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const path = require('path');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { GetObjectCommand } = require('@aws-sdk/client-s3');
 const { createClient } = require('@supabase/supabase-js');
 
 // Supabase client
@@ -100,7 +102,15 @@ videoQueue.process(async (job) => {
       ContentType: 'video/mp4',
       ContentLength: size,
     }));
-    const video_url = `${publicVideoBase}/${storjKey}`;
+    // Получаем presigned URL на 7 дней
+    const video_url = await getSignedUrl(
+      s3,
+      new GetObjectCommand({
+        Bucket: process.env.STORJ_BUCKET,
+        Key: storjKey,
+      }),
+      { expiresIn: 60 * 60 * 24 * 7 }
+    );
 
     // Загружаем обложку на Storj
     let cover_url = null;
