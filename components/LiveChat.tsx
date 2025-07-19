@@ -22,13 +22,13 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const MESSAGE_LIMIT = 500;
 
-  // Автопрокрутка больше не нужна, так как новые сообщения сверху
+  // Autoscroll is no longer needed, as new messages are at the top
 
-  // Загрузка сообщений
+  // Loading messages
   useEffect(() => {
     loadMessages();
     
-    // Подписка на новые сообщения через Supabase Realtime
+    // Subscribe to new messages via Supabase Realtime
     try {
       const channel = supabase
         .channel(`comments:${videoId}`)
@@ -49,7 +49,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
         supabase.removeChannel(channel);
       };
     } catch (error) {
-      console.error('Ошибка подписки на комментарии:', error);
+      console.error('Error subscribing to comments:', error);
     }
   }, [videoId]);
 
@@ -153,7 +153,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
       boxShadow: '0 2px 8px #000a',
       color: '#f3f3f3',
     }}>
-      {/* Заголовок комментариев */}
+      {/* Comments section */}
       <div style={{
         padding: '8px 12px',
         background: 'linear-gradient(135deg, #23232a 80%, #1769aa 100%)',
@@ -172,7 +172,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2196f3" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle'}}>
           <path d="M21 11.5a8.38 8.38 0 0 1-1.9 5.4A8.5 8.5 0 0 1 12 21.5a8.38 8.38 0 0 1-5.4-1.9L3 21l1.4-3.6A8.38 8.38 0 0 1 2.5 12a8.5 8.5 0 1 1 17 0z"/>
         </svg>
-        Комментарии
+        Comments
       </div>
 
       {/* Форма отправки сообщения - СВЕРХУ */}
@@ -192,7 +192,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
             onChange={(e) => {
               if (e.target.value.length <= MESSAGE_LIMIT) setNewMessage(e.target.value);
             }}
-            placeholder={currentUser ? "Написать сообщение..." : "Войдите для отправки сообщений"}
+            placeholder={currentUser ? "Write a comment..." : "Войдите для отправки сообщений"}
             disabled={!currentUser || isLoading || cooldown}
             style={{
               flex: 1,
@@ -248,6 +248,11 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
         flexDirection: 'column-reverse',
       }}>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {messages.length === 0 && (
+            <div style={{ color: '#666', fontSize: 15, textAlign: 'center', margin: '24px 0' }}>
+              No comments yet. Be the first to comment!
+            </div>
+          )}
           {messages.length === 0 ? (
             <div style={{
               textAlign: 'center',

@@ -6,7 +6,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { subscription, premiereId, userId } = req.body;
   if (!subscription || !premiereId || !userId) return res.status(400).json({ error: 'Missing fields' });
 
-  // Сохраняем подписку в таблицу push_subscriptions
+  // Save subscription to push_subscriptions table
   const { error } = await supabase.from('push_subscriptions').upsert([
     {
       user_id: userId,

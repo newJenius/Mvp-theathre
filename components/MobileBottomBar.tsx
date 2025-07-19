@@ -11,13 +11,13 @@ export default function MobileBottomBar() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     
-    // Безопасная проверка пользователя
+    // Safe user check
     try {
       supabase.auth.getUser().then(({ data }: any) => setUser(data.user)).catch((error: any) => {
-        console.error('Ошибка при получении пользователя:', error);
+        console.error('Error getting user:', error);
       });
     } catch (error) {
-      console.error('Ошибка инициализации Supabase:', error);
+      console.error('Supabase initialization error:', error);
     }
     
     return () => window.removeEventListener('resize', checkMobile);
@@ -35,7 +35,7 @@ export default function MobileBottomBar() {
       background: '#18181b',
       color: '#2196f3',
       backgroundColor: '#18181b',
-      boxShadow: '0 -1px 4px #0006', // очень мягкая тень
+      boxShadow: '0 -1px 4px #0006', // very soft shadow
       borderTop: '1px solid #23232a',
       WebkitBackdropFilter: 'none',
       backdropFilter: 'none',
@@ -49,33 +49,33 @@ export default function MobileBottomBar() {
     }}>
       <Link href="/" style={{ textAlign: 'center', color: '#bdbdbd', textDecoration: 'none', flex: 1 }}>
         <div style={{ lineHeight: 1, display: 'flex', justifyContent: 'center', paddingTop: 2 }}>
-          {/* Минималистичный домик */}
+          {/* Minimalistic house */}
           <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#bdbdbd" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="7,20 7,12 17,12 17,20" />
             <polyline points="3,12 12,4 21,12" />
           </svg>
         </div>
-        <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Главная</div>
+        <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Main</div>
       </Link>
       <Link href="/upload" style={{ textAlign: 'center', color: '#bdbdbd', textDecoration: 'none', flex: 1 }}>
         <div style={{ lineHeight: 1, display: 'flex', justifyContent: 'center', paddingTop: 2 }}>
-          {/* Минималистичная загрузка — стрелка вверх в круге */}
+          {/* Minimalistic upload — arrow up in a circle */}
           <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#bdbdbd" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="9" />
             <line x1="12" y1="16" x2="12" y2="8" />
             <polyline points="9,11 12,8 15,11" />
           </svg>
         </div>
-        <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Загрузить</div>
+        <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Upload</div>
       </Link>
       <Link href="/profile" style={{ textAlign: 'center', color: '#bdbdbd', textDecoration: 'none', flex: 1 }}>
         <div style={{ lineHeight: 1, display: 'flex', justifyContent: 'center', paddingTop: 2 }}>
-          {/* Минималистичный профиль — только круг */}
+          {/* Minimalistic profile — only circle */}
           <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#bdbdbd" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="8" />
           </svg>
         </div>
-        <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Профиль</div>
+        <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Profile</div>
       </Link>
     </nav>
   );

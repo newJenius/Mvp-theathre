@@ -239,7 +239,7 @@ export default function Profile() {
 
     // Проверяем ограничение на обновление профиля
     if (!canUpdateProfile) {
-      setMessage(`Профиль можно обновлять раз в 3 недели. Следующее обновление: ${nextUpdateDate}`);
+      setMessage(`Profile can be updated every 3 weeks. Next update: ${nextUpdateDate}`);
       return;
     }
 
@@ -250,7 +250,7 @@ export default function Profile() {
       // Финальная проверка никнейма перед сохранением
       const isAvailable = await checkUsernameAvailability(username);
       if (!isAvailable) {
-        setMessage('Никнейм уже занят. Выберите другой.');
+        setMessage('Username is already taken. Please choose another.');
         setLoading(false);
         return;
       }
@@ -310,7 +310,7 @@ export default function Profile() {
       
       setSelectedFile(null);
       setPreviewUrl('');
-      setMessage('Изменения сохранены!');
+      setMessage('Changes saved!');
       
       // Обновляем состояние возможности обновления
       setTimeout(() => {
@@ -318,7 +318,7 @@ export default function Profile() {
       }, 1000);
     } catch (error: any) {
       console.error('Ошибка сохранения:', error);
-      setMessage('Ошибка сохранения: ' + error.message);
+      setMessage('Error saving: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -342,8 +342,8 @@ export default function Profile() {
         justifyContent: 'center',
         padding: 0
       }}>
-        <h1 style={{ marginBottom: 18, fontSize: 22, fontWeight: 600, letterSpacing: 0.2 }}>Профиль</h1>
-        <p style={{ fontSize: 15, color: '#6b7280', textAlign: 'center', margin: 0, marginBottom: 22 }}>Вы не авторизованы</p>
+        <h1 style={{ marginBottom: 18, fontSize: 22, fontWeight: 600, letterSpacing: 0.2 }}>Profile</h1>
+        <p style={{ fontSize: 15, color: '#6b7280', textAlign: 'center', margin: 0, marginBottom: 22 }}>You are not authorized</p>
         <button 
           onClick={() => window.location.href = '/login'}
           style={{
@@ -372,7 +372,7 @@ export default function Profile() {
             e.currentTarget.style.border = '1.5px solid #23232a';
           }}
         >
-          Войти
+          Login
         </button>
       </div>
     );
@@ -391,14 +391,14 @@ export default function Profile() {
             )}
           </div>
           <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
-          <button onClick={() => fileInputRef.current?.click()} style={{ background: 'none', color: '#bdbdbd', border: 'none', fontSize: 15, cursor: 'pointer', marginTop: 2, padding: 0, textDecoration: 'underline', letterSpacing: 0.2 }}>Изменить аватар</button>
+          <button onClick={() => fileInputRef.current?.click()} style={{ background: 'none', color: '#bdbdbd', border: 'none', fontSize: 15, cursor: 'pointer', marginTop: 2, padding: 0, textDecoration: 'underline', letterSpacing: 0.2 }}>Change avatar</button>
         </div>
         {/* Никнейм и подписчики */}
         <div style={{ width: '100%', textAlign: 'center', marginBottom: 8 }}>
           <div style={{ fontSize: 22, fontWeight: 600, color: '#e0e0e0', marginBottom: 2 }}>{username || '...'}</div>
           <div style={{ fontSize: 15, color: '#bdbdbd', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888a92" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="4"/><circle cx="17" cy="8.5" r="3.5"/><ellipse cx="8" cy="17" rx="7" ry="4"/><ellipse cx="17" cy="17.5" rx="5" ry="2.5"/></svg>
-            {subscribersCount} подписчиков
+            {subscribersCount} subscribers
           </div>
         </div>
         {/* Форма редактирования */}
@@ -408,7 +408,7 @@ export default function Profile() {
             value={username}
             onChange={e => handleUsernameChange(e.target.value)}
             maxLength={24}
-            placeholder="Никнейм"
+            placeholder="Username"
             style={{
               background: '#18181b',
               border: 'none',
@@ -444,12 +444,12 @@ export default function Profile() {
               width: '100%',
             }}
           >
-            {loading ? 'Сохранение...' : 'Сохранить изменения'}
+            {loading ? 'Saving...' : 'Save changes'}
           </button>
           {message && <div style={{ color: '#ff5252', fontSize: 14, textAlign: 'center' }}>{message}</div>}
           {!canUpdateProfile && (
             <div style={{ color: '#bdbdbd', fontSize: 13, textAlign: 'center', marginTop: 2 }}>
-              Профиль можно обновлять раз в 3 недели.<br />Следующее обновление: {nextUpdateDate}
+              Profile can be updated every 3 weeks.<br />Next update: {nextUpdateDate}
             </div>
           )}
         </div>
@@ -481,13 +481,13 @@ export default function Profile() {
             e.currentTarget.style.border = '1.5px solid #23232a';
           }}
         >
-          Выйти из аккаунта
+          Log out of account
         </button>
       </div>
       {/* Список видео пользователя */}
       <div style={{ width: '100%', maxWidth: 600, margin: '36px auto 60px auto', background: 'none', borderRadius: 0, boxShadow: 'none', padding: 0 }}>
-        <h2 style={{ color: '#bdbdbd', fontSize: 18, fontWeight: 600, margin: '0 0 18px 0', letterSpacing: 0.2 }}>Ваши премьеры</h2>
-        {videos.length === 0 && <div style={{ color: '#666', fontSize: 15, textAlign: 'center', margin: '24px 0' }}>Вы ещё не загружали видео</div>}
+        <h2 style={{ color: '#bdbdbd', fontSize: 18, fontWeight: 600, margin: '0 0 18px 0', letterSpacing: 0.2 }}>Your premieres</h2>
+        {videos.length === 0 && <div style={{ color: '#666', fontSize: 15, textAlign: 'center', margin: '24px 0' }}>You haven't uploaded any videos yet</div>}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {videos.map(video => (
             <a key={video.id} href={`/watch/${video.id}`} style={{
@@ -507,7 +507,7 @@ export default function Profile() {
               <img src={video.cover_url} alt={video.title} style={{ width: 64, height: 40, objectFit: 'cover', borderRadius: 4, background: '#23232a', border: '1px solid #23232a' }} onError={e => { (e.currentTarget as HTMLImageElement).src = '/placeholder.png'; }} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 600, fontSize: 16, color: '#e0e0e0', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{video.title}</div>
-                <div style={{ fontSize: 13, color: '#bdbdbd' }}>Премьера: {new Date(video.premiere_at).toLocaleString()}</div>
+                <div style={{ fontSize: 13, color: '#bdbdbd' }}>Premiere: {new Date(video.premiere_at).toLocaleString()}</div>
               </div>
               {video.duration && <div style={{ fontSize: 13, color: '#888', marginLeft: 8 }}>{Math.floor(video.duration/60)}:{(video.duration%60).toString().padStart(2,'0')}</div>}
             </a>

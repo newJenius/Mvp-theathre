@@ -39,7 +39,7 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Удаляю useEffect, который вычисляет shouldHide
+  // Remove useEffect that calculates shouldHide
 
   return (
     <header style={{
@@ -56,7 +56,7 @@ export default function Header() {
       width: '100vw',
       zIndex: 100,
       boxSizing: 'border-box',
-      // boxShadow: '0 2px 8px #000a', // убираем тень
+      // boxShadow: '0 2px 8px #000a', // remove shadow
       transition: 'transform 0.3s cubic-bezier(.4,0,.2,1)',
       transform: hideOnScroll ? 'translateY(-100%)' : 'translateY(0)',
     }}>

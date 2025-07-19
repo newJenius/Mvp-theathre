@@ -25,7 +25,7 @@ const supabase = createClient(
       .not('duration', 'is', null);
     if (error) throw error;
     if (!videos || videos.length === 0) {
-      console.log('Нет завершённых видео.');
+      console.log('No completed videos.');
       return;
     }
     const finished = videos.filter((v) => {
@@ -33,7 +33,7 @@ const supabase = createClient(
       return now.getTime() > premiere.getTime() + (v.duration || 0) * 1000;
     });
     if (finished.length === 0) {
-      console.log('Нет завершённых видео.');
+      console.log('No completed videos.');
       return;
     }
     const errors = [];
@@ -46,24 +46,24 @@ const supabase = createClient(
             Bucket: process.env.STORJ_BUCKET,
             Key: `videos/videos/${fileName}`,
           }));
-          console.log(`Удалено из Storj: ${fileName}, результат:`, delResult);
+          console.log(`Deleted from Storj: ${fileName}, result:`, delResult);
         } else {
-          console.log(`video_url уже null для видео: ${video.id}, пропускаю удаление из Storj`);
+          console.log(`video_url is already null for video: ${video.id}, skipping Storj deletion`);
         }
       } catch (e) {
-        errors.push({ id: video.id, error: 'Ошибка удаления из Storj', details: e });
+        errors.push({ id: video.id, error: 'Error deleting from Storj', details: e });
       }
-      // После удаления из Storj, обнуляем ссылку на видео в Supabase
+      // After deleting from Storj, nullify the video link in Supabase
       const { error: updError } = await supabase.from('videos').update({ video_url: null }).eq('id', video.id);
-      if (updError) errors.push({ id: video.id, error: 'Ошибка обновления video_url в Supabase', details: updError });
-      else console.log(`Обнулена ссылка video_url в Supabase: ${video.id}`);
+      if (updError) errors.push({ id: video.id, error: 'Error updating video_url in Supabase', details: updError });
+      else console.log(`Nullified video_url in Supabase: ${video.id}`);
     }
     if (errors.length > 0) {
-      console.error('Ошибки при удалении:', errors);
+      console.error('Errors during deletion:', errors);
     } else {
-      console.log('Удаление завершено без ошибок.');
+      console.log('Deletion completed without errors.');
     }
   } catch (e) {
-    console.error('Ошибка выполнения скрипта:', e);
+    console.error('Error executing script:', e);
   }
 })(); 

@@ -16,7 +16,7 @@ webpush.setVapidDetails(
 (async () => {
   const now = new Date();
   const soon = new Date(now.getTime() + 60 * 1000);
-  // Находим все премьеры, которые начинаются в ближайшую минуту
+  // Find all premieres that start in the next minute
   const { data: videos, error: videosError } = await supabase
     .from('videos')
     .select('id, title')
@@ -24,13 +24,13 @@ webpush.setVapidDetails(
     .lt('premiere_at', soon.toISOString());
 
   if (videosError) {
-    console.error('Ошибка получения премьер:', videosError);
+    console.error('Error getting premieres:', videosError);
     return;
   }
 
   let totalSent = 0;
   for (const video of videos || []) {
-    // Получаем подписки на эту премьеру
+    // Get subscriptions for this premiere
     const { data: subs } = await supabase
       .from('push_subscriptions')
       .select('subscription')
@@ -42,16 +42,16 @@ webpush.setVapidDetails(
           row.subscription,
           JSON.stringify({
             title: video.title,
-            body: 'Премьера началась! Жми, чтобы смотреть.',
-            url: `https://ВАШ_ДОМЕН/watch/${video.id}`
+            body: 'Premiere started! Click to watch.',
+            url: `https://YOUR_DOMAIN/watch/${video.id}`
           })
         );
         totalSent++;
-        console.log(`Уведомление отправлено для видео ${video.id}`);
+        console.log(`Notification sent for video ${video.id}`);
       } catch (e) {
-        console.error('Ошибка отправки уведомления:', e);
+        console.error('Error sending notification:', e);
       }
     }
   }
-  console.log(`Всего отправлено уведомлений: ${totalSent}`);
+  console.log(`Total notifications sent: ${totalSent}`);
 })(); 

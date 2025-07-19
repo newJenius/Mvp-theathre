@@ -28,10 +28,10 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
     setError(null);
     try {
       if ('serviceWorker' in navigator && 'PushManager' in window) {
-        // Системное окно разрешения уведомлений
+        // System notification permission window
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
-          setError('Вы не разрешили уведомления в браузере');
+          setError('You did not allow notifications in the browser');
           setLoading(false);
           return;
         }
@@ -45,10 +45,10 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ subscription, premiereId, userId })
         });
-        if (!res.ok) throw new Error('Ошибка при сохранении подписки');
+        if (!res.ok) throw new Error('Error saving subscription');
         setSubscribed(true);
       } else {
-        setError('Push API не поддерживается');
+        setError('Push API is not supported');
       }
     } catch (e: any) {
       setError(e.message);
@@ -59,9 +59,8 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
   return (
     <>
       {unsupported && (
-        <div style={{ color: '#f87171', marginTop: 8, fontSize: 14 }}>
-          Уведомления не поддерживаются в вашем браузере или на этом устройстве.<br/>
-          Попробуйте открыть сайт на компьютере или установить его на главный экран, если используете iPhone (iOS 16.4+).
+        <div style={{ color: '#f87171', fontSize: 14, textAlign: 'center', marginTop: 8 }}>
+          Push notifications are not supported in your browser
         </div>
       )}
       <button
@@ -80,7 +79,7 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
           marginTop: 12
         }}
       >
-        {subscribed ? 'Уведомления включены' : loading ? 'Включение...' : 'Включить уведомления о начале'}
+        {subscribed ? 'Notifications enabled' : loading ? 'Enabling...' : 'Enable premiere notifications'}
       </button>
       {error && <div style={{ color: '#f87171', marginTop: 8, fontSize: 14 }}>{error}</div>}
     </>

@@ -18,28 +18,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'POST') return res.status(405).end();
 
   try {
-    // Получаем все видео, у которых премьера завершилась
+    // Get all videos whose premiere has ended
     const now = new Date();
     const { data: videos, error } = await supabase
       .from('videos')
-      .select('*')
-      .not('duration', 'is', null)
-      .lt('premiere_at', new Date(now.getTime() - 1000 * 60 * 60 * 24 * 365).toISOString()) // safety: не удалять слишком старые без duration
-      ;
+      .select('id, video_url, cover_url, premiere_at, duration')
+      .lt('premiere_at', new Date(now.getTime() - 1000 * 60 * 60 * 24 * 365).toISOString()) // safety: don't delete too old without duration
+      .is('duration', null);
     if (error) throw error;
-    if (!videos || videos.length === 0) return res.status(200).json({ message: 'Нет завершённых видео.' });
+    if (!videos || videos.length === 0) return res.status(200).json({ message: 'No completed videos.' });
 
-    // Фильтруем только те, у которых премьера завершилась
+    // Filter only those whose premiere has ended
     const finished = videos.filter((v: any) => {
       const premiere = new Date(v.premiere_at);
       return now.getTime() > premiere.getTime() + (v.duration || 0) * 1000;
     });
-    if (finished.length === 0) return res.status(200).json({ message: 'Нет завершённых видео.' });
+    if (finished.length === 0) return res.status(200).json({ message: 'No completed videos.' });
 
-    // Удаляем из Storj и Supabase
+    // Delete from Storj and Supabase
     const errors: any[] = [];
     for (const video of finished) {
-      // Парсим имя файла из video_url
+      // Parse filename from video_url
       try {
         const urlParts = video.video_url.split('/');
         const fileName = urlParts[urlParts.length - 1];
@@ -48,13 +47,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           Key: `videos/${fileName}`,
         }));
       } catch (e) {
-        errors.push({ id: video.id, error: 'Ошибка удаления из Storj', details: e });
+        errors.push({ id: video.id, error: 'Error deleting from Storj', details: e });
       }
-      // Удаляем запись из Supabase
+      // Delete record from Supabase
       const { error: delError } = await supabase.from('videos').delete().eq('id', video.id);
-      if (delError) errors.push({ id: video.id, error: 'Ошибка удаления из Supabase', details: delError });
+      if (delError) errors.push({ id: video.id, error: 'Error deleting from Supabase', details: delError });
     }
-    res.status(200).json({ message: 'Удаление завершено', errors });
+    res.status(200).json({ message: 'Deletion completed', errors });
   } catch (e) {
     res.status(500).json({ error: e });
   }

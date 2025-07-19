@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { premiereId, title, url } = req.body;
   if (!premiereId || !title || !url) return res.status(400).json({ error: 'Missing fields' });
 
-  // Получаем все подписки на эту премьеру
+  // Get all subscriptions for this premiere
   const { data: subs, error } = await supabase
     .from('push_subscriptions')
     .select('subscription')
@@ -28,13 +28,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         row.subscription,
         JSON.stringify({
           title,
-          body: 'Премьера началась! Жми, чтобы смотреть.',
+          body: 'Premiere started! Click to watch.',
           url
         })
       );
       sent++;
     } catch (e) {
-      // Можно добавить обработку ошибок (например, удалять невалидные подписки)
+      // Can add error handling (e.g., remove invalid subscriptions)
     }
   }
 

@@ -7,7 +7,7 @@ import { NextPageContext } from 'next';
 import WatchSubscribePush from '../../components/WatchSubscribePush';
 import React from 'react';
 import Header from '../../components/Header';
-// Хелпер для определения мобильного устройства
+// Helper for mobile device detection
 function isMobileDevice() {
   if (typeof navigator === 'undefined') return false;
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -21,7 +21,7 @@ type Video = {
   user_id: string;
   description: string;
   video_url: string;
-  duration?: number; // Добавляем поле duration
+  duration?: number; // Add duration field
 };
 
 export default function Watch(props: any) {
@@ -43,22 +43,22 @@ export default function Watch(props: any) {
   }, []);
 
   useEffect(() => {
-    // Получаем текущего пользователя
+    // Get current user
     try {
       supabase.auth.getUser().then(({ data: { user } }: any) => {
         setCurrentUser(user);
       }).catch((error: any) => {
-        console.error('Ошибка при получении пользователя:', error);
+        console.error('Error getting user:', error);
       });
     } catch (error) {
-      console.error('Ошибка инициализации Supabase:', error);
+      console.error('Supabase initialization error:', error);
     }
   }, []);
 
   useEffect(() => {
     if (!id) return;
     
-    // Загружаем видео
+    // Load video
     supabase
       .from('videos')
       .select('*')
@@ -67,7 +67,7 @@ export default function Watch(props: any) {
       .then(async ({ data }: any) => {
         setVideo(data);
         if (data?.user_id) {
-          // Загружаем username автора
+          // Load author username
           const { data: userData } = await supabase
             .from('users')
             .select('username')
@@ -77,17 +77,17 @@ export default function Watch(props: any) {
         }
       });
 
-    // Загружаем количество ожидающих
+    // Load waiting count
     loadWaitingCount();
     
-    // Проверяем, ждет ли текущий пользователь
+    // Check if current user is waiting
     if (currentUser) {
       checkIfWaiting();
     }
   }, [id, currentUser]);
 
   useEffect(() => {
-    // Загружаем ленту видео (кроме текущего)
+    // Load video feed (excluding current)
     supabase
       .from('videos')
       .select('id, title, cover_url, premiere_at, duration')
@@ -99,7 +99,7 @@ export default function Watch(props: any) {
       });
   }, [id]);
 
-  // Лента "Сейчас" (каталог текущего часа, как на главной)
+  // "Now" feed (current hour catalog, like on main page)
   const [nowFeed, setNowFeed] = useState<Video[]>([]);
   useEffect(() => {
     if (!video) return;
@@ -132,7 +132,7 @@ export default function Watch(props: any) {
         setWaitingCount(count);
       }
     } catch (error) {
-      console.error('Ошибка при загрузке количества ожидающих:', error);
+      console.error('Error loading waiting count:', error);
     }
   };
 
@@ -149,23 +149,23 @@ export default function Watch(props: any) {
       
       setIsWaiting(!!data);
     } catch (error) {
-      console.error('Ошибка при проверке статуса ожидания:', error);
+      console.error('Error checking waiting status:', error);
     }
   };
 
   const toggleWaiting = async () => {
     if (!id || !currentUser) {
-      alert('Войдите в аккаунт, чтобы ждать премьеру');
+      alert('Please log in to wait for the premiere');
       return;
     }
 
-    if (isLoading) return; // Предотвращаем повторные нажатия
+    if (isLoading) return; // Prevent double clicks
 
     setIsLoading(true);
 
     try {
       if (isWaiting) {
-        // Удаляем из списка ожидающих
+        // Remove from waiting list
         const { error } = await supabase
           .from('video_expected_users')
           .delete()
@@ -176,10 +176,10 @@ export default function Watch(props: any) {
           setIsWaiting(false);
           setWaitingCount(prev => Math.max(0, prev - 1));
         } else {
-          console.error('Ошибка при удалении из списка ожидающих:', error);
+          console.error('Error removing from waiting list:', error);
         }
       } else {
-        // Добавляем в список ожидающих
+        // Add to waiting list
         const { error } = await supabase
           .from('video_expected_users')
           .insert({
@@ -191,11 +191,11 @@ export default function Watch(props: any) {
           setIsWaiting(true);
           setWaitingCount(prev => prev + 1);
         } else {
-          console.error('Ошибка при добавлении в список ожидающих:', error);
+          console.error('Error adding to waiting list:', error);
         }
       }
     } catch (error) {
-      console.error('Ошибка:', error);
+      console.error('Error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -207,14 +207,14 @@ export default function Watch(props: any) {
       await supabase.from('video_chat_messages').insert({
         video_id: video.id,
         user_id: currentUser.id,
-        message: emotion.gif // отправляем ссылку на гифку
+        message: emotion.gif // send gif link
       });
     } catch (e) {
-      // Можно добавить обработку ошибок
+      // Add error handling
     }
   };
 
-  if (!video) return <div>Загрузка...</div>;
+  if (!video) return <div>Loading...</div>;
 
   const premiere = new Date(video.premiere_at);
   const canWatch = now >= premiere;
@@ -232,13 +232,13 @@ export default function Watch(props: any) {
       minHeight: '100vh',
       color: '#f3f3f3',
         fontFamily: `'JetBrains Mono', monospace`,
-        paddingTop: 40 // уменьшен отступ сверху для Header
+        paddingTop: 40 // reduced top padding for Header
     }}>
       {!canWatch && (
         <h1 style={{ fontSize: '24px', marginBottom: '20px', color: '#fff', fontWeight: 700 }}>{video.title}</h1>
       )}
       
-        {/* Основной контент */}
+        {/* Main content */}
         <div style={{ width: '100%' }}>
           {!canWatch && (
             <>
@@ -253,7 +253,7 @@ export default function Watch(props: any) {
                   authorId={video.user_id} 
                   currentUser={currentUser} 
                 />
-                <div style={{ fontSize: '16px', marginBottom: '10px', color: '#bdbdbd' }}>Премьера: {premiere.toLocaleString()}</div>
+                <div style={{ fontSize: '16px', marginBottom: '10px', color: '#bdbdbd' }}>Premiere: {premiere.toLocaleString()}</div>
                 
                 <div style={{
                   background: '#23232a',
@@ -266,7 +266,7 @@ export default function Watch(props: any) {
                   boxShadow: '0 2px 8px #0006',
                 }}>
                   <div style={{ fontSize: '16px', color: '#fff', marginRight: 32 }}>
-                    Премьера начнётся через: <strong>{timeUntilPremiere} минут</strong>
+                    Premiere starts in: <strong>{timeUntilPremiere} minutes</strong>
                   </div>
                   <div style={{ fontSize: '14px', color: '#bdbdbd', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2196f3" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: 4}}>
@@ -275,7 +275,7 @@ export default function Watch(props: any) {
                       <ellipse cx="8" cy="17" rx="7" ry="4"/>
                       <ellipse cx="17" cy="17.5" rx="5" ry="2.5"/>
                     </svg>
-                    Ждут премьеру: <strong>{waitingCount}</strong>
+                    Waiting for premiere: <strong>{waitingCount}</strong>
                   </div>
                 </div>
                 
@@ -295,7 +295,7 @@ export default function Watch(props: any) {
                     marginRight: 12
                   }}
                 >
-                  {isWaiting ? 'Вы ждёте премьеру' : isLoading ? '...' : 'Жду премьеру'}
+                  {isWaiting ? 'You are waiting for the premiere' : isLoading ? '...' : 'Wait for premiere'}
                 </button>
                 {currentUser && (
                   <WatchSubscribePush premiereId={video.id} userId={currentUser.id} visible={isWaiting} />
@@ -303,7 +303,7 @@ export default function Watch(props: any) {
               </div>
               
               <div style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '20px', color: '#e0e0e0' }}>
-                <strong>Описание:</strong><br />
+                <strong>Description:</strong><br />
                 {video.description}
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0 0 0' }}>
@@ -319,13 +319,13 @@ export default function Watch(props: any) {
                 <ShareButton />
               </div>
               
-              {/* Сворачиваемая вкладка с информацией */}
+              {/* Collapsible information tab */}
               <div style={{
                 background: '#23232a',
                 borderTop: '1px solid #23232a',
                 marginTop: '0',
               }}>
-                {/* Заголовок вкладки */}
+                {/* Tab header */}
                 <div 
                   onClick={() => setIsInfoExpanded(!isInfoExpanded)}
                   style={{
@@ -379,7 +379,7 @@ export default function Watch(props: any) {
                   </div>
                 </div>
                 
-                {/* Содержимое вкладки */}
+                {/* Tab content */}
                 {isInfoExpanded && (
                   <div style={{
                     padding: '20px',
@@ -400,7 +400,7 @@ export default function Watch(props: any) {
                         color: '#bdbdbd',
                         marginBottom: '12px',
                       }}>
-                        Премьера: {new Date(video.premiere_at).toLocaleString('ru-RU')}
+                        Premiere: {new Date(video.premiere_at).toLocaleString('en-US')}
                       </div>
                     </div>
                     
@@ -413,7 +413,7 @@ export default function Watch(props: any) {
                       borderRadius: '8px',
                       border: '1px solid #23232a',
                     }}>
-                      <strong>Описание:</strong><br />
+                      <strong>Description:</strong><br />
                       {video.description}
                     </div>
                     
@@ -426,7 +426,7 @@ export default function Watch(props: any) {
                       fontSize: '14px',
                       fontWeight: '500',
                     }}>
-                      🎬 Премьера активна • Смотрите и общайтесь в чате
+                      🎬 Premiere is active • Watch and chat in comments
                     </div>
                   </div>
                 )}
@@ -444,7 +444,7 @@ export default function Watch(props: any) {
                   }}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', display: 'inline-block' }}><path d="M21 11.5a8.38 8.38 0 0 1-1.9 5.4A8.5 8.5 0 0 1 12 21.5a8.38 8.38 0 0 1-5.4-1.9L3 21l1.4-3.6A8.38 8.38 0 0 1 2.5 12a8.5 8.5 0 1 1 17 0z"/></svg>
-                  {showChat ? 'Скрыть комментарии' : 'Показать комментарии'}
+                  {showChat ? 'Hide comments' : 'Show comments'}
                 </button>
                 <button
                   style={{
@@ -457,14 +457,14 @@ export default function Watch(props: any) {
                   }}
                   disabled
                 >
-                  Подписаться на автора
+                  Subscribe to author
                 </button>
               </div>
             </>
           )}
         </div>
 
-      {/* Живой чат снизу - только для активных премьер */}
+      {/* Live chat below - only for active premieres */}
       {canWatch && video && (
         <>
           {showChat && (
@@ -473,10 +473,10 @@ export default function Watch(props: any) {
             </div>
           )}
           
-          {/* Вертикальная лента "Сейчас" */}
+          {/* Vertical "Now" feed */}
           <div style={{ margin: '32px 0 0 0', width: '100%', padding: '0 10px' }}>
-            <h2 style={{ color: '#bdbdbd', fontSize: 18, fontWeight: 600, margin: '0 0 18px 0', letterSpacing: 0.2 }}>Сейчас в эфире</h2>
-            {nowFeed.length === 0 && <div style={{ color: '#666', fontSize: 15, textAlign: 'center', margin: '24px 0' }}>Нет других премьер в этом часу</div>}
+            <h2 style={{ color: '#bdbdbd', fontSize: 18, fontWeight: 600, margin: '0 0 18px 0', letterSpacing: 0.2 }}>Now on air</h2>
+            {nowFeed.length === 0 && <div style={{ color: '#666', fontSize: 15, textAlign: 'center', margin: '24px 0' }}>No other premieres in this hour</div>}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               {nowFeed.map(v => (
                 <a key={v.id} href={`/watch/${v.id}`} style={{
@@ -496,7 +496,7 @@ export default function Watch(props: any) {
                   <img src={v.cover_url} alt={v.title} style={{ width: 64, height: 40, objectFit: 'cover', borderRadius: 4, background: '#23232a', border: '1px solid #23232a' }} onError={e => { (e.currentTarget as HTMLImageElement).src = '/placeholder.png'; }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: 16, color: '#e0e0e0', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
-                    <div style={{ fontSize: 13, color: '#bdbdbd' }}>Премьера: {new Date(v.premiere_at).toLocaleString()}</div>
+                    <div style={{ fontSize: 13, color: '#bdbdbd' }}>Premiere: {new Date(v.premiere_at).toLocaleString()}</div>
                   </div>
                   {v.duration && <div style={{ fontSize: 13, color: '#888', marginLeft: 8 }}>{Math.floor(v.duration/60)}:{(v.duration%60).toString().padStart(2,'0')}</div>}
                 </a>
@@ -514,7 +514,7 @@ Watch.getInitialProps = async (ctx: NextPageContext) => {
   const { query } = ctx;
   const id = query.id;
   if (!id) return {};
-  // Получаем видео из базы
+  // Get video from database
   const { data: video } = await supabase
     .from('videos')
     .select('premiere_at')
@@ -523,11 +523,11 @@ Watch.getInitialProps = async (ctx: NextPageContext) => {
   if (!video) return {};
   const now = new Date();
   const premiere = new Date(video.premiere_at);
-  // Если премьера ещё не началась, скрываем Header
+  // If premiere hasn't started yet, hide Header
   return { hideHeader: now < premiere };
 };
 
-// Кастомный плеер с кнопкой полноэкранного режима (динамическая иконка)
+// Custom video player with fullscreen button (dynamic icon)
 function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string, premiereAt: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -535,17 +535,17 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
   const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
 
-  // Вычисляем, сколько секунд прошло с начала премьеры
+  // Calculate how many seconds have passed since the premiere
   const [startOffset, setStartOffset] = useState(0);
   useEffect(() => {
     if (!premiereAt) return;
     const premiereDate = new Date(premiereAt);
     const now = new Date();
-    const diff = Math.floor((now.getTime() - premiereDate.getTime()) / 1000); // в секундах
+    const diff = Math.floor((now.getTime() - premiereDate.getTime()) / 1000); // in seconds
     setStartOffset(diff > 0 ? diff : 0);
   }, [premiereAt]);
 
-  // Выставляем currentTime только один раз при загрузке метаданных
+  // Set currentTime only once when metadata is loaded
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -562,7 +562,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
     };
   }, [startOffset, videoUrl]);
 
-  // Обработчик смены состояния полноэкранного режима
+  // Fullscreen state change handler
   const handleFullscreenChange = useCallback(() => {
     const fsElement = document.fullscreenElement || (document as any).webkitFullscreenElement || (document as any).msFullscreenElement;
     setIsFullscreen(!!fsElement && (containerRef.current === fsElement));
@@ -654,7 +654,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         }}
         onContextMenu={e => e.preventDefault()}
       />
-      {/* Кнопка включения звука (unmute) слева */}
+      {/* Unmute button (left) */}
       <button
         onClick={() => {
           setIsMuted(false);
@@ -679,10 +679,10 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
           justifyContent: 'center',
           transition: 'background 0.2s',
         }}
-        title={isMuted ? 'Включить звук' : 'Звук включён'}
+        title={isMuted ? 'Unmute' : 'Sound on'}
         disabled={!isMuted}
       >
-        {/* Иконка динамика (не тонкая) */}
+        {/* Sound icon (not thin) */}
         {isMuted ? (
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="5 9 9 9 13 5 13 19 9 15 5 15 5 9" fill="#fff"/>
@@ -714,7 +714,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
           justifyContent: 'center',
           transition: 'background 0.2s',
         }}
-        title={isPseudoFullscreen ? 'Выйти из полноэкранного режима' : 'На весь экран'}
+        title={isPseudoFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
       >
         {isPseudoFullscreen ? (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
@@ -730,7 +730,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
           </svg>
         )}
       </button>
-      {/* Блокируем взаимодействие с видео на мобильных, кроме полноэкранного режима */}
+      {/* Block video interaction on mobile except fullscreen mode */}
       {isMobile && !isFullscreen && !isPseudoFullscreen && (
         <div
           style={{
@@ -752,7 +752,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
   );
 }
 
-// Кнопка поделиться премьерой
+// Share premiere button
 function ShareButton() {
   const handleShare = async () => {
     const url = window.location.href;
@@ -764,9 +764,9 @@ function ShareButton() {
     } else {
       try {
         await navigator.clipboard.writeText(url);
-        alert('Ссылка скопирована!');
+        alert('Link copied!');
       } catch (e) {
-        prompt('Скопируйте ссылку:', url);
+        prompt('Copy link:', url);
       }
     }
   };
@@ -787,7 +787,7 @@ function ShareButton() {
         transition: 'background 0.2s',
         fontFamily: `'JetBrains Mono', monospace`
       }}
-      title="Поделиться премьерой"
+      title="Share premiere"
     >
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
         <circle cx="18" cy="5" r="3" />
@@ -796,7 +796,7 @@ function ShareButton() {
         <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
         <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
       </svg>
-      Поделиться
+      Share
     </button>
   );
 }
@@ -808,7 +808,7 @@ function SubscribeAuthorButton({ authorId, currentUser }: { authorId: string, cu
 
   if (currentUser && currentUser.id === authorId) return null;
 
-  // Проверяем подписку при загрузке компонента
+  // Check subscription on component load
   useEffect(() => {
     if (!currentUser || !authorId) return;
     (async () => {
@@ -843,19 +843,19 @@ function SubscribeAuthorButton({ authorId, currentUser }: { authorId: string, cu
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: currentUser.id, authorId })
       });
-      if (!res.ok) throw new Error('Ошибка при подписке');
+      if (!res.ok) throw new Error('Error subscribing');
       setSubscribed(true);
       if ('Notification' in window) {
         if (Notification.permission !== 'granted') {
           const permission = await Notification.requestPermission();
           if (permission !== 'granted') {
-            alert('Вы подписались на премьеры пользователя, но не разрешили пуш-уведомления. Включите их, чтобы получать оповещения!');
+            alert('You subscribed to premieres, but did not allow push notifications. Please enable them to receive notifications!');
             setLoading(false);
             return;
           }
         }
       }
-      alert('Вы подписались на премьеры пользователя. Когда они появятся, мы пришлем вам уведомление!');
+      alert('You subscribed to premieres. When they appear, we will send you a notification!');
     } catch (e: any) {
       setError(e.message);
     }
@@ -888,7 +888,7 @@ function SubscribeAuthorButton({ authorId, currentUser }: { authorId: string, cu
           display: 'block',
         }}
       >
-        {subscribed ? 'Вы подписаны на автора' : loading ? 'Подписка...' : 'Подписаться на автора'}
+        {subscribed ? 'You are subscribed to the author' : loading ? 'Subscribing...' : 'Subscribe to author'}
       </button>
       {error && <div style={{ color: '#f87171', marginTop: 8, fontSize: 14 }}>{error}</div>}
     </div>

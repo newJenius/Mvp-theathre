@@ -36,16 +36,16 @@ export default function Upload() {
         setUser(data.user);
         setCheckedAuth(true);
       }).catch((error: any) => {
-        console.error('Ошибка при получении пользователя:', error);
+        console.error('Error getting user:', error);
         setCheckedAuth(true);
       });
     } catch (error) {
-      console.error('Ошибка инициализации Supabase:', error);
+      console.error('Supabase initialization error:', error);
       setCheckedAuth(true);
     }
   }, []);
 
-  // Проверяем статус каждые 10 секунд, если есть jobId
+  // Check status every 10 seconds if there's a jobId
   useEffect(() => {
     if (!jobId) return;
     
@@ -56,14 +56,14 @@ export default function Upload() {
     return () => clearInterval(interval);
   }, [jobId]);
 
-  // Восстанавливаем состояние загрузки из localStorage при загрузке страницы
+  // Restore upload state from localStorage when page loads
   useEffect(() => {
     const savedJobId = localStorage.getItem('uploadJobId');
     const savedProcessingStatus = localStorage.getItem('uploadProcessingStatus');
     const savedQueuePosition = localStorage.getItem('uploadQueuePosition');
     const savedEstimatedTime = localStorage.getItem('uploadEstimatedTime');
     
-    // Восстанавливаем данные формы
+    // Restore form data
     const savedTitle = localStorage.getItem('uploadTitle');
     const savedDescription = localStorage.getItem('uploadDescription');
     const savedPremiereAt = localStorage.getItem('uploadPremiereAt');
@@ -80,7 +80,7 @@ export default function Upload() {
     }
   }, []);
 
-  // Сохраняем данные формы при изменении
+  // Save form data when it changes
   useEffect(() => {
     if (title) localStorage.setItem('uploadTitle', title);
     else localStorage.removeItem('uploadTitle');
@@ -92,7 +92,7 @@ export default function Upload() {
     else localStorage.removeItem('uploadPremiereAt');
   }, [title, description, premiereAt]);
 
-  // Сохраняем состояние в localStorage при изменении
+  // Save state to localStorage when it changes
   useEffect(() => {
     if (jobId) {
       localStorage.setItem('uploadJobId', jobId);
@@ -100,20 +100,20 @@ export default function Upload() {
       if (queuePosition) localStorage.setItem('uploadQueuePosition', queuePosition.toString());
       if (estimatedTime) localStorage.setItem('uploadEstimatedTime', estimatedTime.toString());
     } else {
-      // Очищаем localStorage если загрузка завершена
+      // Clear localStorage if upload is completed
       localStorage.removeItem('uploadJobId');
       localStorage.removeItem('uploadProcessingStatus');
       localStorage.removeItem('uploadQueuePosition');
       localStorage.removeItem('uploadEstimatedTime');
       
-      // Очищаем данные формы после успешной загрузки
+      // Clear form data after successful upload
       localStorage.removeItem('uploadTitle');
       localStorage.removeItem('uploadDescription');
       localStorage.removeItem('uploadPremiereAt');
     }
   }, [jobId, processingStatus, queuePosition, estimatedTime]);
 
-  // Функция для проверки статуса обработки
+  // Function to check processing status
   const checkStatus = async (jobId: string) => {
     try {
       const response = await fetch(`${apiUrl}/status/${jobId}`);
@@ -123,17 +123,17 @@ export default function Upload() {
         setProcessingStatus(data.state);
         
         if (data.state === 'completed') {
-          setMessage('Видео успешно обработано и загружено!');
+          setMessage('Video successfully processed and uploaded!');
           setJobId(null);
           setProcessingStatus('');
         } else if (data.state === 'failed') {
-          setMessage(`Ошибка обработки: ${data.failedReason}`);
+          setMessage(`Processing error: ${data.failedReason}`);
           setJobId(null);
           setProcessingStatus('');
         }
       }
     } catch (error) {
-      console.error('Ошибка проверки статуса:', error);
+      console.error('Error checking status:', error);
     }
   };
 
@@ -146,28 +146,28 @@ export default function Upload() {
     setQueuePosition(null);
     setEstimatedTime(null);
 
-    // Ограничение размера файла (2 ГБ)
+    // File size limit (2 GB)
     const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024;
     if (video && video.size > MAX_FILE_SIZE) {
-      setMessage('Загрузка файлов больше 2 ГБ не поддерживается. Пожалуйста, выберите файл меньшего размера.');
+      setMessage('Uploading files larger than 2 GB is not supported. Please select a smaller file.');
       setLoading(false);
       return;
     }
 
-    // Проверка: дата премьеры не дальше 6 дней
+    // Check: premiere date is not more than 6 days in advance
     if (premiereAt) {
       const premiereDate = new Date(premiereAt);
       const now = new Date();
       const maxDate = new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000);
       if (premiereDate > maxDate) {
-        setMessage('Премьера не может быть назначена дальше, чем через 6 дней.');
+        setMessage('Premiere cannot be scheduled more than 6 days in advance.');
         setLoading(false);
         return;
       }
     }
 
     if (!video) {
-      setMessage('Не выбрано видео для загрузки.');
+      setMessage('No video selected for upload.');
       setLoading(false);
       return;
     }
@@ -195,26 +195,26 @@ export default function Upload() {
         setQueuePosition(data.queuePosition);
         setEstimatedTime(data.estimatedTime);
         setProcessingStatus('waiting');
-        setMessage(`Видео добавлено в очередь! Позиция: ${data.queuePosition}, Примерное время: ${data.estimatedTime} минут`);
+        setMessage(`Video added to queue! Position: ${data.queuePosition}, Estimated time: ${data.estimatedTime} minutes`);
       } else {
-        setMessage('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+        setMessage('Error: ' + (data.error || 'Unknown error'));
       }
     } catch (err: any) {
-      setMessage('Ошибка загрузки: ' + err.message);
+      setMessage('Upload error: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Добавляем отображение статуса обработки
+  // Add processing status display
   const renderProcessingStatus = () => {
     if (!jobId) return null;
     
     const statusText = {
-      'waiting': 'Ожидает обработки',
-      'active': 'Обрабатывается',
-      'completed': 'Завершено',
-      'failed': 'Ошибка'
+      'waiting': 'Waiting for processing',
+      'active': 'Processing',
+      'completed': 'Completed',
+      'failed': 'Error'
     };
     
     return (
@@ -225,21 +225,21 @@ export default function Upload() {
         marginTop: '16px',
         border: '1px solid #374151'
       }}>
-        <h3 style={{ color: '#e5e7eb', marginBottom: '8px' }}>Статус обработки</h3>
+        <h3 style={{ color: '#e5e7eb', marginBottom: '8px' }}>Processing status</h3>
         <p style={{ color: '#9ca3af', marginBottom: '4px' }}>
-          ID задачи: {jobId}
+          Task ID: {jobId}
         </p>
         <p style={{ color: '#9ca3af', marginBottom: '4px' }}>
-          Статус: {statusText[processingStatus as keyof typeof statusText] || processingStatus}
+          Status: {statusText[processingStatus as keyof typeof statusText] || processingStatus}
         </p>
         {queuePosition && (
           <p style={{ color: '#9ca3af', marginBottom: '4px' }}>
-            Позиция в очереди: {queuePosition}
+            Queue position: {queuePosition}
           </p>
         )}
         {estimatedTime && (
           <p style={{ color: '#9ca3af', marginBottom: '4px' }}>
-            Примерное время: {estimatedTime} минут
+            Estimated time: {estimatedTime} minutes
           </p>
         )}
       </div>
@@ -352,11 +352,11 @@ export default function Upload() {
           textAlign: 'center',
           lineHeight: 1.4,
         }}>
-          Внимание: видео будет автоматически удалено сразу после окончания премьеры!
+          Warning: video will be automatically deleted immediately after the premiere ends!
         </div>
         <input
           type="text"
-          placeholder="Название видео"
+          placeholder="Video title"
           value={title}
           onChange={e => setTitle(e.target.value)}
           maxLength={TITLE_LIMIT}
@@ -445,7 +445,7 @@ export default function Upload() {
             }}
           />
         )}
-        <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>Видео</label>
+        <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>Video</label>
         {jobId ? (
           <div style={{
             background: '#1f2937',
@@ -457,7 +457,7 @@ export default function Upload() {
             marginBottom: 16,
             textAlign: 'center'
           }}>
-            Видео обрабатывается и загружается на сервер
+            Video is being processed and uploaded to server
           </div>
         ) : (
           <input

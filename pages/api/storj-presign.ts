@@ -19,7 +19,7 @@ export default async function handler(
 
   const { fileName, fileType, bucket } = req.body;
 
-  // Автоматически определяем Content-Type для популярных форматов
+  // Automatically determine Content-Type for popular formats
   let contentType = fileType;
   if (!contentType) {
     if (fileName.endsWith('.mp4')) contentType = 'video/mp4';
@@ -34,7 +34,7 @@ export default async function handler(
     ContentType: contentType,
   });
 
-  const url = await getSignedUrl(s3, command, { expiresIn: 60 * 5 }); // 5 минут
+  const url = await getSignedUrl(s3, command, { expiresIn: 60 * 5 }); // 5 minutes
 
   res.status(200).json({ url });
 }

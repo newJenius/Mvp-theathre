@@ -6,7 +6,7 @@ const Queue = require('bull');
 
 const app = express();
 
-// CORS настройки
+// CORS settings
 app.use(cors({
   origin: [
     'https://api.nermes.xyz',
@@ -21,7 +21,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Создаём очередь для обработки видео
+// Create queue for video processing
 const videoQueue = new Queue('video-processing', {
   redis: { 
     port: 6379, 
@@ -32,7 +32,7 @@ const videoQueue = new Queue('video-processing', {
 
 const upload = multer({ dest: 'uploads/' });
 
-// API для загрузки видео
+// API for video upload
 app.post('/upload', upload.fields([
   { name: 'video', maxCount: 1 },
   { name: 'cover', maxCount: 1 }
@@ -44,7 +44,7 @@ app.post('/upload', upload.fields([
     const coverPath = coverFile.path;
     const { title, description, user_id, premiere_at } = req.body;
 
-    // Добавляем задачу в очередь
+    // Add task to queue
     const job = await videoQueue.add({
       inputPath,
       coverPath,
@@ -55,42 +55,42 @@ app.post('/upload', upload.fields([
       originalName: videoFile.originalname,
       originalNameCover: coverFile.originalname
     }, {
-      attempts: 3, // Количество попыток при ошибке
+      attempts: 3, // Number of retry attempts on error
       backoff: {
         type: 'exponential',
         delay: 2000
       }
     });
 
-    // Получаем информацию о позиции в очереди
+    // Get information about queue position
     const waitingJobs = await videoQueue.getWaiting();
     const position = waitingJobs.findIndex(j => j.id === job.id) + 1;
 
-    console.log(`Видео добавлено в очередь. ID: ${job.id}, Позиция: ${position}`);
+    console.log(`Video added to queue. ID: ${job.id}, Position: ${position}`);
 
     res.json({ 
-      message: 'Видео добавлено в очередь обработки',
+      message: 'Video added to processing queue',
       jobId: job.id,
       queuePosition: position,
-      estimatedTime: position * 10 // примерное время в минутах (10 мин на видео)
+      estimatedTime: position * 10 // approximate time in minutes (10 min per video)
     });
 
   } catch (error) {
-    console.error('Ошибка добавления в очередь:', error);
+    console.error('Error adding to queue:', error);
     res.status(500).json({ 
-      error: 'Ошибка добавления видео в очередь', 
+      error: 'Error adding video to queue', 
       details: error.message 
     });
   }
 });
 
-// API для проверки статуса обработки
+// API for checking processing status
 app.get('/status/:jobId', async (req, res) => {
   try {
     const job = await videoQueue.getJob(req.params.jobId);
     
     if (!job) {
-      return res.status(404).json({ error: 'Задача не найдена' });
+      return res.status(404).json({ error: 'Task not found' });
     }
 
     const state = await job.getState();
@@ -106,15 +106,15 @@ app.get('/status/:jobId', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Ошибка получения статуса:', error);
+    console.error('Error getting status:', error);
     res.status(500).json({ 
-      error: 'Ошибка получения статуса', 
+      error: 'Error getting status', 
       details: error.message 
     });
   }
 });
 
-// API для получения информации об очереди
+// API for getting queue information
 app.get('/queue-info', async (req, res) => {
   try {
     const waiting = await videoQueue.getWaiting();
@@ -131,14 +131,14 @@ app.get('/queue-info', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Ошибка получения информации об очереди:', error);
+    console.error('Error getting queue information:', error);
     res.status(500).json({ 
-      error: 'Ошибка получения информации об очереди', 
+      error: 'Error getting queue information', 
       details: error.message 
     });
   }
 });
 
 app.listen(4000, () => {
-  console.log('Backend сервер с очередью запущен на порту 4000');
+  console.log('Backend server with queue started on port 4000');
 }); 

@@ -26,7 +26,7 @@ const s3 = new S3Client({
   forcePathStyle: true,
 });
 
-// Создаём очередь для обработки видео
+// Create queue for video processing
 const videoQueue = new Queue('video-processing', {
   redis: { 
     port: 6379, 
@@ -35,9 +35,9 @@ const videoQueue = new Queue('video-processing', {
   }
 });
 
-// Обработчик задач в очереди
+// Task handler in queue
 videoQueue.process(async (job) => {
-  console.log(`Начинаю обработку видео: ${job.id}`);
+  console.log(`Starting video processing: ${job.id}`);
   
   const { 
     inputPath, 
@@ -52,11 +52,11 @@ videoQueue.process(async (job) => {
 
   const outputPath = path.join('processed', `${Date.now()}_output.mp4`);
 
-  // Убедись, что папка processed существует
+  // Make sure processed folder exists
   if (!fs.existsSync('processed')) fs.mkdirSync('processed');
 
   try {
-    // ffprobe: выводим информацию о дорожках исходного файла
+    // ffprobe: output information about source file tracks
     await new Promise((resolve) => {
       ffmpeg.ffprobe(inputPath, (err, metadata) => {
         if (err) {
@@ -67,7 +67,7 @@ videoQueue.process(async (job) => {
         resolve();
       });
     });
-    // Обработка видео через ffmpeg
+    // Process video through ffmpeg
     await new Promise((resolve, reject) => {
       ffmpeg(inputPath)
         .outputOptions('-vf', 'fps=30')
@@ -88,16 +88,16 @@ videoQueue.process(async (job) => {
         })
         .save(outputPath)
         .on('end', () => {
-          console.log(`Видео обработано: ${job.id}`);
+          console.log(`Video processed: ${job.id}`);
           resolve();
         })
         .on('error', (err) => {
-          console.error(`Ошибка обработки видео ${job.id}:`, err);
+          console.error(`Error processing video ${job.id}:`, err);
           reject(err);
         });
     });
 
-    // Получаем длительность видео
+    // Get video duration
     let duration = 0;
     await new Promise((resolve) => {
       ffmpeg.ffprobe(outputPath, (err, metadata) => {
@@ -108,20 +108,20 @@ videoQueue.process(async (job) => {
       });
     });
 
-    // Публичные Storj Share Links для raw доступа
+    // Public Storj Share Links for raw access
     const publicCoverBase = 'https://link.storjshare.io/raw/jxj2acs5rzznak3duyrymzh2kwya/videos/videos';
     const publicVideoBase = 'https://link.storjshare.io/raw/jxhdowy5aqta7qav6ysj7h3erwxq/videos/videos';
 
-    // Загружаем обработанный файл на Storj
+    // Upload processed file to Storj
     const { size } = fs.statSync(outputPath);
     const storjKey = `videos/videos/${Date.now()}_${originalName}`;
     
-    // Выбираем метод загрузки в зависимости от размера файла
+    // Choose upload method based on file size
     if (size > 2 * 1024 * 1024 * 1024) {
-      // Для файлов больше 2GB используем Multipart Upload
-      console.log(`Файл большой (${size} байт), используем Multipart Upload`);
+      // For files larger than 2GB, use Multipart Upload
+      console.log(`Large file (${size} bytes), using Multipart Upload`);
       
-      // Создаём multipart upload
+      // Create multipart upload
       const multipartUpload = await s3.send(new CreateMultipartUploadCommand({
         Bucket: process.env.STORJ_BUCKET,
         Key: storjKey,
@@ -129,10 +129,10 @@ videoQueue.process(async (job) => {
       }));
       
       const uploadId = multipartUpload.UploadId;
-      const partSize = 8 * 1024 * 1024; // 8MB части
+      const partSize = 8 * 1024 * 1024; // 8MB parts
       const parts = [];
       
-      // Загружаем части файла
+      // Upload parts of the file
       const fileStream = fs.createReadStream(outputPath);
       let partNumber = 1;
       let buffer = Buffer.alloc(0);
@@ -159,7 +159,7 @@ videoQueue.process(async (job) => {
         }
       }
       
-      // Загружаем последнюю часть
+      // Upload the last part
       if (buffer.length > 0) {
         const part = await s3.send(new UploadPartCommand({
           Bucket: process.env.STORJ_BUCKET,
@@ -175,7 +175,7 @@ videoQueue.process(async (job) => {
         });
       }
       
-      // Завершаем multipart upload
+      // Complete multipart upload
       await s3.send(new CompleteMultipartUploadCommand({
         Bucket: process.env.STORJ_BUCKET,
         Key: storjKey,
@@ -184,13 +184,13 @@ videoQueue.process(async (job) => {
       }));
       
     } else {
-      // Для файлов меньше 2GB используем обычную загрузку
+      // For files smaller than 2GB, use regular upload
       let body;
       try {
         body = fs.readFileSync(outputPath);
       } catch (error) {
         if (error.code === 'ERR_FS_FILE_TOO_LARGE') {
-          console.log(`Файл слишком большой (${size} байт), используем потоковое чтение`);
+          console.log(`File too large (${size} bytes), using streaming`);
           body = fs.createReadStream(outputPath);
         } else {
           throw error;
@@ -205,7 +205,7 @@ videoQueue.process(async (job) => {
         ...(body instanceof Buffer && { ContentLength: size }),
       }));
     }
-    // Получаем presigned URL на 7 дней
+    // Get presigned URL for 7 days
     const video_url = await getSignedUrl(
       s3,
       new GetObjectCommand({
@@ -215,13 +215,13 @@ videoQueue.process(async (job) => {
       { expiresIn: 60 * 60 * 24 * 7 }
     );
 
-    // Загружаем обложку на Storj
+    // Upload cover to Storj
     let cover_url = null;
     if (coverPath && fs.existsSync(coverPath)) {
       const coverSize = fs.statSync(coverPath).size;
       const coverStorjKey = `videos/covers/${Date.now()}_${originalNameCover}`;
       
-      // Обложки обычно маленькие, используем буферизованное чтение
+      // Covers are usually small, use buffered reading
       const coverBody = fs.readFileSync(coverPath);
       
       await s3.send(new PutObjectCommand({
@@ -231,7 +231,7 @@ videoQueue.process(async (job) => {
         ContentType: 'image/jpeg',
         ContentLength: coverSize,
       }));
-      // Получаем presigned URL на 7 дней для обложки
+      // Get presigned URL for cover for 7 days
       cover_url = await getSignedUrl(
         s3,
         new GetObjectCommand({
@@ -242,7 +242,7 @@ videoQueue.process(async (job) => {
       );
     }
 
-    // Сохраняем ссылку и метаданные в Supabase
+    // Save link and metadata to Supabase
     const { error } = await supabase.from('videos').insert([
       {
         user_id: user_id || null,
@@ -257,14 +257,14 @@ videoQueue.process(async (job) => {
     ]);
 
     if (error) {
-      throw new Error(`Ошибка сохранения в Supabase: ${error.message}`);
+      throw new Error(`Error saving to Supabase: ${error.message}`);
     }
 
-    // Удаляем временные файлы
+    // Delete temporary files
     fs.unlinkSync(inputPath);
     fs.unlinkSync(outputPath);
 
-    console.log(`Видео успешно обработано и загружено: ${job.id}`);
+    console.log(`Video successfully processed and uploaded: ${job.id}`);
     
     return {
       success: true,
@@ -273,30 +273,30 @@ videoQueue.process(async (job) => {
     };
 
   } catch (error) {
-    // Не удаляем временные файлы в catch, чтобы задача могла быть повторно обработана
-    console.error(`Ошибка обработки видео ${job.id}:`, error);
+    // Do not delete temporary files in catch to allow the job to be retried
+    console.error(`Error processing video ${job.id}:`, error);
     throw error;
   }
 });
 
-// Обработчики событий очереди
+// Queue event handlers
 videoQueue.on('completed', (job, result) => {
-  console.log(`Задача ${job.id} завершена успешно:`, result);
+  console.log(`Task ${job.id} completed successfully:`, result);
 });
 
 videoQueue.on('failed', (job, err) => {
-  console.error(`Задача ${job.id} завершилась с ошибкой:`, err);
+  console.error(`Task ${job.id} failed with error:`, err);
 });
 
 videoQueue.on('error', (err) => {
-  console.error('Ошибка очереди:', err);
+  console.error('Queue error:', err);
 });
 
-console.log('Процессор очереди видео запущен и готов к работе...');
+console.log('Video queue processor started and ready to work...');
 
-// Обработка завершения процесса
+// Handle process termination
 process.on('SIGINT', async () => {
-  console.log('Завершение работы процессора очереди...');
+  console.log('Shutting down video queue processor...');
   await videoQueue.close();
   process.exit(0);
 }); 

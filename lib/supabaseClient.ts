@@ -3,13 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Создаем fallback клиент если переменные не настроены
+// Create fallback client if variables are not configured
 let supabase: any;
 
 try {
   if (!supabaseUrl || !supabaseAnonKey) {
     console.warn('Supabase environment variables are not configured');
-    // Создаем mock клиент
+    // Create mock client
     supabase = {
       auth: {
         getUser: () => Promise.resolve({ data: { user: null }, error: null }),
@@ -29,7 +29,7 @@ try {
   }
 } catch (error) {
   console.error('Error initializing Supabase client:', error);
-  // Fallback mock клиент
+  // Fallback mock client
   supabase = {
     auth: {
       getUser: () => Promise.resolve({ data: { user: null }, error: null }),

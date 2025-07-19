@@ -1,4 +1,4 @@
--- Создание таблицы users для хранения профилей пользователей (упрощенная версия)
+-- Create users table for storing user profiles (simplified version)
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   username TEXT UNIQUE,
@@ -6,24 +6,24 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Создание индексов
+-- Create indexes
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
 
--- Включение RLS
+-- Enable RLS
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
--- Политика: пользователи могут видеть все профили
+-- Policy: users can see all profiles
 DROP POLICY IF EXISTS "Users can view all profiles" ON users;
 CREATE POLICY "Users can view all profiles" ON users
   FOR SELECT USING (true);
 
--- Политика: пользователи могут обновлять только свой профиль
+-- Policy: users can update own profile
 DROP POLICY IF EXISTS "Users can update own profile" ON users;
 CREATE POLICY "Users can update own profile" ON users
   FOR UPDATE USING (auth.uid() = id);
 
--- Политика: пользователи могут вставлять только свой профиль
+-- Policy: users can insert own profile
 DROP POLICY IF EXISTS "Users can insert own profile" ON users;
 CREATE POLICY "Users can insert own profile" ON users
   FOR INSERT WITH CHECK (auth.uid() = id); 
