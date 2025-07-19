@@ -471,6 +471,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
   // Вычисляем, сколько секунд прошло с начала премьеры
   const [startOffset, setStartOffset] = useState(0);
@@ -575,7 +576,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         src={videoUrl}
         autoPlay
         playsInline
-        muted
+        muted={isMuted}
         controls={false}
         disablePictureInPicture
         controlsList="nodownload nofullscreen noremoteplayback noplaybackrate nofullscreen"
@@ -591,6 +592,49 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         }}
         onContextMenu={e => e.preventDefault()}
       />
+      {/* Кнопка включения звука (unmute) слева */}
+      <button
+        onClick={() => {
+          setIsMuted(false);
+          if (videoRef.current) {
+            videoRef.current.muted = false;
+            videoRef.current.volume = 1;
+            videoRef.current.play();
+          }
+        }}
+        style={{
+          position: 'absolute',
+          top: 12,
+          left: 12,
+          background: isMuted ? 'rgba(24,24,27,0.85)' : 'rgba(24,24,27,0.5)',
+          border: 'none',
+          borderRadius: 6,
+          padding: 6,
+          cursor: isMuted ? 'pointer' : 'default',
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'background 0.2s',
+        }}
+        title={isMuted ? 'Включить звук' : 'Звук включён'}
+        disabled={!isMuted}
+      >
+        {/* Иконка динамика (не тонкая) */}
+        {isMuted ? (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="5 9 9 9 13 5 13 19 9 15 5 15 5 9" fill="#fff"/>
+            <line x1="17" y1="9" x2="21" y2="13" stroke="#fff" strokeWidth="2"/>
+            <line x1="21" y1="9" x2="17" y2="13" stroke="#fff" strokeWidth="2"/>
+          </svg>
+        ) : (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="5 9 9 9 13 5 13 19 9 15 5 15 5 9" fill="#fff"/>
+            <path d="M15 9.34a4 4 0 0 1 0 5.32" stroke="#fff" strokeWidth="2"/>
+            <path d="M17.5 7.5a8 8 0 0 1 0 9" stroke="#fff" strokeWidth="2"/>
+          </svg>
+        )}
+      </button>
       <button
         onClick={() => setIsPseudoFullscreen(!isPseudoFullscreen)}
         style={{
