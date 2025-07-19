@@ -68,23 +68,8 @@ export default function Upload() {
       setProcessingStatus(savedProcessingStatus || 'waiting');
       setQueuePosition(savedQueuePosition ? parseInt(savedQueuePosition) : null);
       setEstimatedTime(savedEstimatedTime ? parseInt(savedEstimatedTime) : null);
-    } else if (user?.id) {
-      // Если в localStorage нет данных, пробуем восстановить из Supabase
-      supabase.from('user_upload_status')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
-        .then(({ data, error }: { data: any, error: any }) => {
-          if (data && !error) {
-            setJobId(data.job_id);
-            setProcessingStatus(data.status);
-            setQueuePosition(data.queue_position);
-            setEstimatedTime(data.estimated_time);
-          }
-        })
-        .catch(console.error);
     }
-  }, [user?.id]);
+  }, []);
 
   // Сохраняем состояние в localStorage при изменении
   useEffect(() => {
@@ -93,31 +78,14 @@ export default function Upload() {
       localStorage.setItem('uploadProcessingStatus', processingStatus);
       if (queuePosition) localStorage.setItem('uploadQueuePosition', queuePosition.toString());
       if (estimatedTime) localStorage.setItem('uploadEstimatedTime', estimatedTime.toString());
-      
-      // Дополнительно сохраняем в Supabase для надёжности
-      if (user?.id) {
-        supabase.from('user_upload_status').upsert({
-          user_id: user.id,
-          job_id: jobId,
-          status: processingStatus,
-          queue_position: queuePosition,
-          estimated_time: estimatedTime,
-          updated_at: new Date().toISOString()
-        }).catch(console.error);
-      }
     } else {
       // Очищаем localStorage если загрузка завершена
       localStorage.removeItem('uploadJobId');
       localStorage.removeItem('uploadProcessingStatus');
       localStorage.removeItem('uploadQueuePosition');
       localStorage.removeItem('uploadEstimatedTime');
-      
-      // Очищаем из Supabase
-      if (user?.id) {
-        supabase.from('user_upload_status').delete().eq('user_id', user.id).catch(console.error);
-      }
     }
-  }, [jobId, processingStatus, queuePosition, estimatedTime, user?.id]);
+  }, [jobId, processingStatus, queuePosition, estimatedTime]);
 
   // Функция для проверки статуса обработки
   const checkStatus = async (jobId: string) => {
