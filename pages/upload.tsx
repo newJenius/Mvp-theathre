@@ -263,7 +263,7 @@ export default function Upload() {
         padding: isMobile ? '20px' : '40px',
         paddingTop: isMobile ? '80px' : '40px',
       }}>
-        Загрузка...
+        Loading...
       </div>
     );
   }
@@ -297,8 +297,8 @@ export default function Upload() {
           border: 'none',
           boxShadow: 'none',
         }}>
-          <h1 style={{ color: '#e0e0e0', fontSize: isMobile ? 20 : 22, fontWeight: 600, marginBottom: 10, letterSpacing: 0.2 }}>Требуется вход</h1>
-          <p style={{ color: '#6b7280', fontSize: isMobile ? 13 : 14, margin: 0, marginBottom: 0 }}>Войдите или зарегистрируйтесь, чтобы загружать премьеры</p>
+          <h1 style={{ color: '#e0e0e0', fontSize: isMobile ? 20 : 22, fontWeight: 600, marginBottom: 10, letterSpacing: 0.2 }}>Login required</h1>
+          <p style={{ color: '#6b7280', fontSize: isMobile ? 13 : 14, margin: 0, marginBottom: 0 }}>Sign in or register to upload premieres</p>
         </div>
       </div>
     );
@@ -321,7 +321,7 @@ export default function Upload() {
           border: '1px solid #374151',
           opacity: 0.9
         }}>
-          Загрузка в процессе...
+          Upload in progress...
         </div>
       )}
       <form onSubmit={handleUpload} style={{
@@ -343,7 +343,7 @@ export default function Upload() {
           marginBottom: 18,
           letterSpacing: '0',
           textAlign: 'left',
-        }}>Загрузка премьеры</h1>
+        }}>Upload premiere</h1>
         <div style={{
           background: 'none',
           color: '#bdbdbd',
@@ -375,7 +375,7 @@ export default function Upload() {
         />
         <textarea
           ref={descriptionRef}
-          placeholder="Описание (необязательно)"
+          placeholder="Description (optional)"
           value={description}
           onChange={e => setDescription(e.target.value)}
           maxLength={DESCRIPTION_LIMIT}
@@ -412,9 +412,9 @@ export default function Upload() {
           }}
         />
         <div style={{ color: '#666', fontSize: 13, marginTop: 2, marginBottom: 8, textAlign: 'right', opacity: 0.7 }}>
-          Время указывается в UTC
+          Time is specified in UTC
         </div>
-        <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>Обложка (обязательно)</label>
+        <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>Cover (required)</label>
         {jobId ? (
           <div style={{
             background: '#1f2937',
@@ -426,7 +426,7 @@ export default function Upload() {
             marginBottom: 16,
             textAlign: 'center'
           }}>
-            Файлы уже загружены, обработка идёт в фоне
+            Files already uploaded, processing in the background
           </div>
         ) : (
           <input
@@ -493,7 +493,7 @@ export default function Upload() {
             letterSpacing: '0.5px',
           }}
         >
-          {loading ? 'Загрузка...' : jobId ? 'Загрузка в процессе' : 'Загрузить'}
+          {loading ? 'Uploading...' : jobId ? 'Upload in progress' : 'Upload'}
         </button>
         {message && (
           <div style={{ color: '#ff5252', fontSize: 15, marginTop: 4, textAlign: 'left' }}>{message}</div>

@@ -36,9 +36,9 @@ class ErrorBoundary extends Component<Props, State> {
           textAlign: 'center'
         }}>
           <div>
-            <h1 style={{ color: '#ff5252', marginBottom: '20px' }}>Что-то пошло не так</h1>
+            <h1 style={{ color: '#ff5252', marginBottom: '20px' }}>Something went wrong</h1>
             <p style={{ marginBottom: '20px', color: '#bdbdbd' }}>
-              Произошла ошибка при загрузке страницы.
+              An error occurred while loading the page.
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -52,7 +52,7 @@ class ErrorBoundary extends Component<Props, State> {
                 fontSize: '16px'
               }}
             >
-              Обновить страницу
+              Refresh page
             </button>
           </div>
         </div>

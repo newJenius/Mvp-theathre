@@ -23,7 +23,7 @@ export default function Register() {
     setMessage('');
     
     try {
-      // Проверка инвайта
+      // Check invite
       const { data: invites, error } = await supabase
         .from('invites')
         .select('*')
@@ -31,32 +31,32 @@ export default function Register() {
         .eq('used', false);
 
       if (error || !invites || invites.length === 0) {
-        setMessage('Инвайт не найден или уже использован');
+        setMessage('Invite not found or already used');
         setLoading(false);
         return;
       }
 
-      // Регистрация через Supabase Auth
+      // Registration through Supabase Auth
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
       });
       if (signUpError) {
-        setMessage('Ошибка регистрации: ' + signUpError.message);
+        setMessage('Registration error: ' + signUpError.message);
         setLoading(false);
         return;
       }
 
-      // Пометить инвайт как использованный
+      // Mark invite as used
       await supabase
         .from('invites')
         .update({ used: true })
         .eq('id', invites[0].id);
 
-      setMessage('Проверьте почту для подтверждения!');
+      setMessage('Check your email for confirmation!');
     } catch (error) {
-      console.error('Ошибка при регистрации:', error);
-      setMessage('Ошибка подключения к серверу');
+      console.error('Registration error:', error);
+      setMessage('Server connection error');
     } finally {
       setLoading(false);
     }
@@ -93,8 +93,8 @@ export default function Register() {
             padding: '12px 10px',
             lineHeight: 1.5,
           }}>
-            <span style={{ color: '#22c55e', fontWeight: 600 }}>Приватное пространство.</span> Здесь царит атмосфера доверия и уникальности. Для регистрации потребуется инвайт-код.<br/>
-            Если у вас его нет — спросите у знакомых участников или напишите администрации.
+            <span style={{ color: '#22c55e', fontWeight: 600 }}>Private space.</span> Here reigns an atmosphere of trust and uniqueness. An invite code is required for registration.<br/>
+            If you don't have one — ask existing members or contact the administration.
           </div>
           <h1 style={{ 
             color: '#e0e0e0',
@@ -103,14 +103,14 @@ export default function Register() {
             marginBottom: '6px',
             letterSpacing: 0.2
           }}>
-            Регистрация
+            Registration
           </h1>
           <p style={{ 
             color: '#6b7280',
             fontSize: isMobile ? '13px' : '14px',
             margin: 0
           }}>
-            Создайте аккаунт, чтобы создавать уникальные премьеры
+            Create an account to create unique premieres
           </p>
         </div>
 
@@ -127,7 +127,7 @@ export default function Register() {
             </label>
             <input
               type="email"
-              placeholder="Введите ваш email"
+              placeholder="Enter your email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
@@ -156,11 +156,11 @@ export default function Register() {
               fontWeight: '500',
               marginBottom: '6px'
             }}>
-              Пароль
+              Password
             </label>
             <input
               type="password"
-              placeholder="Введите пароль"
+              placeholder="Enter password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -189,11 +189,11 @@ export default function Register() {
               fontWeight: '500',
               marginBottom: '6px'
             }}>
-              Инвайт-код
+              Invite code
             </label>
             <input
               type="text"
-              placeholder="Введите инвайт-код"
+              placeholder="Enter invite code"
               value={invite}
               onChange={e => setInvite(e.target.value)}
               required
@@ -233,7 +233,7 @@ export default function Register() {
               letterSpacing: 0.2
             }}
           >
-            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+            {loading ? 'Registering...' : 'Register'}
           </button>
 
           {message && (
@@ -242,9 +242,9 @@ export default function Register() {
               borderRadius: '0',
               fontSize: isMobile ? '13px' : '14px',
               textAlign: 'center',
-              background: message.includes('Ошибка') ? '#2a181b' : '#182a1b',
-              color: message.includes('Ошибка') ? '#ff5252' : '#22c55e',
-              border: `1px solid ${message.includes('Ошибка') ? '#3a232a' : '#233a2a'}`
+              background: message.includes('error') ? '#2a181b' : '#182a1b',
+              color: message.includes('error') ? '#ff5252' : '#22c55e',
+              border: `1px solid ${message.includes('error') ? '#3a232a' : '#233a2a'}`
             }}>
               {message}
             </div>
@@ -261,7 +261,7 @@ export default function Register() {
               fontSize: isMobile ? '12px' : '13px',
               margin: '0 0 10px 0'
             }}>
-              Уже есть аккаунт? <Link href="/login" style={{ color: '#22c55e', textDecoration: 'underline' }}>Войти</Link>
+              Already have an account? <Link href="/login" style={{ color: '#22c55e', textDecoration: 'underline' }}>Login</Link>
             </p>
           </div>
         </form>

@@ -57,7 +57,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
     if (messagesEndRef.current) {
       const parent = messagesEndRef.current.parentElement?.parentElement;
       if (parent) {
-        // Прокручиваем чуть ниже, чтобы последнее сообщение не было вплотную к верху
+        // Scroll down a bit so the last message is not right at the top
         parent.scrollTop = parent.scrollHeight - parent.clientHeight - 32;
       } else {
         messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -78,7 +78,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
         setMessages(data);
       }
     } catch (error) {
-      console.error('Ошибка загрузки сообщений:', error);
+      console.error('Error loading messages:', error);
     }
   };
 
@@ -99,15 +99,15 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
         .select();
 
       if (!error && data) {
-        console.log('Сообщение отправлено:', data);
+        console.log('Message sent:', data);
         setNewMessage('');
         setCooldown(true);
         setTimeout(() => setCooldown(false), 2000);
       } else {
-        console.error('Ошибка отправки сообщения:', error);
+        console.error('Error sending message:', error);
       }
     } catch (error) {
-      console.error('Ошибка:', error);
+      console.error('Error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -120,9 +120,9 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
     });
   };
 
-  // Генерация уникального цвета по user_id
+  // Generate unique color by user_id
   function getUserColor(userId: string) {
-    // Простая хеш-функция для генерации цвета
+    // Simple hash function for color generation
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
       hash = userId.charCodeAt(i) + ((hash << 5) - hash);
@@ -132,11 +132,11 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
   }
 
   const getUserDisplayName = (message: ChatMessage) => {
-    // Если это сообщение текущего пользователя, показываем его email
+    // If this is the current user's message, show their email
     if (message.user_id === currentUser?.id && currentUser?.email) {
       return currentUser.email.split('@')[0];
     }
-    // Для других пользователей показываем короткий ID
+    // For other users show short ID
     return `user_${message.user_id.slice(0, 4)}`;
   };
 
@@ -175,7 +175,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
         Comments
       </div>
 
-      {/* Форма отправки сообщения - СВЕРХУ */}
+      {/* Message sending form - TOP */}
       <form onSubmit={sendMessage} style={{
         padding: '16px',
         borderBottom: '1px solid #23232a',
@@ -192,7 +192,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
             onChange={(e) => {
               if (e.target.value.length <= MESSAGE_LIMIT) setNewMessage(e.target.value);
             }}
-            placeholder={currentUser ? "Write a comment..." : "Войдите для отправки сообщений"}
+            placeholder={currentUser ? "Write a comment..." : "Sign in to send messages"}
             disabled={!currentUser || isLoading || cooldown}
             style={{
               flex: 1,
@@ -238,7 +238,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
         </div>
       </form>
 
-      {/* Область сообщений - СНИЗУ, новые сообщения сверху */}
+      {/* Messages area - BOTTOM, new messages at top */}
       <div style={{
         flex: 1,
         overflowY: 'auto',
@@ -260,7 +260,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
               fontSize: '14px',
               marginTop: '20px',
             }}>
-              Начните общение первым!
+              Start the conversation first!
             </div>
           ) : (
             [...messages].reverse().map((message, idx, arr) => (

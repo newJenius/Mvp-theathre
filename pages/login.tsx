@@ -32,17 +32,17 @@ export default function Login() {
       });
       
       if (error) {
-        setMessage('Ошибка входа: ' + error.message);
+        setMessage('Login error: ' + error.message);
       } else {
-        setMessage('Вход выполнен!');
-        // Редирект на главную после успешного входа
+        setMessage('Login successful!');
+        // Redirect to main page after successful login
         setTimeout(() => {
           window.location.href = '/';
         }, 1000);
       }
     } catch (error) {
-      console.error('Ошибка при входе:', error);
-      setMessage('Ошибка подключения к серверу');
+      console.error('Login error:', error);
+      setMessage('Server connection error');
     } finally {
       setLoading(false);
     }
@@ -74,14 +74,14 @@ export default function Login() {
             marginBottom: '6px',
             letterSpacing: 0.2
           }}>
-            Вход
+            Login
           </h1>
           <p style={{ 
             color: '#6b7280', 
             fontSize: isMobile ? '13px' : '14px',
             margin: 0
           }}>
-            Войдите, чтобы продолжить
+            Sign in to continue
           </p>
         </div>
 
@@ -127,11 +127,11 @@ export default function Login() {
               fontWeight: '500',
               marginBottom: '6px'
             }}>
-              Пароль
+              Password
             </label>
             <input
               type="password"
-              placeholder="Пароль"
+              placeholder="Password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -171,7 +171,7 @@ export default function Login() {
               letterSpacing: 0.2
             }}
           >
-            {loading ? 'Вход...' : 'Войти'}
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
 
           {message && (
@@ -180,9 +180,9 @@ export default function Login() {
               borderRadius: '0',
               fontSize: isMobile ? '13px' : '14px',
               textAlign: 'center',
-              background: message.includes('Ошибка') ? '#2a181b' : '#182a1b',
-              color: message.includes('Ошибка') ? '#ff5252' : '#22c55e',
-              border: `1px solid ${message.includes('Ошибка') ? '#3a232a' : '#233a2a'}`
+              background: message.includes('error') ? '#2a181b' : '#182a1b',
+              color: message.includes('error') ? '#ff5252' : '#22c55e',
+              border: `1px solid ${message.includes('error') ? '#3a232a' : '#233a2a'}`
             }}>
               {message}
             </div>
@@ -199,7 +199,7 @@ export default function Login() {
               fontSize: isMobile ? '12px' : '13px',
               margin: '0 0 10px 0'
             }}>
-              Нет аккаунта?
+              Don't have an account?
             </p>
             <Link href="/register" style={{
               color: '#2196f3',
@@ -208,7 +208,7 @@ export default function Login() {
               fontWeight: '500',
               transition: 'opacity 0.2s',
             }}>
-              Зарегистрироваться
+              Register
             </Link>
           </div>
         </form>

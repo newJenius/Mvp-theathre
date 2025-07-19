@@ -43,10 +43,10 @@ export default function Profile() {
           loadUserVideos(data.user.id);
         }
       }).catch((error: any) => {
-        console.error('Ошибка при получении пользователя:', error);
+        console.error('Error getting user:', error);
       });
     } catch (error) {
-      console.error('Ошибка инициализации Supabase:', error);
+      console.error('Supabase initialization error:', error);
     }
   }, []);
 
@@ -56,9 +56,9 @@ export default function Profile() {
     }
   }, [profile]);
 
-  // Отладочная информация для аватарки
+  // Debug information for avatar
   useEffect(() => {
-    console.log('Отображение аватарки:', { 
+    console.log('Displaying avatar:', { 
       previewUrl, 
       profileAvatarUrl: profile?.avatar_url, 
       profile, 
@@ -66,13 +66,13 @@ export default function Profile() {
     });
   }, [previewUrl, profile, user]);
 
-  // Проверка возможности обновления профиля (раз в 3 недели, но первое изменение всегда разрешено)
+  // Check profile update possibility (every 3 weeks, but first change is always allowed)
   const checkProfileUpdateAvailability = () => {
     if (!profile?.updated_at) {
       setCanUpdateProfile(true);
       return;
     }
-    // Если updated_at совпадает с created_at (или отличается < 1 мин), разрешаем первое изменение
+    // If updated_at matches created_at (or differs < 1 min), allow first change
     if (profile?.created_at && Math.abs(new Date(profile.updated_at).getTime() - new Date(profile.created_at).getTime()) < 60 * 1000) {
       setCanUpdateProfile(true);
       setNextUpdateDate('');
@@ -80,7 +80,7 @@ export default function Profile() {
     }
     const lastUpdate = new Date(profile.updated_at);
     const now = new Date();
-    const threeWeeksInMs = 21 * 24 * 60 * 60 * 1000; // 21 день в миллисекундах
+    const threeWeeksInMs = 21 * 24 * 60 * 60 * 1000; // 21 days in milliseconds
     const timeSinceLastUpdate = now.getTime() - lastUpdate.getTime();
     
     if (timeSinceLastUpdate >= threeWeeksInMs) {
@@ -99,7 +99,7 @@ export default function Profile() {
 
   const loadProfile = async (userId: string) => {
     try {
-      console.log('Загружаем профиль для пользователя:', userId);
+      console.log('Loading profile for user:', userId);
       
       const { data, error } = await supabase
         .from('users')
@@ -107,17 +107,17 @@ export default function Profile() {
         .eq('id', userId)
         .single();
       
-      console.log('Данные профиля из базы:', data);
-      console.log('Ошибка загрузки профиля:', error);
+      console.log('Profile data from database:', data);
+      console.log('Profile loading error:', error);
       
       if (!error && data) {
         setProfile(data);
-        console.log('Профиль установлен:', data);
+        console.log('Profile set:', data);
       } else {
-        console.error('Не удалось загрузить профиль:', error);
+        console.error('Failed to load profile:', error);
       }
     } catch (error) {
-      console.error('Ошибка при загрузке профиля:', error);
+      console.error('Error loading profile:', error);
     }
   };
 
@@ -132,7 +132,7 @@ export default function Profile() {
         setSubscribersCount(count);
       }
     } catch (error) {
-      console.error('Ошибка при загрузке количества подписчиков:', error);
+      console.error('Error loading subscribers count:', error);
     }
   };
 
@@ -173,15 +173,15 @@ export default function Profile() {
       return true;
     }
 
-    // Проверка минимальной длины
+    // Check minimum length
     if (username.length < 4) {
-      setUsernameError('Никнейм должен содержать минимум 4 символа');
+      setUsernameError('Username must contain at least 4 characters');
       return false;
     }
 
-    // Проверка, что никнейм не начинается с цифры
+    // Check that username doesn't start with a number
     if (/^\d/.test(username)) {
-      setUsernameError('Никнейм не может начинаться с цифры');
+      setUsernameError('Username cannot start with a number');
       return false;
     }
 
@@ -202,7 +202,7 @@ export default function Profile() {
 
       if (data && data.length > 0) {
         // Никнейм найден - занят
-        setUsernameError('Этот никнейм уже занят');
+        setUsernameError('This username is already taken');
         return false;
       } else {
         // Никнейм не найден - доступен
@@ -289,7 +289,7 @@ export default function Profile() {
         updateData.avatar_url = avatarUrl;
       }
 
-      console.log('Данные для сохранения:', updateData);
+      console.log('Data to save:', updateData);
 
       // Обновляем профиль в базе
       const { error: updateError } = await supabase

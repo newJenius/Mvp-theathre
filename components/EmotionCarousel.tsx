@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 
 const emotions = [
-  { id: 1, name: 'Смех', gif: 'https://i.gifer.com/SC77.gif' },
-  { id: 2, name: 'Вау', gif: 'https://i.gifer.com/S7hF.gif' },
-  { id: 3, name: 'Сердце', gif: 'https://i.gifer.com/VA0w.gif' },
-  { id: 4, name: 'Огонь', gif: 'https://i.gifer.com/VZ7e.gif' },
-  { id: 5, name: 'Класс', gif: 'https://i.gifer.com/IQ0X.gif' },
-  { id: 6, name: 'Круто', gif: 'https://i.gifer.com/Pbd.gif' },
-  { id: 7, name: 'Класс', gif: 'https://i.gifer.com/1Pxu.gif' },
-  { id: 8, name: 'Круто', gif: 'https://i.gifer.com/PyTL.gif' },
+  { id: 1, name: 'Laugh', gif: 'https://i.gifer.com/SC77.gif' },
+  { id: 2, name: 'Wow', gif: 'https://i.gifer.com/S7hF.gif' },
+  { id: 3, name: 'Heart', gif: 'https://i.gifer.com/VA0w.gif' },
+  { id: 4, name: 'Fire', gif: 'https://i.gifer.com/VZ7e.gif' },
+  { id: 5, name: 'Like', gif: 'https://i.gifer.com/IQ0X.gif' },
+  { id: 6, name: 'Cool', gif: 'https://i.gifer.com/Pbd.gif' },
+  { id: 7, name: 'Like', gif: 'https://i.gifer.com/1Pxu.gif' },
+  { id: 8, name: 'Cool', gif: 'https://i.gifer.com/PyTL.gif' },
 ];
 
 export default function EmotionCarousel({ onEmotionClick }: { onEmotionClick?: (emotion: typeof emotions[0]) => void }) {
