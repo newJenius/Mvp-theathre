@@ -407,55 +407,85 @@ export default function Upload() {
           Время указывается в UTC
         </div>
         <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>Обложка (обязательно)</label>
-        <input
-          type="file"
-          accept="image/*"
-          ref={coverInputRef}
-          onChange={e => setCover(e.target.files?.[0] || null)}
-          required
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#bdbdbd',
-            fontSize: 15,
-            padding: 0,
-            marginBottom: 0,
-          }}
-        />
+        {jobId ? (
+          <div style={{
+            background: '#1f2937',
+            border: '1px solid #374151',
+            color: '#9ca3af',
+            fontSize: 14,
+            padding: '12px 8px',
+            borderRadius: 4,
+            marginBottom: 16,
+            textAlign: 'center'
+          }}>
+            Файлы уже загружены, обработка идёт в фоне
+          </div>
+        ) : (
+          <input
+            type="file"
+            accept="image/*"
+            ref={coverInputRef}
+            onChange={e => setCover(e.target.files?.[0] || null)}
+            required
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#bdbdbd',
+              fontSize: 15,
+              padding: 0,
+              marginBottom: 0,
+            }}
+          />
+        )}
         <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>Видео</label>
-        <input
-          type="file"
-          accept="video/*"
-          ref={videoInputRef}
-          onChange={e => setVideo(e.target.files?.[0] || null)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#bdbdbd',
-            fontSize: 15,
-            padding: 0,
-            marginBottom: 0,
-          }}
-        />
+        {jobId ? (
+          <div style={{
+            background: '#1f2937',
+            border: '1px solid #374151',
+            color: '#9ca3af',
+            fontSize: 14,
+            padding: '12px 8px',
+            borderRadius: 4,
+            marginBottom: 16,
+            textAlign: 'center'
+          }}>
+            Видео обрабатывается и загружается на сервер
+          </div>
+        ) : (
+          <input
+            type="file"
+            accept="video/*"
+            ref={videoInputRef}
+            onChange={e => setVideo(e.target.files?.[0] || null)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#bdbdbd',
+              fontSize: 15,
+              padding: 0,
+              marginBottom: 0,
+            }}
+          />
+        )}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !!jobId}
           style={{
-            background: loading ? '#23232a' : '#18181b',
-            color: loading ? '#888' : '#e0e0e0',
+            background: loading || !!jobId ? '#23232a' : '#18181b',
+            color: loading || !!jobId ? '#888' : '#e0e0e0',
             border: 'none',
             borderRadius: 6,
             fontSize: 18,
             fontWeight: 600,
             padding: '14px 0',
             marginTop: 8,
-            cursor: loading ? 'not-allowed' : 'pointer',
+            cursor: loading || !!jobId ? 'not-allowed' : 'pointer',
             transition: 'background 0.2s, color 0.2s',
             boxShadow: 'none',
             letterSpacing: '0.5px',
           }}
         >
-          {loading ? 'Загрузка...' : 'Загрузить'}
+          {loading ? 'Загрузка...' : jobId ? 'Загрузка в процессе' : 'Загрузить'}
         </button>
         {message && (
           <div style={{ color: '#ff5252', fontSize: 15, marginTop: 4, textAlign: 'left' }}>{message}</div>

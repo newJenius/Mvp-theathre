@@ -99,7 +99,6 @@ videoQueue.process(async (job) => {
       Key: storjKey,
       Body: fs.createReadStream(outputPath),
       ContentType: 'video/mp4',
-      ContentLength: size,
     }));
     // Получаем presigned URL на 7 дней
     const video_url = await getSignedUrl(
@@ -120,7 +119,6 @@ videoQueue.process(async (job) => {
         Key: coverStorjKey,
         Body: fs.createReadStream(coverPath),
         ContentType: 'image/jpeg',
-        ContentLength: fs.statSync(coverPath).size,
       }));
       // Получаем presigned URL на 7 дней для обложки
       cover_url = await getSignedUrl(
