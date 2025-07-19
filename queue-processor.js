@@ -91,14 +91,13 @@ videoQueue.process(async (job) => {
     const publicVideoBase = 'https://link.storjshare.io/raw/jxhdowy5aqta7qav6ysj7h3erwxq/videos/videos';
 
     // Загружаем обработанный файл на Storj
-    const fileBuffer = fs.readFileSync(outputPath);
     const { size } = fs.statSync(outputPath);
     const storjKey = `videos/videos/${Date.now()}_${originalName}`;
     
     await s3.send(new PutObjectCommand({
       Bucket: process.env.STORJ_BUCKET,
       Key: storjKey,
-      Body: fileBuffer,
+      Body: fs.createReadStream(outputPath),
       ContentType: 'video/mp4',
       ContentLength: size,
     }));
@@ -115,14 +114,13 @@ videoQueue.process(async (job) => {
     // Загружаем обложку на Storj
     let cover_url = null;
     if (coverPath && fs.existsSync(coverPath)) {
-      const coverBuffer = fs.readFileSync(coverPath);
       const coverStorjKey = `videos/covers/${Date.now()}_${originalNameCover}`;
       await s3.send(new PutObjectCommand({
         Bucket: process.env.STORJ_BUCKET,
         Key: coverStorjKey,
-        Body: coverBuffer,
+        Body: fs.createReadStream(coverPath),
         ContentType: 'image/jpeg',
-        ContentLength: coverBuffer.length,
+        ContentLength: fs.statSync(coverPath).size,
       }));
       // Получаем presigned URL на 7 дней для обложки
       cover_url = await getSignedUrl(
