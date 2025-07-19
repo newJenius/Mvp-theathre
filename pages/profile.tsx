@@ -57,13 +57,18 @@ export default function Profile() {
     });
   }, [previewUrl, profile, user]);
 
-  // Проверка возможности обновления профиля (раз в 3 недели)
+  // Проверка возможности обновления профиля (раз в 3 недели, но первое изменение всегда разрешено)
   const checkProfileUpdateAvailability = () => {
     if (!profile?.updated_at) {
       setCanUpdateProfile(true);
       return;
     }
-
+    // Если updated_at совпадает с created_at (или отличается < 1 мин), разрешаем первое изменение
+    if (profile?.created_at && Math.abs(new Date(profile.updated_at).getTime() - new Date(profile.created_at).getTime()) < 60 * 1000) {
+      setCanUpdateProfile(true);
+      setNextUpdateDate('');
+      return;
+    }
     const lastUpdate = new Date(profile.updated_at);
     const now = new Date();
     const threeWeeksInMs = 21 * 24 * 60 * 60 * 1000; // 21 день в миллисекундах
