@@ -4,6 +4,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const path = require('path');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { CreateMultipartUploadCommand, UploadPartCommand, CompleteMultipartUploadCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { GetObjectCommand } = require('@aws-sdk/client-s3');
 const { createClient } = require('@supabase/supabase-js');
@@ -94,23 +95,95 @@ videoQueue.process(async (job) => {
     const { size } = fs.statSync(outputPath);
     const storjKey = `videos/videos/${Date.now()}_${originalName}`;
     
-    // Используем буферизованное чтение для файлов меньше 1.5GB, потоковое для больших
-    let body;
-    if (size > 1.5 * 1024 * 1024 * 1024) {
-      // Для файлов больше 1.5GB используем поток
-      body = fs.createReadStream(outputPath);
+    // Выбираем метод загрузки в зависимости от размера файла
+    if (size > 2 * 1024 * 1024 * 1024) {
+      // Для файлов больше 2GB используем Multipart Upload
+      console.log(`Файл большой (${size} байт), используем Multipart Upload`);
+      
+      // Создаём multipart upload
+      const multipartUpload = await s3.send(new CreateMultipartUploadCommand({
+        Bucket: process.env.STORJ_BUCKET,
+        Key: storjKey,
+        ContentType: 'video/mp4',
+      }));
+      
+      const uploadId = multipartUpload.UploadId;
+      const partSize = 100 * 1024 * 1024; // 100MB части
+      const parts = [];
+      
+      // Загружаем части файла
+      const fileStream = fs.createReadStream(outputPath);
+      let partNumber = 1;
+      let buffer = Buffer.alloc(0);
+      
+      for await (const chunk of fileStream) {
+        buffer = Buffer.concat([buffer, chunk]);
+        
+        if (buffer.length >= partSize) {
+          const part = await s3.send(new UploadPartCommand({
+            Bucket: process.env.STORJ_BUCKET,
+            Key: storjKey,
+            UploadId: uploadId,
+            PartNumber: partNumber,
+            Body: buffer,
+          }));
+          
+          parts.push({
+            ETag: part.ETag,
+            PartNumber: partNumber,
+          });
+          
+          buffer = Buffer.alloc(0);
+          partNumber++;
+        }
+      }
+      
+      // Загружаем последнюю часть
+      if (buffer.length > 0) {
+        const part = await s3.send(new UploadPartCommand({
+          Bucket: process.env.STORJ_BUCKET,
+          Key: storjKey,
+          UploadId: uploadId,
+          PartNumber: partNumber,
+          Body: buffer,
+        }));
+        
+        parts.push({
+          ETag: part.ETag,
+          PartNumber: partNumber,
+        });
+      }
+      
+      // Завершаем multipart upload
+      await s3.send(new CompleteMultipartUploadCommand({
+        Bucket: process.env.STORJ_BUCKET,
+        Key: storjKey,
+        UploadId: uploadId,
+        MultipartUpload: { Parts: parts },
+      }));
+      
     } else {
-      // Для файлов меньше 1.5GB используем буфер
-      body = fs.readFileSync(outputPath);
+      // Для файлов меньше 2GB используем обычную загрузку
+      let body;
+      try {
+        body = fs.readFileSync(outputPath);
+      } catch (error) {
+        if (error.code === 'ERR_FS_FILE_TOO_LARGE') {
+          console.log(`Файл слишком большой (${size} байт), используем потоковое чтение`);
+          body = fs.createReadStream(outputPath);
+        } else {
+          throw error;
+        }
+      }
+      
+      await s3.send(new PutObjectCommand({
+        Bucket: process.env.STORJ_BUCKET,
+        Key: storjKey,
+        Body: body,
+        ContentType: 'video/mp4',
+        ...(body instanceof Buffer && { ContentLength: size }),
+      }));
     }
-    
-    await s3.send(new PutObjectCommand({
-      Bucket: process.env.STORJ_BUCKET,
-      Key: storjKey,
-      Body: body,
-      ContentType: 'video/mp4',
-      ContentLength: size,
-    }));
     // Получаем presigned URL на 7 дней
     const video_url = await getSignedUrl(
       s3,
