@@ -42,11 +42,11 @@ const supabase = createClient(
         if (video.video_url) {
           const urlParts = video.video_url.split('/');
           const fileName = urlParts[urlParts.length - 1].split('?')[0];
-          await s3.send(new DeleteObjectCommand({
+          const delResult = await s3.send(new DeleteObjectCommand({
             Bucket: process.env.STORJ_BUCKET,
             Key: `videos/${fileName}`,
           }));
-          console.log(`Удалено из Storj: ${fileName}`);
+          console.log(`Удалено из Storj: ${fileName}, результат:`, delResult);
         } else {
           console.log(`video_url уже null для видео: ${video.id}, пропускаю удаление из Storj`);
         }

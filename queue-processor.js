@@ -56,6 +56,17 @@ videoQueue.process(async (job) => {
   if (!fs.existsSync('processed')) fs.mkdirSync('processed');
 
   try {
+    // ffprobe: выводим информацию о дорожках исходного файла
+    await new Promise((resolve) => {
+      ffmpeg.ffprobe(inputPath, (err, metadata) => {
+        if (err) {
+          console.error('ffprobe error:', err);
+        } else {
+          console.log('ffprobe streams:', metadata.streams);
+        }
+        resolve();
+      });
+    });
     // Обработка видео через ffmpeg
     await new Promise((resolve, reject) => {
       ffmpeg(inputPath)
@@ -67,6 +78,14 @@ videoQueue.process(async (job) => {
         .outputOptions('-crf', '23')
         .outputOptions('-c:a', 'aac')
         .outputOptions('-b:a', '128k')
+        .outputOptions('-ar', '44100')
+        .outputOptions('-ac', '2')
+        .on('start', commandLine => {
+          console.log('Spawned ffmpeg with command:', commandLine);
+        })
+        .on('stderr', stderrLine => {
+          console.log('ffmpeg stderr:', stderrLine);
+        })
         .save(outputPath)
         .on('end', () => {
           console.log(`Видео обработано: ${job.id}`);
