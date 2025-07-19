@@ -94,10 +94,20 @@ videoQueue.process(async (job) => {
     const { size } = fs.statSync(outputPath);
     const storjKey = `videos/videos/${Date.now()}_${originalName}`;
     
+    // Используем буферизованное чтение для файлов меньше 1.5GB, потоковое для больших
+    let body;
+    if (size > 1.5 * 1024 * 1024 * 1024) {
+      // Для файлов больше 1.5GB используем поток
+      body = fs.createReadStream(outputPath);
+    } else {
+      // Для файлов меньше 1.5GB используем буфер
+      body = fs.readFileSync(outputPath);
+    }
+    
     await s3.send(new PutObjectCommand({
       Bucket: process.env.STORJ_BUCKET,
       Key: storjKey,
-      Body: fs.createReadStream(outputPath),
+      Body: body,
       ContentType: 'video/mp4',
       ContentLength: size,
     }));
@@ -116,10 +126,14 @@ videoQueue.process(async (job) => {
     if (coverPath && fs.existsSync(coverPath)) {
       const coverSize = fs.statSync(coverPath).size;
       const coverStorjKey = `videos/covers/${Date.now()}_${originalNameCover}`;
+      
+      // Обложки обычно маленькие, используем буферизованное чтение
+      const coverBody = fs.readFileSync(coverPath);
+      
       await s3.send(new PutObjectCommand({
         Bucket: process.env.STORJ_BUCKET,
         Key: coverStorjKey,
-        Body: fs.createReadStream(coverPath),
+        Body: coverBody,
         ContentType: 'image/jpeg',
         ContentLength: coverSize,
       }));
