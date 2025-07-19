@@ -1,5 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
+type Video = {
+  id: string;
+  title: string;
+  cover_url: string;
+  premiere_at: string;
+  duration?: number;
+};
 
 export default function Profile() {
   const [user, setUser] = useState<any>(null);
@@ -17,6 +24,7 @@ export default function Profile() {
   const [nextUpdateDate, setNextUpdateDate] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const usernameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [videos, setVideos] = useState<Video[]>([]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 600px)').matches);
@@ -32,6 +40,7 @@ export default function Profile() {
         if (data.user) {
           loadProfile(data.user.id);
           loadSubscribersCount(data.user.id);
+          loadUserVideos(data.user.id);
         }
       }).catch((error: any) => {
         console.error('Ошибка при получении пользователя:', error);
@@ -124,6 +133,21 @@ export default function Profile() {
       }
     } catch (error) {
       console.error('Ошибка при загрузке количества подписчиков:', error);
+    }
+  };
+
+  const loadUserVideos = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('videos')
+        .select('id, title, cover_url, premiere_at, duration')
+        .eq('user_id', userId)
+        .order('premiere_at', { ascending: false });
+      if (!error && data) {
+        setVideos(data);
+      }
+    } catch (error) {
+      // ignore
     }
   };
 
@@ -459,6 +483,36 @@ export default function Profile() {
         >
           Выйти из аккаунта
         </button>
+      </div>
+      {/* Список видео пользователя */}
+      <div style={{ width: '100%', maxWidth: 600, margin: '36px auto 60px auto', background: 'none', borderRadius: 0, boxShadow: 'none', padding: 0 }}>
+        <h2 style={{ color: '#bdbdbd', fontSize: 18, fontWeight: 600, margin: '0 0 18px 0', letterSpacing: 0.2 }}>Ваши премьеры</h2>
+        {videos.length === 0 && <div style={{ color: '#666', fontSize: 15, textAlign: 'center', margin: '24px 0' }}>Вы ещё не загружали видео</div>}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {videos.map(video => (
+            <a key={video.id} href={`/watch/${video.id}`} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+              background: '#18181b',
+              borderRadius: 8,
+              padding: '10px 14px',
+              textDecoration: 'none',
+              color: '#e0e0e0',
+              border: '1.5px solid #23232a',
+              transition: 'background 0.2s, border 0.2s',
+              boxShadow: 'none',
+              fontSize: 16,
+            }}>
+              <img src={video.cover_url} alt={video.title} style={{ width: 64, height: 40, objectFit: 'cover', borderRadius: 4, background: '#23232a', border: '1px solid #23232a' }} onError={e => { (e.currentTarget as HTMLImageElement).src = '/placeholder.png'; }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600, fontSize: 16, color: '#e0e0e0', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{video.title}</div>
+                <div style={{ fontSize: 13, color: '#bdbdbd' }}>Премьера: {new Date(video.premiere_at).toLocaleString()}</div>
+              </div>
+              {video.duration && <div style={{ fontSize: 13, color: '#888', marginLeft: 8 }}>{Math.floor(video.duration/60)}:{(video.duration%60).toString().padStart(2,'0')}</div>}
+            </a>
+          ))}
+        </div>
       </div>
     </div>
   );
