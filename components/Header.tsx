@@ -81,7 +81,7 @@ export default function Header() {
           textTransform: 'lowercase',
           fontFamily: 'monospace',
         }}>
-          onetimeshow     Timur
+          onetimeshow
         </span>
       </Link>
     </header>

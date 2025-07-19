@@ -746,6 +746,28 @@ function SubscribeAuthorButton({ authorId, currentUser }: { authorId: string, cu
 
   if (currentUser && currentUser.id === authorId) return null;
 
+  // Проверяем подписку при загрузке компонента
+  useEffect(() => {
+    if (!currentUser || !authorId) return;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('author_subscriptions')
+          .select('id')
+          .eq('user_id', currentUser.id)
+          .eq('author_id', authorId)
+          .single();
+        if (!error && data) {
+          setSubscribed(true);
+        } else {
+          setSubscribed(false);
+        }
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }, [currentUser, authorId]);
+
   async function handleSubscribe() {
     if (!currentUser) {
       window.location.href = '/register';
