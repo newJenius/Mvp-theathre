@@ -31,7 +31,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
     // Подписка на новые сообщения через Supabase Realtime
     try {
       const channel = supabase
-        .channel(`chat:${videoId}`)
+        .channel(`comments:${videoId}`)
         .on('postgres_changes', 
           { 
             event: 'INSERT', 
@@ -49,7 +49,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
         supabase.removeChannel(channel);
       };
     } catch (error) {
-      console.error('Ошибка подписки на чат:', error);
+      console.error('Ошибка подписки на комментарии:', error);
     }
   }, [videoId]);
 
@@ -153,7 +153,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
       boxShadow: '0 2px 8px #000a',
       color: '#f3f3f3',
     }}>
-      {/* Заголовок чата */}
+      {/* Заголовок комментариев */}
       <div style={{
         padding: '8px 12px',
         background: 'linear-gradient(135deg, #23232a 80%, #1769aa 100%)',
@@ -172,7 +172,7 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2196f3" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle'}}>
           <path d="M21 11.5a8.38 8.38 0 0 1-1.9 5.4A8.5 8.5 0 0 1 12 21.5a8.38 8.38 0 0 1-5.4-1.9L3 21l1.4-3.6A8.38 8.38 0 0 1 2.5 12a8.5 8.5 0 1 1 17 0z"/>
         </svg>
-        Живой чат
+        Комментарии
       </div>
 
       {/* Форма отправки сообщения - СВЕРХУ */}

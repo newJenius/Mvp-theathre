@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import LiveChat from '../../components/LiveChat';
-import EmotionCarousel from '../../components/EmotionCarousel';
+// import EmotionCarousel from '../../components/EmotionCarousel';
 import { NextPageContext } from 'next';
 import WatchSubscribePush from '../../components/WatchSubscribePush';
 import React from 'react';
@@ -21,6 +21,7 @@ type Video = {
   user_id: string;
   description: string;
   video_url: string;
+  duration?: number; // Добавляем поле duration
 };
 
 export default function Watch(props: any) {
@@ -35,6 +36,7 @@ export default function Watch(props: any) {
   const [isInfoExpanded, setIsInfoExpanded] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [now, setNow] = useState(new Date());
+  const [feedVideos, setFeedVideos] = useState<Video[]>([]);
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
@@ -83,6 +85,39 @@ export default function Watch(props: any) {
       checkIfWaiting();
     }
   }, [id, currentUser]);
+
+  useEffect(() => {
+    // Загружаем ленту видео (кроме текущего)
+    supabase
+      .from('videos')
+      .select('id, title, cover_url, premiere_at, duration')
+      .neq('id', id)
+      .order('premiere_at', { ascending: false })
+      .limit(12)
+      .then(({ data }: { data: any }) => {
+        if (data) setFeedVideos(data);
+      });
+  }, [id]);
+
+  // Лента "Сейчас" (каталог текущего часа, как на главной)
+  const [nowFeed, setNowFeed] = useState<Video[]>([]);
+  useEffect(() => {
+    if (!video) return;
+    const now = new Date();
+    const hourStart = new Date(now);
+    hourStart.setMinutes(0, 0, 0);
+    const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
+    supabase
+      .from('videos')
+      .select('id, title, cover_url, premiere_at, duration')
+      .neq('id', id)
+      .gte('premiere_at', hourStart.toISOString())
+      .lt('premiere_at', hourEnd.toISOString())
+      .order('premiere_at', { ascending: false })
+      .then(({ data }: { data: any }) => {
+        if (data) setNowFeed(data);
+      });
+  }, [id, video]);
 
   const loadWaitingCount = async () => {
     if (!id) return;
@@ -400,25 +435,24 @@ export default function Watch(props: any) {
                 <button
                   onClick={() => setShowChat((v) => !v)}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
                     background: '#23232a', color: '#e5e7eb', border: 'none', borderRadius: 7,
-                    padding: '0 0', fontWeight: 700, fontSize: 16, cursor: 'pointer',
+                    padding: '0 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer',
                     transition: 'background 0.2s, color 0.2s', boxShadow: '0 1px 8px #0002',
-                    letterSpacing: 0.2, minWidth: 140, maxWidth: 180, width: '100%', justifyContent: 'center',
-                    height: 48,
+                    letterSpacing: 0.2, width: '100%', height: 40,
                     fontFamily: `'JetBrains Mono', monospace`
                   }}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-1.9 5.4A8.5 8.5 0 0 1 12 21.5a8.38 8.38 0 0 1-5.4-1.9L3 21l1.4-3.6A8.38 8.38 0 0 1 2.5 12a8.5 8.5 0 1 1 17 0z"/></svg>
-                  Чат
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', display: 'inline-block' }}><path d="M21 11.5a8.38 8.38 0 0 1-1.9 5.4A8.5 8.5 0 0 1 12 21.5a8.38 8.38 0 0 1-5.4-1.9L3 21l1.4-3.6A8.38 8.38 0 0 1 2.5 12a8.5 8.5 0 1 1 17 0z"/></svg>
+                  {showChat ? 'Скрыть комментарии' : 'Показать комментарии'}
                 </button>
                 <button
                   style={{
                     background: '#d1d5db', color: '#18181b', border: 'none', borderRadius: 7,
-                    padding: '0 0', fontWeight: 700, fontSize: 16, cursor: 'pointer',
+                    padding: '0 0', fontWeight: 700, fontSize: 12, cursor: 'pointer',
                     transition: 'background 0.2s, color 0.2s', boxShadow: '0 1px 8px #0002',
                     letterSpacing: 0.2, minWidth: 120, maxWidth: 180, width: '100%', justifyContent: 'center',
-                    height: 48,
+                    height: 40,
                     fontFamily: `'JetBrains Mono', monospace`
                   }}
                   disabled
@@ -439,8 +473,36 @@ export default function Watch(props: any) {
             </div>
           )}
           
-          {/* Карусель эмоций */}
-          <EmotionCarousel onEmotionClick={sendEmotionToChat} />
+          {/* Вертикальная лента "Сейчас" */}
+          <div style={{ margin: '32px 0 0 0', width: '100%', padding: '0 10px' }}>
+            <h2 style={{ color: '#bdbdbd', fontSize: 18, fontWeight: 600, margin: '0 0 18px 0', letterSpacing: 0.2 }}>Сейчас в эфире</h2>
+            {nowFeed.length === 0 && <div style={{ color: '#666', fontSize: 15, textAlign: 'center', margin: '24px 0' }}>Нет других премьер в этом часу</div>}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {nowFeed.map(v => (
+                <a key={v.id} href={`/watch/${v.id}`} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 16,
+                  background: '#18181b',
+                  borderRadius: 8,
+                  padding: '10px 14px',
+                  textDecoration: 'none',
+                  color: '#e0e0e0',
+                  border: '1.5px solid #23232a',
+                  transition: 'background 0.2s, border 0.2s',
+                  boxShadow: 'none',
+                  fontSize: 16,
+                }}>
+                  <img src={v.cover_url} alt={v.title} style={{ width: 64, height: 40, objectFit: 'cover', borderRadius: 4, background: '#23232a', border: '1px solid #23232a' }} onError={e => { (e.currentTarget as HTMLImageElement).src = '/placeholder.png'; }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: 16, color: '#e0e0e0', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
+                    <div style={{ fontSize: 13, color: '#bdbdbd' }}>Премьера: {new Date(v.premiere_at).toLocaleString()}</div>
+                  </div>
+                  {v.duration && <div style={{ fontSize: 13, color: '#888', marginLeft: 8 }}>{Math.floor(v.duration/60)}:{(v.duration%60).toString().padStart(2,'0')}</div>}
+                </a>
+              ))}
+            </div>
+          </div>
         </>
       )}
     </div>
@@ -814,7 +876,7 @@ function SubscribeAuthorButton({ authorId, currentUser }: { authorId: string, cu
           paddingLeft: 10,
           paddingRight: 10,
           fontWeight: 700,
-          fontSize: 16,
+          fontSize: 12,
           cursor: subscribed ? 'default' : 'pointer',
           opacity: loading ? 0.7 : 1,
           marginTop: 10,

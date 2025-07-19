@@ -44,7 +44,7 @@ const supabase = createClient(
           const fileName = urlParts[urlParts.length - 1].split('?')[0];
           const delResult = await s3.send(new DeleteObjectCommand({
             Bucket: process.env.STORJ_BUCKET,
-            Key: `videos/${fileName}`,
+            Key: `videos/videos/${fileName}`,
           }));
           console.log(`Удалено из Storj: ${fileName}, результат:`, delResult);
         } else {
