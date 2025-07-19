@@ -21,9 +21,7 @@ export default function Upload() {
   const TITLE_LIMIT = 150;
   const [user, setUser] = useState<any>(null);
   const [checkedAuth, setCheckedAuth] = useState(false);
-  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.nermes.xyz';
-  const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'wss://api.nermes.xyz';
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 600px)').matches);
@@ -81,79 +79,6 @@ export default function Upload() {
       setEstimatedTime(savedEstimatedTime ? parseInt(savedEstimatedTime) : null);
     }
   }, []);
-
-  // Предупреждение при попытке покинуть страницу во время загрузки
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (jobId && processingStatus !== 'completed' && processingStatus !== 'failed') {
-        e.preventDefault();
-        e.returnValue = 'Загрузка в процессе. Если вы покинете страницу, файлы нужно будет выбрать заново.';
-        return e.returnValue;
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [jobId, processingStatus]);
-
-  // Глобальная проверка статуса загрузки (работает на всех страницах)
-  useEffect(() => {
-    // WebSocket подключение для уведомлений
-    if (user?.id) {
-      const ws = new WebSocket(`${wsUrl}?userId=${user.id}`);
-      
-      ws.onopen = () => {
-        console.log('WebSocket подключен');
-        setWsConnection(ws);
-      };
-      
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === 'upload_completed') {
-            // Загрузка завершена - показываем уведомление
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification('Загрузка завершена!', {
-                body: `${data.title} успешно обработано и загружено.`,
-                icon: '/favicon.ico'
-              });
-            }
-            
-            // Очищаем localStorage
-            localStorage.removeItem('uploadJobId');
-            localStorage.removeItem('uploadProcessingStatus');
-            localStorage.removeItem('uploadQueuePosition');
-            localStorage.removeItem('uploadEstimatedTime');
-            localStorage.removeItem('uploadTitle');
-            localStorage.removeItem('uploadDescription');
-            localStorage.removeItem('uploadPremiereAt');
-            
-            // Обновляем состояние
-            setJobId(null);
-            setProcessingStatus('');
-            setQueuePosition(null);
-            setEstimatedTime(null);
-            setMessage('Видео успешно обработано и загружено!');
-          }
-        } catch (error) {
-          console.error('Ошибка обработки WebSocket сообщения:', error);
-        }
-      };
-      
-      ws.onerror = (error) => {
-        console.error('WebSocket ошибка:', error);
-      };
-      
-      ws.onclose = () => {
-        console.log('WebSocket отключен');
-        setWsConnection(null);
-      };
-      
-      return () => {
-        ws.close();
-      };
-    }
-  }, [user?.id, wsUrl]);
 
   // Сохраняем данные формы при изменении
   useEffect(() => {

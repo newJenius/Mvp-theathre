@@ -153,29 +153,6 @@ videoQueue.process(async (job) => {
       throw new Error(`Ошибка сохранения в Supabase: ${error.message}`);
     }
 
-    // Отправляем уведомление пользователю через WebSocket
-    if (user_id) {
-      try {
-        const WebSocket = require('ws');
-        const ws = new WebSocket('ws://localhost:3000');
-        
-        ws.on('open', () => {
-          ws.send(JSON.stringify({
-            type: 'notification',
-            userId: user_id,
-            message: {
-              type: 'upload_completed',
-              title: title || 'Видео',
-              video_url: video_url
-            }
-          }));
-          ws.close();
-        });
-      } catch (wsError) {
-        console.log('WebSocket уведомление не отправлено:', wsError.message);
-      }
-    }
-
     // Удаляем временные файлы
     fs.unlinkSync(inputPath);
     fs.unlinkSync(outputPath);

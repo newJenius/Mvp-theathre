@@ -3,10 +3,8 @@ const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const Queue = require('bull');
-const WebSocket = require('ws');
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 // CORS настройки
 app.use(cors({
@@ -31,44 +29,6 @@ const videoQueue = new Queue('video-processing', {
     maxRetriesPerRequest: null
   }
 });
-
-// Создаём HTTP сервер
-const server = require('http').createServer(app);
-
-// WebSocket сервер для уведомлений (на том же порту)
-const wss = new WebSocket.Server({ server });
-
-// Хранилище подключений пользователей
-const userConnections = new Map();
-
-wss.on('connection', (ws, req) => {
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const userId = url.searchParams.get('userId');
-  
-  if (userId) {
-    userConnections.set(userId, ws);
-    console.log(`Пользователь ${userId} подключился к WebSocket`);
-  }
-  
-  ws.on('close', () => {
-    // Удаляем подключение при отключении
-    for (const [uid, connection] of userConnections.entries()) {
-      if (connection === ws) {
-        userConnections.delete(uid);
-        console.log(`Пользователь ${uid} отключился от WebSocket`);
-        break;
-      }
-    }
-  });
-});
-
-// Функция для отправки уведомления пользователю
-function notifyUser(userId, message) {
-  const ws = userConnections.get(userId);
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify(message));
-  }
-}
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -179,6 +139,6 @@ app.get('/queue-info', async (req, res) => {
   }
 });
 
-server.listen(port, () => {
-  console.log(`Backend сервер с WebSocket запущен на порту ${port}`);
+app.listen(4000, () => {
+  console.log('Backend сервер с очередью запущен на порту 4000');
 }); 
