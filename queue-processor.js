@@ -60,6 +60,8 @@ videoQueue.process(async (job) => {
     await new Promise((resolve, reject) => {
       ffmpeg(inputPath)
         .outputOptions('-vf', 'fps=30')
+        .outputOptions('-map', '0:v:0')
+        .outputOptions('-map', '0:a:0?')
         .outputOptions('-c:v', 'libx264')
         .outputOptions('-preset', 'ultrafast')
         .outputOptions('-crf', '23')

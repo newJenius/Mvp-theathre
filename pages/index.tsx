@@ -103,7 +103,7 @@ export default function Home() {
       try {
         const { data, error } = await supabase
           .from('videos')
-          .select('id, title, cover_url, premiere_at, user_id');
+          .select('id, title, cover_url, premiere_at, user_id, duration');
         if (!error && isMounted) {
           const videosData = data || [];
           // Загружаем количество ожидающих и аватарки
