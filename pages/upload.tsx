@@ -146,6 +146,14 @@ export default function Upload() {
     setQueuePosition(null);
     setEstimatedTime(null);
 
+    // Ограничение размера файла (2 ГБ)
+    const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024;
+    if (video && video.size > MAX_FILE_SIZE) {
+      setMessage('Загрузка файлов больше 2 ГБ не поддерживается. Пожалуйста, выберите файл меньшего размера.');
+      setLoading(false);
+      return;
+    }
+
     // Проверка: дата премьеры не дальше 6 дней
     if (premiereAt) {
       const premiereDate = new Date(premiereAt);
