@@ -56,6 +56,69 @@ export default function Upload() {
     return () => clearInterval(interval);
   }, [jobId]);
 
+  // Восстанавливаем состояние загрузки из localStorage при загрузке страницы
+  useEffect(() => {
+    const savedJobId = localStorage.getItem('uploadJobId');
+    const savedProcessingStatus = localStorage.getItem('uploadProcessingStatus');
+    const savedQueuePosition = localStorage.getItem('uploadQueuePosition');
+    const savedEstimatedTime = localStorage.getItem('uploadEstimatedTime');
+    
+    if (savedJobId) {
+      setJobId(savedJobId);
+      setProcessingStatus(savedProcessingStatus || 'waiting');
+      setQueuePosition(savedQueuePosition ? parseInt(savedQueuePosition) : null);
+      setEstimatedTime(savedEstimatedTime ? parseInt(savedEstimatedTime) : null);
+    } else if (user?.id) {
+      // Если в localStorage нет данных, пробуем восстановить из Supabase
+      supabase.from('user_upload_status')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data, error }: { data: any, error: any }) => {
+          if (data && !error) {
+            setJobId(data.job_id);
+            setProcessingStatus(data.status);
+            setQueuePosition(data.queue_position);
+            setEstimatedTime(data.estimated_time);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [user?.id]);
+
+  // Сохраняем состояние в localStorage при изменении
+  useEffect(() => {
+    if (jobId) {
+      localStorage.setItem('uploadJobId', jobId);
+      localStorage.setItem('uploadProcessingStatus', processingStatus);
+      if (queuePosition) localStorage.setItem('uploadQueuePosition', queuePosition.toString());
+      if (estimatedTime) localStorage.setItem('uploadEstimatedTime', estimatedTime.toString());
+      
+      // Дополнительно сохраняем в Supabase для надёжности
+      if (user?.id) {
+        supabase.from('user_upload_status').upsert({
+          user_id: user.id,
+          job_id: jobId,
+          status: processingStatus,
+          queue_position: queuePosition,
+          estimated_time: estimatedTime,
+          updated_at: new Date().toISOString()
+        }).catch(console.error);
+      }
+    } else {
+      // Очищаем localStorage если загрузка завершена
+      localStorage.removeItem('uploadJobId');
+      localStorage.removeItem('uploadProcessingStatus');
+      localStorage.removeItem('uploadQueuePosition');
+      localStorage.removeItem('uploadEstimatedTime');
+      
+      // Очищаем из Supabase
+      if (user?.id) {
+        supabase.from('user_upload_status').delete().eq('user_id', user.id).catch(console.error);
+      }
+    }
+  }, [jobId, processingStatus, queuePosition, estimatedTime, user?.id]);
+
   // Функция для проверки статуса обработки
   const checkStatus = async (jobId: string) => {
     try {
@@ -69,8 +132,6 @@ export default function Upload() {
           setMessage('Видео успешно обработано и загружено!');
           setJobId(null);
           setProcessingStatus('');
-          setQueuePosition(null);
-          setEstimatedTime(null);
         } else if (data.state === 'failed') {
           setMessage(`Ошибка обработки: ${data.failedReason}`);
           setJobId(null);
@@ -243,6 +304,24 @@ export default function Upload() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#111114', padding: isMobile ? '16px' : '40px', paddingTop: isMobile ? '56px' : '48px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+      {jobId && (
+        <div style={{
+          position: 'fixed',
+          top: isMobile ? '60px' : '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#1f2937',
+          color: '#9ca3af',
+          padding: '8px 16px',
+          borderRadius: '20px',
+          fontSize: '14px',
+          zIndex: 1000,
+          border: '1px solid #374151',
+          opacity: 0.9
+        }}>
+          Загрузка в процессе...
+        </div>
+      )}
       <form onSubmit={handleUpload} style={{
         width: '100%',
         maxWidth: 400,
