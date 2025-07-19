@@ -215,7 +215,8 @@ export default function Home() {
               <a href={`/watch/${video.id}`} style={{
                 display: 'block',
                 width: '100%',
-                height: '80%',
+                height: 'auto',
+                aspectRatio: '4/3',
                 overflow: 'hidden',
                 position: 'relative',
               }}>
