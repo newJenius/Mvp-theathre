@@ -5,12 +5,21 @@ import LiveChat from '../../components/LiveChat';
 // import EmotionCarousel from '../../components/EmotionCarousel';
 import { NextPageContext } from 'next';
 import WatchSubscribePush from '../../components/WatchSubscribePush';
-import React from 'react';
 import Header from '../../components/Header';
 // Helper for mobile device detection
 function isMobileDevice() {
   if (typeof navigator === 'undefined') return false;
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+}
+
+function getTimeLeft(premiere_at: string) {
+  const now = new Date();
+  const premiere = new Date(premiere_at);
+  const diff = premiere.getTime() - now.getTime();
+  if (diff <= 0) return '0m';
+  const hours = Math.floor(diff / 1000 / 60 / 60);
+  const minutes = Math.floor((diff / 1000 / 60) % 60);
+  return `${hours > 0 ? hours + 'h ' : ''}${minutes}m`;
 }
 
 type Video = {
@@ -22,6 +31,8 @@ type Video = {
   description: string;
   video_url: string;
   duration?: number; // Add duration field
+  avatar_url?: string;
+  username?: string;
 };
 
 export default function Watch(props: any) {
@@ -104,19 +115,48 @@ export default function Watch(props: any) {
   useEffect(() => {
     if (!video) return;
     const now = new Date();
-    const hourStart = new Date(now);
-    hourStart.setMinutes(0, 0, 0);
-    const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
-    supabase
-      .from('videos')
-      .select('id, title, cover_url, premiere_at, duration')
-      .neq('id', id)
-      .gte('premiere_at', hourStart.toISOString())
-      .lt('premiere_at', hourEnd.toISOString())
-      .order('premiere_at', { ascending: false })
-      .then(({ data }: { data: any }) => {
-        if (data) setNowFeed(data);
-      });
+    
+    const loadNowFeed = async () => {
+      const { data: videos } = await supabase
+        .from('videos')
+        .select('id, title, cover_url, premiere_at, duration, user_id')
+        .neq('id', id)
+        .lte('premiere_at', now.toISOString()) // Only videos that have already started
+        .gte('premiere_at', new Date(now.getTime() - 60 * 60 * 1000).toISOString()) // Within the last hour
+        .order('premiere_at', { ascending: false });
+      
+      if (videos && videos.length > 0) {
+        // Filter out completed premieres
+        const activeVideos = videos.filter((v: any) => {
+          if (!v.duration) return true; // If no duration, show it
+          const premiereEnd = new Date(new Date(v.premiere_at).getTime() + v.duration * 1000);
+          return premiereEnd > now; // Only show if premiere hasn't ended yet
+        });
+        
+        // Load avatars and usernames
+        const userIds = Array.from(new Set(activeVideos.map((v: any) => v.user_id)));
+        const { data: usersData } = await supabase
+          .from('users')
+          .select('id, avatar_url, username')
+          .in('id', userIds);
+        
+        if (usersData) {
+          const userMap = Object.fromEntries(usersData.map((u: any) => [u.id, { avatar_url: u.avatar_url, username: u.username }]));
+          const videosWithAvatars = activeVideos.map((v: any) => ({
+            ...v,
+            avatar_url: userMap[v.user_id]?.avatar_url || undefined,
+            username: userMap[v.user_id]?.username || undefined
+          }));
+          setNowFeed(videosWithAvatars);
+        } else {
+          setNowFeed(activeVideos);
+        }
+      } else {
+        setNowFeed(videos || []);
+      }
+    };
+    
+    loadNowFeed();
   }, [id, video]);
 
   const loadWaitingCount = async () => {
@@ -479,27 +519,171 @@ export default function Watch(props: any) {
             {nowFeed.length === 0 && <div style={{ color: '#666', fontSize: 15, textAlign: 'center', margin: '24px 0' }}>No other premieres in this hour</div>}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               {nowFeed.map(v => (
-                <a key={v.id} href={`/watch/${v.id}`} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 16,
-                  background: '#18181b',
-                  borderRadius: 8,
-                  padding: '10px 14px',
-                  textDecoration: 'none',
-                  color: '#e0e0e0',
-                  border: '1.5px solid #23232a',
-                  transition: 'background 0.2s, border 0.2s',
-                  boxShadow: 'none',
-                  fontSize: 16,
-                }}>
-                  <img src={v.cover_url} alt={v.title} style={{ width: 64, height: 40, objectFit: 'cover', borderRadius: 4, background: '#23232a', border: '1px solid #23232a' }} onError={e => { (e.currentTarget as HTMLImageElement).src = '/placeholder.png'; }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: 16, color: '#e0e0e0', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.title}</div>
-                    <div style={{ fontSize: 13, color: '#bdbdbd' }}>Premiere: {new Date(v.premiere_at).toLocaleString()}</div>
+                <div
+                  key={v.id}
+                  style={{
+                    width: '100%',
+                    maxWidth: 600,
+                    margin: '0 auto',
+                    background: 'none',
+                    borderRadius: 8,
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <a href={`/watch/${v.id}`} style={{
+                    display: 'block',
+                    width: '100%',
+                    height: 'auto',
+                    aspectRatio: '4/3',
+                    overflow: 'hidden',
+                    position: 'relative',
+                  }}>
+                    <img
+                      src={v.cover_url}
+                      alt={v.title}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        background: 'none',
+                        display: 'block',
+                        border: 'none',
+                        boxShadow: 'none',
+                      }}
+                      onError={e => { e.currentTarget.src = '/placeholder.png'; }}
+                    />
+                    {/* Status for corners */}
+                    {(() => {
+                      const now = new Date();
+                      const premiere = new Date(v.premiere_at);
+                      const durationMs = (v.duration || 0) * 1000;
+                      const extraMs = 3 * 60 * 1000;
+                      let status = '';
+                      if (premiere <= now && now.getTime() - premiere.getTime() < durationMs + extraMs) {
+                        status = 'live';
+                      } else if (premiere > now && premiere.getTime() - now.getTime() < 30 * 60 * 1000) {
+                        status = 'soon';
+                      } else if (premiere > now) {
+                        status = 'waiting';
+                      } else {
+                        status = 'ended';
+                      }
+                      // Top left corner
+                      if (status === 'live') {
+                        return (
+                          <div style={{
+                            position: 'absolute',
+                            top: 8,
+                            left: 8,
+                            background: 'rgba(0,0,0,0.65)',
+                            color: '#fff',
+                            fontSize: 13,
+                            fontWeight: 500,
+                            borderRadius: 12,
+                            padding: '2px 10px',
+                            zIndex: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4,
+                          }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><ellipse cx="12" cy="12" rx="8" ry="5"/><circle cx="12" cy="12" r="2.2"/></svg> 0
+                          </div>
+                        );
+                      } else if (status === 'soon' || status === 'waiting') {
+                        return (
+                          <div style={{
+                            position: 'absolute',
+                            top: 8,
+                            left: 8,
+                            background: 'rgba(0,0,0,0.65)',
+                            color: '#fff',
+                            fontSize: 13,
+                            fontWeight: 500,
+                            borderRadius: 12,
+                            padding: '2px 10px',
+                            zIndex: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4,
+                          }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> 0
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+                    {/* Bottom right corner: status */}
+                    <div style={{
+                      position: 'absolute',
+                      right: 8,
+                      bottom: 8,
+                      background: 'rgba(0,0,0,0.65)',
+                      color: '#fff',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      borderRadius: 12,
+                      padding: '2px 12px',
+                      zIndex: 2,
+                    }}>
+                      {(() => {
+                        const now = new Date();
+                        const premiere = new Date(v.premiere_at);
+                        const durationMs = (v.duration || 0) * 1000;
+                        const extraMs = 3 * 60 * 1000;
+                        if (premiere <= now && now.getTime() - premiere.getTime() < durationMs + extraMs) {
+                          return 'Live';
+                        } else if (premiere > now && premiere.getTime() - now.getTime() < 30 * 60 * 1000) {
+                          return 'Soon';
+                        } else if (premiere > now) {
+                          return 'Expected';
+                        } else {
+                          return 'Completed';
+                        }
+                      })()}
+                    </div>
+                    {/* Premiere date — bottom left corner */}
+                    <div style={{
+                      position: 'absolute',
+                      left: 8,
+                      bottom: 8,
+                      background: 'rgba(0,0,0,0.65)',
+                      color: '#fff',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      borderRadius: 12,
+                      padding: '2px 12px',
+                      zIndex: 2,
+                    }}>
+                      {new Date(v.premiere_at).toLocaleString()}
+                    </div>
+                  </a>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '12px 12px 10px 12px' }}>
+                    <h3 style={{
+                      fontSize: 16,
+                      fontWeight: 700,
+                      margin: '0 0 6px 0',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      color: '#fff',
+                    }}>
+                      <a href={`/watch/${v.id}`} style={{ color: '#fff', textDecoration: 'none' }}>{v.title}</a>
+                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: '#bdbdbd', marginBottom: 4, gap: 6 }}>
+                      <img src={v.avatar_url || '/avatar-placeholder.png'} alt="avatar" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', background: '#23232a', border: '1px solid #23232a', marginRight: 4 }} />
+                      {v.username || '—'}
+                    </div>
+                    {new Date(v.premiere_at) > new Date() && (
+                      <div style={{ fontSize: 10, color: '#e57373', marginTop: 0 }}>
+                        Until premiere: {getTimeLeft(v.premiere_at)}
+                      </div>
+                    )}
                   </div>
-                  {v.duration && <div style={{ fontSize: 13, color: '#888', marginLeft: 8 }}>{Math.floor(v.duration/60)}:{(v.duration%60).toString().padStart(2,'0')}</div>}
-                </a>
+                </div>
               ))}
             </div>
           </div>
@@ -664,8 +848,8 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
             videoRef.current.play();
           }
         }}
-        style={{
-          position: 'absolute',
+          style={{
+            position: 'absolute',
           top: 12,
           left: 12,
           background: isMuted ? 'rgba(24,24,27,0.85)' : 'rgba(24,24,27,0.5)',
