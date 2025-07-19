@@ -68,56 +68,60 @@ export default function Register() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#18181b',
-      padding: isMobile ? '16px' : '20px',
+      background: '#111114',
+      padding: isMobile ? '0' : '0',
     }}>
       <div style={{
-        background: '#23232a',
-        borderRadius: isMobile ? 8 : 12,
-        padding: isMobile ? '24px 20px' : '40px',
+        background: 'none',
+        borderRadius: 0,
+        padding: isMobile ? '24px 12px' : '36px 0',
         width: '100%',
-        maxWidth: isMobile ? '100%' : '400px',
-        border: '1px solid #2a2a2a',
+        maxWidth: isMobile ? '100%' : '340px',
+        border: 'none',
+        boxShadow: 'none',
       }}>
-        <div style={{ textAlign: 'center', marginBottom: isMobile ? '24px' : '32px' }}>
+        <div style={{ textAlign: 'center', marginBottom: isMobile ? '20px' : '28px' }}>
+          <div style={{
+            background: '#18181b',
+            color: '#bdbdbd',
+            borderRadius: '0',
+            fontSize: isMobile ? '13px' : '14px',
+            border: 'none',
+            fontWeight: '400',
+            opacity: 0.85,
+            marginBottom: '18px',
+            padding: '12px 10px',
+            lineHeight: 1.5,
+          }}>
+            <span style={{ color: '#22c55e', fontWeight: 600 }}>Приватное пространство.</span> Здесь царит атмосфера доверия и уникальности. Для регистрации потребуется инвайт-код.<br/>
+            Если у вас его нет — спросите у знакомых участников или напишите администрации.
+          </div>
           <h1 style={{ 
-            color: '#fff', 
-            fontSize: isMobile ? '24px' : '28px', 
-            fontWeight: '700',
-            marginBottom: '8px'
+            color: '#e0e0e0',
+            fontSize: isMobile ? '20px' : '22px',
+            fontWeight: '600',
+            marginBottom: '6px',
+            letterSpacing: 0.2
           }}>
             Регистрация
           </h1>
           <p style={{ 
-            color: '#bdbdbd', 
-            fontSize: isMobile ? '14px' : '16px',
+            color: '#6b7280',
+            fontSize: isMobile ? '13px' : '14px',
             margin: 0
           }}>
             Создайте аккаунт, чтобы создавать уникальные премьеры
           </p>
-          <div style={{
-            marginTop: '12px',
-            padding: '8px 12px',
-            background: '#2a2a2a',
-            color: '#bdbdbd',
-            borderRadius: '6px',
-            fontSize: isMobile ? '12px' : '13px',
-            border: '1px solid #3a3a3a',
-            fontWeight: '400',
-            opacity: 0.8
-          }}>
-            Для регистрации необходим инвайт-код
-          </div>
         </div>
 
-        <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '20px' }}>
+        <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '14px' : '16px' }}>
           <div>
             <label style={{ 
-              display: 'block', 
-              color: '#fff', 
-              fontSize: '14px', 
+              display: 'block',
+              color: '#bdbdbd',
+              fontSize: '13px',
               fontWeight: '500',
-              marginBottom: '8px'
+              marginBottom: '6px'
             }}>
               Email
             </label>
@@ -129,27 +133,28 @@ export default function Register() {
               required
               style={{
                 width: '100%',
-                padding: isMobile ? '10px 14px' : '12px 16px',
-                fontSize: isMobile ? '16px' : '16px',
-                borderRadius: '8px',
-                border: '1px solid #2a2a2a',
+                padding: isMobile ? '10px 10px' : '12px 12px',
+                fontSize: '15px',
+                borderRadius: '0',
+                border: '1.5px solid #23232a',
                 background: '#18181b',
-                color: '#fff',
+                color: '#e0e0e0',
                 boxSizing: 'border-box',
                 transition: 'border-color 0.2s',
+                outline: 'none',
               }}
-              onFocus={(e) => e.target.style.borderColor = '#22c55e'}
-              onBlur={(e) => e.target.style.borderColor = '#2a2a2a'}
+              onFocus={e => e.target.style.borderColor = '#444'}
+              onBlur={e => e.target.style.borderColor = '#23232a'}
             />
           </div>
 
           <div>
             <label style={{ 
-              display: 'block', 
-              color: '#fff', 
-              fontSize: '14px', 
+              display: 'block',
+              color: '#bdbdbd',
+              fontSize: '13px',
               fontWeight: '500',
-              marginBottom: '8px'
+              marginBottom: '6px'
             }}>
               Пароль
             </label>
@@ -161,27 +166,28 @@ export default function Register() {
               required
               style={{
                 width: '100%',
-                padding: isMobile ? '10px 14px' : '12px 16px',
-                fontSize: isMobile ? '16px' : '16px',
-                borderRadius: '8px',
-                border: '1px solid #2a2a2a',
+                padding: isMobile ? '10px 10px' : '12px 12px',
+                fontSize: '15px',
+                borderRadius: '0',
+                border: '1.5px solid #23232a',
                 background: '#18181b',
-                color: '#fff',
+                color: '#e0e0e0',
                 boxSizing: 'border-box',
                 transition: 'border-color 0.2s',
+                outline: 'none',
               }}
-              onFocus={(e) => e.target.style.borderColor = '#22c55e'}
-              onBlur={(e) => e.target.style.borderColor = '#2a2a2a'}
+              onFocus={e => e.target.style.borderColor = '#444'}
+              onBlur={e => e.target.style.borderColor = '#23232a'}
             />
           </div>
 
           <div>
             <label style={{ 
-              display: 'block', 
-              color: '#fff', 
-              fontSize: '14px', 
+              display: 'block',
+              color: '#bdbdbd',
+              fontSize: '13px',
               fontWeight: '500',
-              marginBottom: '8px'
+              marginBottom: '6px'
             }}>
               Инвайт-код
             </label>
@@ -193,17 +199,18 @@ export default function Register() {
               required
               style={{
                 width: '100%',
-                padding: isMobile ? '10px 14px' : '12px 16px',
-                fontSize: isMobile ? '16px' : '16px',
-                borderRadius: '8px',
-                border: '1px solid #2a2a2a',
+                padding: isMobile ? '10px 10px' : '12px 12px',
+                fontSize: '15px',
+                borderRadius: '0',
+                border: '1.5px solid #23232a',
                 background: '#18181b',
-                color: '#fff',
+                color: '#e0e0e0',
                 boxSizing: 'border-box',
                 transition: 'border-color 0.2s',
+                outline: 'none',
               }}
-              onFocus={(e) => e.target.style.borderColor = '#22c55e'}
-              onBlur={(e) => e.target.style.borderColor = '#2a2a2a'}
+              onFocus={e => e.target.style.borderColor = '#444'}
+              onBlur={e => e.target.style.borderColor = '#23232a'}
             />
           </div>
 
@@ -211,32 +218,33 @@ export default function Register() {
             type="submit" 
             disabled={loading}
             style={{
-              padding: isMobile ? '12px 20px' : '14px 24px',
-              background: loading ? '#2a2a2a' : 'linear-gradient(90deg, #22c55e, #16a34a)',
-              color: '#fff',
+              padding: isMobile ? '12px 0' : '13px 0',
+              background: loading ? '#23232a' : '#18181b',
+              color: loading ? '#888' : '#e0e0e0',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: '0',
               fontWeight: '600',
-              fontSize: isMobile ? '15px' : '16px',
+              fontSize: isMobile ? '15px' : '15px',
               cursor: loading ? 'default' : 'pointer',
-              transition: 'opacity 0.2s',
+              transition: 'background 0.2s, color 0.2s',
               opacity: loading ? 0.7 : 1,
+              marginTop: 2,
+              width: '100%',
+              letterSpacing: 0.2
             }}
-            onMouseEnter={(e) => !loading && (e.currentTarget.style.opacity = '0.9')}
-            onMouseLeave={(e) => !loading && (e.currentTarget.style.opacity = '1')}
           >
             {loading ? 'Регистрация...' : 'Зарегистрироваться'}
           </button>
 
           {message && (
             <div style={{ 
-              padding: isMobile ? '10px 14px' : '12px 16px',
-              borderRadius: '8px',
+              padding: isMobile ? '10px 10px' : '12px 12px',
+              borderRadius: '0',
               fontSize: isMobile ? '13px' : '14px',
               textAlign: 'center',
-              background: message.includes('Ошибка') || message.includes('не найден') ? '#fef2f2' : '#f0fdf4',
-              color: message.includes('Ошибка') || message.includes('не найден') ? '#dc2626' : '#16a34a',
-              border: `1px solid ${message.includes('Ошибка') || message.includes('не найден') ? '#fecaca' : '#bbf7d0'}`
+              background: message.includes('Ошибка') ? '#2a181b' : '#182a1b',
+              color: message.includes('Ошибка') ? '#ff5252' : '#22c55e',
+              border: `1px solid ${message.includes('Ошибка') ? '#3a232a' : '#233a2a'}`
             }}>
               {message}
             </div>
@@ -244,29 +252,17 @@ export default function Register() {
 
           <div style={{ 
             textAlign: 'center', 
-            marginTop: isMobile ? '12px' : '16px',
-            paddingTop: isMobile ? '16px' : '20px',
-            borderTop: '1px solid #2a2a2a'
+            marginTop: isMobile ? '10px' : '14px',
+            paddingTop: isMobile ? '12px' : '14px',
+            borderTop: '1px solid #23232a'
           }}>
             <p style={{ 
-              color: '#bdbdbd', 
-              fontSize: isMobile ? '13px' : '14px',
-              margin: '0 0 12px 0'
+              color: '#6b7280', 
+              fontSize: isMobile ? '12px' : '13px',
+              margin: '0 0 10px 0'
             }}>
-              Уже есть аккаунт?
+              Уже есть аккаунт? <Link href="/login" style={{ color: '#22c55e', textDecoration: 'underline' }}>Войти</Link>
             </p>
-            <Link href="/login" style={{
-              color: '#22c55e',
-              textDecoration: 'none',
-              fontSize: isMobile ? '15px' : '16px',
-              fontWeight: '600',
-              transition: 'opacity 0.2s',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-            >
-              Войти
-            </Link>
           </div>
         </form>
       </div>

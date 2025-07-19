@@ -523,6 +523,17 @@ export default function Home() {
           </div>
         </section>
       ))}
+      {/* Пасхалка в самом низу ленты */}
+      <div style={{
+        width: '100%',
+        textAlign: 'center',
+        color: '#23232a',
+        fontSize: 13,
+        margin: '40px 0 60px 0', // увеличен нижний отступ
+        opacity: 0.45,
+        letterSpacing: 1.5,
+        userSelect: 'none',
+      }}>timurXD</div>
     </div>
   );
 }
