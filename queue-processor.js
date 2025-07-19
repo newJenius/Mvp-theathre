@@ -108,7 +108,7 @@ videoQueue.process(async (job) => {
       }));
       
       const uploadId = multipartUpload.UploadId;
-      const partSize = 100 * 1024 * 1024; // 100MB части
+      const partSize = 8 * 1024 * 1024; // 8MB части
       const parts = [];
       
       // Загружаем части файла
