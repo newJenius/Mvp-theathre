@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { v4 as uuidv4 } from 'uuid';
 type Video = {
   id: string;
   title: string;
@@ -25,6 +26,8 @@ export default function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const usernameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [videos, setVideos] = useState<Video[]>([]);
+  const [inviteCodes, setInviteCodes] = useState<string[]>([]);
+  const [inviteError, setInviteError] = useState<string>('');
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 600px)').matches);
@@ -330,6 +333,49 @@ export default function Profile() {
     return hasChangesToSave && !usernameError && canUpdateProfile;
   };
 
+  // Генерация случайного кода (6-8 символов)
+  function generateCode() {
+    return uuidv4().replace(/-/g, '').slice(0, 8).toUpperCase();
+  }
+
+  // Загрузка или генерация инвайт-кодов
+  const handleShowInviteCodes = async () => {
+    setInviteError('');
+    if (!user?.id) {
+      setInviteError('Пользователь не найден');
+      return;
+    }
+    setLoading(true);
+    try {
+      // Получаем неиспользованные коды пользователя
+      const { data: existing, error } = await supabase
+        .from('invites')
+        .select('code')
+        .eq('invited_by', user.id)
+        .eq('used', false);
+      if (error) throw error;
+      let codes = existing?.map((row: any) => row.code) || [];
+      // Если меньше 3, генерируем недостающие
+      if (codes.length < 3) {
+        const toCreate = 3 - codes.length;
+        const newCodes = Array.from({ length: toCreate }, () => generateCode());
+        // Сохраняем новые коды в базу
+        for (const code of newCodes) {
+          const { error: insertError } = await supabase
+            .from('invites')
+            .insert([{ code, used: false, invited_by: user.id }]);
+          if (insertError) throw insertError;
+        }
+        codes = [...codes, ...newCodes];
+      }
+      setInviteCodes(codes.slice(0, 3));
+    } catch (e: any) {
+      setInviteError('Ошибка при генерации инвайт-кодов');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <div style={{ 
@@ -484,7 +530,42 @@ export default function Profile() {
           Log out of account
         </button>
       </div>
-      {/* Список видео пользователя */}
+      {/* Invite codes button and block (moved up, after logout) */}
+      <div style={{ width: '100%', maxWidth: 600, margin: '24px auto 0 auto', background: 'none', borderRadius: 0, boxShadow: 'none', padding: 0, textAlign: 'center' }}>
+        <button
+          style={{
+            background: '#23232a',
+            color: '#e0e0e0',
+            border: '1.5px solid #23232a',
+            borderRadius: 8,
+            fontSize: 16,
+            cursor: 'pointer',
+            marginTop: 18,
+            padding: '12px 0',
+            width: '100%',
+            fontWeight: 500,
+            letterSpacing: 0.2,
+            transition: 'background 0.2s, color 0.2s, border 0.2s',
+            boxShadow: 'none',
+          }}
+          onClick={handleShowInviteCodes}
+        >
+          My Invite Codes
+        </button>
+        {inviteCodes.length > 0 && (
+          <div style={{ marginTop: 18 }}>
+            <div style={{ color: '#bdbdbd', fontSize: 16, marginBottom: 8 }}>Your invite codes:</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {inviteCodes.map((code, idx) => (
+                <div key={idx} style={{ background: '#18181b', color: '#e0e0e0', borderRadius: 6, padding: '8px 0', fontSize: 18, letterSpacing: 2, fontWeight: 600 }}>{code}</div>
+              ))}
+            </div>
+            <div style={{ color: '#888', fontSize: 13, marginTop: 8 }}>Share these codes with friends so they can register.</div>
+          </div>
+        )}
+        {inviteError && <div style={{ color: '#ff5252', fontSize: 14, marginTop: 8 }}>{inviteError}</div>}
+      </div>
+      {/* User's videos list */}
       <div style={{ width: '100%', maxWidth: 600, margin: '36px auto 60px auto', background: 'none', borderRadius: 0, boxShadow: 'none', padding: 0 }}>
         <h2 style={{ color: '#bdbdbd', fontSize: 18, fontWeight: 600, margin: '0 0 18px 0', letterSpacing: 0.2 }}>Your premieres</h2>
         {videos.length === 0 && <div style={{ color: '#666', fontSize: 15, textAlign: 'center', margin: '24px 0' }}>You haven't uploaded any videos yet</div>}
