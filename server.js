@@ -12,7 +12,9 @@ app.use(cors({
     'https://api.nermes.xyz',
     'http://localhost:3000',
     'https://mvp-theathre.vercel.app',
-    'https://vercel.app'
+    'https://vercel.app',
+    'https://www.onetimeshow.app',
+    'https://onetimeshow.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
