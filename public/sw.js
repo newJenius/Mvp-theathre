@@ -5,8 +5,12 @@ const urlsToCache = [
   '/static/js/main.js',
   '/globe.svg',
   '/avatar-placeholder.png',
-  '/icon-192x192.png',
-  '/icon-512x512.png'
+  '/icon-16x16.svg',
+  '/icon-32x32.svg',
+  '/icon-192x192.svg',
+  '/icon-512x512.svg',
+  '/apple-touch-icon.svg',
+  '/favicon.svg'
 ];
 
 // Install event - cache resources
@@ -56,8 +60,8 @@ self.addEventListener('push', function(event) {
   const data = event.data ? event.data.json() : {};
   const options = {
     body: data.body || 'New content available!',
-    icon: '/icon-192x192.png',
-    badge: '/icon-192x192.png',
+    icon: '/icon-192x192.svg',
+    badge: '/icon-192x192.svg',
     vibrate: [100, 50, 100],
     data: {
       url: data.url || '/'
@@ -66,12 +70,12 @@ self.addEventListener('push', function(event) {
       {
         action: 'open',
         title: 'Open',
-        icon: '/icon-192x192.png'
+        icon: '/icon-192x192.svg'
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/icon-192x192.png'
+        icon: '/icon-192x192.svg'
       }
     ]
   };

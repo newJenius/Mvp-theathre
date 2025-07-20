@@ -862,7 +862,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'background 0.2s',
-        }}
+          }}
         title={isMuted ? 'Unmute' : 'Sound on'}
         disabled={!isMuted}
       >
