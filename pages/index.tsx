@@ -131,8 +131,16 @@ export default function Home() {
   const now = new Date();
   const nowHour = now.getHours();
 
-  // Filter only today's videos
-  const todayVideos = videos.filter(v => isToday(v.premiere_at)).sort((a, b) => new Date(a.premiere_at).getTime() - new Date(b.premiere_at).getTime());
+  // Filter only today's videos and exclude completed
+  const todayVideos = videos.filter(v => {
+    if (!isToday(v.premiere_at)) return false;
+    const now = new Date();
+    const premiere = new Date(v.premiere_at);
+    const durationMs = (v.duration || 0) * 1000;
+    const extraMs = 3 * 60 * 1000; // запас на завершение
+    // Показываем только если премьера ещё не закончилась
+    return (premiere.getTime() + durationMs + extraMs) > now.getTime();
+  }).sort((a, b) => new Date(a.premiere_at).getTime() - new Date(b.premiere_at).getTime());
 
   // Group today's videos by premiere hour
   const videosByHour: { [hour: number]: Video[] } = {};
