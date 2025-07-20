@@ -74,17 +74,15 @@ videoQueue.process(async (job) => {
         .outputOptions('-map', '0:v:0')
         .outputOptions('-map', '0:a:0?')
         .outputOptions('-c:v', 'libx264')
-        .outputOptions('-preset', 'slow') // Better compression than medium
-        .outputOptions('-crf', '32') // Much more aggressive compression
-        .outputOptions('-maxrate', '1M') // Strict bitrate limit
-        .outputOptions('-bufsize', '2M') // Smaller buffer
+        .outputOptions('-preset', 'slow')
+        .outputOptions('-crf', '20')
+        .outputOptions('-maxrate', '5M')
+        .outputOptions('-bufsize', '10M')
         .outputOptions('-c:a', 'aac')
-        .outputOptions('-b:a', '64k') // Even lower audio bitrate
+        .outputOptions('-b:a', '192k')
         .outputOptions('-ar', '44100')
         .outputOptions('-ac', '2')
         .outputOptions('-movflags', '+faststart')
-        .outputOptions('-profile:v', 'baseline') // More compatible, often smaller
-        .outputOptions('-level', '3.1') // Limit complexity
         .on('start', commandLine => {
           console.log('Spawned ffmpeg with command:', commandLine);
         })
