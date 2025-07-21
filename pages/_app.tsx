@@ -39,15 +39,15 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
-        <meta name="msapplication-TileColor" content="#007AFF" />
+        <meta name="msapplication-TileColor" content="#18181b" />
         <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="theme-color" content="#007AFF" />
+        <meta name="theme-color" content="#18181b" />
 
         <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
         <link rel="icon" type="image/svg+xml" sizes="32x32" href="/icon-32x32.svg" />
         <link rel="icon" type="image/svg+xml" sizes="16x16" href="/icon-16x16.svg" />
         <link rel="manifest" href="/manifest.json" />
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#007AFF" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#18181b" />
         <link rel="shortcut icon" href="/favicon.svg" />
 
         <meta name="twitter:card" content="summary" />
