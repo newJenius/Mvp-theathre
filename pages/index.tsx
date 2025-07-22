@@ -202,7 +202,7 @@ export default function Home() {
         <div style={{
           display: 'block',
         }}>
-          {nowVideos.length === 0 && <div style={{ color: '#bdbdbd', fontSize: 16 }}>No videos</div>}
+          {nowVideos.length === 0 && <div style={{ color: '#bdbdbd', fontSize: 16, opacity: 0.5 }}>No videos</div>}
           {nowVideos.map(video => (
             <div
               key={video.id}
@@ -378,8 +378,8 @@ export default function Home() {
       </section>
       {/* Other hour sections — always show */}
       {orderedHours.filter(h => h !== nowHour).map(hour => (
-        <section key={hour} style={{ marginBottom: 12 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 700, margin: '18px 0 10px 8px', color: '#f3f3f3' }}>{hourLabel(hour)}</h2>
+        <section key={hour} style={{ marginBottom: 0 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, margin: '10px 0 6px 8px', color: '#f3f3f3' }}>{hourLabel(hour)}</h2>
           <div style={{
             display: 'flex',
             overflowX: 'auto',
@@ -387,7 +387,7 @@ export default function Home() {
             padding: '4px 0 8px 8px',
             scrollbarWidth: 'thin',
           }}>
-            {(!videosByHour[hour] || videosByHour[hour].length === 0) && <div style={{ color: '#bdbdbd', fontSize: 16 }}>No videos</div>}
+            {(!videosByHour[hour] || videosByHour[hour].length === 0) && <div style={{ color: '#bdbdbd', fontSize: 16, opacity: 0.5 }}>No videos</div>}
             {videosByHour[hour] && videosByHour[hour].map(video => (
               <div
                 key={video.id}
@@ -404,7 +404,7 @@ export default function Home() {
                   display: 'flex',
                   flexDirection: 'column',
                   cursor: 'pointer',
-                  marginBottom: 8,
+                  marginBottom: 2, // уменьшено с 8
                 }}
               >
                 <a href={`/watch/${video.id}`} style={{
@@ -569,7 +569,7 @@ export default function Home() {
         textAlign: 'center',
         color: '#23232a',
         fontSize: 13,
-        margin: '40px 0 12px 0', // уменьшенный нижний отступ
+        margin: '40px 0 60px 0', // increased bottom margin
         opacity: 0.45,
         letterSpacing: 1.5,
         userSelect: 'none',

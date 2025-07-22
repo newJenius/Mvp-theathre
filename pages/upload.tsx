@@ -299,6 +299,30 @@ export default function Upload() {
         }}>
           <h1 style={{ color: '#e0e0e0', fontSize: isMobile ? 20 : 22, fontWeight: 600, marginBottom: 10, letterSpacing: 0.2 }}>Login required</h1>
           <p style={{ color: '#6b7280', fontSize: isMobile ? 13 : 14, margin: 0, marginBottom: 0 }}>Sign in or register to upload premieres</p>
+          <a
+            href="/register"
+            style={{
+              display: 'block',
+              margin: isMobile ? '22px auto 0 auto' : '28px auto 0 auto',
+              background: '#18181b',
+              color: '#e0e0e0',
+              border: 'none',
+              borderRadius: 6,
+              fontSize: isMobile ? 16 : 18,
+              fontWeight: 600,
+              padding: isMobile ? '12px 0' : '14px 0',
+              width: '100%',
+              maxWidth: 340,
+              textAlign: 'center',
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'background 0.2s, color 0.2s',
+              boxShadow: 'none',
+              letterSpacing: '0.5px',
+            }}
+          >
+            Register
+          </a>
         </div>
       </div>
     );
@@ -394,10 +418,12 @@ export default function Upload() {
             transition: 'border 0.2s',
           }}
         />
+        <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 4, fontWeight: 400, display: 'block' }}>Premiere date and time (UTC)</label>
         <input
           type="datetime-local"
           value={premiereAt}
           onChange={e => setPremiereAt(e.target.value)}
+          placeholder="YYYY-MM-DDThh:mm"
           style={{
             background: '#18181b',
             border: 'none',
@@ -411,9 +437,6 @@ export default function Upload() {
             transition: 'border 0.2s',
           }}
         />
-        <div style={{ color: '#666', fontSize: 13, marginTop: 2, marginBottom: 8, textAlign: 'right', opacity: 0.7 }}>
-          Time is specified in UTC
-        </div>
         <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>Cover (required)</label>
         {jobId ? (
           <div style={{
@@ -445,7 +468,9 @@ export default function Upload() {
             }}
           />
         )}
-        <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>Video</label>
+        <label style={{ color: '#bdbdbd', fontSize: 15, marginBottom: 0, fontWeight: 400 }}>
+          Video (required)
+        </label>
         {jobId ? (
           <div style={{
             background: '#1f2937',
@@ -465,6 +490,7 @@ export default function Upload() {
             accept="video/*"
             ref={videoInputRef}
             onChange={e => setVideo(e.target.files?.[0] || null)}
+            required
             style={{
               background: 'none',
               border: 'none',
@@ -479,8 +505,8 @@ export default function Upload() {
           type="submit"
           disabled={loading || !!jobId}
           style={{
-            background: loading || !!jobId ? '#23232a' : '#18181b',
-            color: loading || !!jobId ? '#888' : '#e0e0e0',
+            background: loading || !!jobId ? '#23232a' : '#39FF14',
+            color: loading || !!jobId ? '#888' : '#18181b',
             border: 'none',
             borderRadius: 6,
             fontSize: 18,
@@ -496,7 +522,7 @@ export default function Upload() {
           {loading ? 'Uploading...' : jobId ? 'Upload in progress' : 'Upload'}
         </button>
         {message && (
-          <div style={{ color: '#ff5252', fontSize: 15, marginTop: 4, textAlign: 'left' }}>{message}</div>
+          <div style={{ color: message.toLowerCase().includes('success') ? '#22c55e' : '#ff5252', fontSize: 15, marginTop: 4, textAlign: 'left' }}>{message}</div>
         )}
         {renderProcessingStatus()}
       </form>
