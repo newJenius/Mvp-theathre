@@ -395,7 +395,6 @@ export default function Home() {
                   width: 340,
                   minWidth: 340,
                   maxWidth: 340,
-                  height: 360,
                   flex: '0 0 auto',
                   background: 'none',
                   border: 'none',
@@ -570,7 +569,7 @@ export default function Home() {
         textAlign: 'center',
         color: '#23232a',
         fontSize: 13,
-        margin: '40px 0 60px 0', // increased bottom margin
+        margin: '40px 0 12px 0', // уменьшенный нижний отступ
         opacity: 0.45,
         letterSpacing: 1.5,
         userSelect: 'none',
