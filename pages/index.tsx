@@ -172,8 +172,7 @@ export default function Home() {
   // Other hours (excluding current)
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const afterNow = hours.filter(h => h > nowHour);
-  const beforeNow = hours.filter(h => h < nowHour);
-  const orderedHours = [nowHour, ...afterNow, ...beforeNow];
+  const orderedHours = [nowHour, ...afterNow]; // Только до конца дня
 
   // Function for beautiful header
   function hourLabel(hour: number) {
