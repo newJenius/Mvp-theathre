@@ -67,16 +67,22 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
         onClick={handleSubscribe}
         disabled={subscribed || loading || unsupported}
         style={{
-          background: subscribed ? '#23232a' : '#23232a',
-          color: '#e0e0e0',
+          background: subscribed ? '#fef9c3' : '#fef9c3',
+          color: '#18181b',
           border: 'none',
-          borderRadius: 0,
-          padding: '8px 20px',
-          fontWeight: 600,
-          fontSize: 16,
+          borderRadius: 7,
+          padding: '12px 0',
+          fontWeight: 700,
+          fontSize: 15,
           cursor: subscribed || unsupported ? 'default' : 'pointer',
           opacity: loading || unsupported ? 0.7 : 1,
-          marginTop: 12
+          marginTop: 0,
+          width: '100%',
+          maxWidth: 420,
+          transition: 'background 0.2s, color 0.2s',
+          boxShadow: 'none',
+          letterSpacing: 0.2,
+          fontFamily: `'JetBrains Mono', monospace`
         }}
       >
         {subscribed ? 'Notifications enabled' : loading ? 'Enabling...' : 'Enable premiere notifications'}

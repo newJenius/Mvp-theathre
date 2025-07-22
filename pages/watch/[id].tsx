@@ -272,11 +272,12 @@ export default function Watch(props: any) {
       minHeight: '100vh',
       color: '#f3f3f3',
         fontFamily: `'JetBrains Mono', monospace`,
-        paddingTop: 40 // reduced top padding for Header
+        paddingTop: !canWatch ? 56 : 40 // уменьшен отступ сверху, если премьера не началась
     }}>
-      {!canWatch && (
+      {/* Удаляю отображение названия ролика сверху, если премьера не началась */}
+      {/* {!canWatch && (
         <h1 style={{ fontSize: '24px', marginBottom: '20px', color: '#fff', fontWeight: 700 }}>{video.title}</h1>
-      )}
+      )} */}
       
         {/* Main content */}
         <div style={{ width: '100%' }}>
@@ -285,16 +286,11 @@ export default function Watch(props: any) {
               <div style={{ width: '100%', aspectRatio: '40/28', overflow: 'hidden', margin: 0, padding: 0 }}>
                 <img src={video.cover_url} alt={video.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', margin: 0, padding: 0, borderRadius: 8, boxShadow: 'none', background: '#18181b' }} />
               </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0 0 0' }}>
+                <ShareButton />
+              </div>
               
               <div style={{ marginBottom: '20px', marginTop: '10px' }}>
-                <div style={{ fontSize: '18px', marginBottom: '2px', color: '#e0e0e0', fontWeight: 700 }}>{video.title}</div>
-                <div style={{ fontSize: '15px', marginBottom: '10px', color: '#bdbdbd' }}>{authorUsername ? `@${authorUsername}` : ''}</div>
-                <SubscribeAuthorButton 
-                  authorId={video.user_id} 
-                  currentUser={currentUser} 
-                />
-                <div style={{ fontSize: '16px', marginBottom: '10px', color: '#bdbdbd' }}>Premiere: {premiere.toLocaleString()}</div>
-                
                 <div style={{
                   background: '#23232a',
                   padding: '15px',
@@ -318,36 +314,67 @@ export default function Watch(props: any) {
                     Waiting for premiere: <strong>{waitingCount}</strong>
                   </div>
                 </div>
-                
-                <button
-                  onClick={toggleWaiting}
-                  disabled={isLoading}
-                  style={{
-                    background: isWaiting ? '#222' : 'linear-gradient(90deg, #2563eb, #1e40af)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 8,
-                    padding: '8px 20px',
-                    fontWeight: 600,
-                    fontSize: 16,
-                    cursor: isLoading ? 'default' : 'pointer',
-                    opacity: isLoading ? 0.7 : 1,
-                    marginRight: 12
-                  }}
-                >
-                  {isWaiting ? 'You are waiting for the premiere' : isLoading ? '...' : 'Wait for premiere'}
-                </button>
-                {currentUser && (
-                  <WatchSubscribePush premiereId={video.id} userId={currentUser.id} visible={isWaiting} />
-                )}
+                <div style={{ fontSize: '18px', marginBottom: '2px', color: '#e0e0e0', fontWeight: 700 }}>{video.title}</div>
+                <div style={{ fontSize: '15px', marginBottom: '10px', color: '#bdbdbd' }}>{authorUsername ? `@${authorUsername}` : ''}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <button
+                    onClick={toggleWaiting}
+                    disabled={isLoading}
+                    style={{
+                      background: '#bbf7d0',
+                      color: '#18181b',
+                      border: 'none',
+                      borderRadius: 7,
+                      padding: '12px 0',
+                      fontWeight: 700,
+                      fontSize: 15,
+                      cursor: isLoading ? 'default' : 'pointer',
+                      opacity: isLoading ? 0.7 : 1,
+                      margin: 0,
+                      width: '100%',
+                      maxWidth: 420,
+                      transition: 'background 0.2s, color 0.2s',
+                      boxShadow: 'none',
+                      letterSpacing: 0.2,
+                      fontFamily: `'JetBrains Mono', monospace`
+                    }}
+                  >
+                    {isWaiting ? 'You are waiting for the premiere' : isLoading ? '...' : 'Wait for premiere'}
+                  </button>
+                  {/*
+                  <button
+                    disabled
+                    style={{
+                      background: '#bae6fd',
+                      color: '#18181b',
+                      border: 'none',
+                      borderRadius: 7,
+                      padding: '12px 0',
+                      fontWeight: 700,
+                      fontSize: 15,
+                      cursor: 'not-allowed',
+                      opacity: 1,
+                      margin: 0,
+                      width: '100%',
+                      maxWidth: 420,
+                      transition: 'background 0.2s, color 0.2s',
+                      boxShadow: 'none',
+                      letterSpacing: 0.2,
+                      fontFamily: `'JetBrains Mono', monospace`
+                    }}
+                  >
+                    Subscribe to author
+                  </button>
+                  */}
+                  {currentUser && (
+                    <WatchSubscribePush premiereId={video.id} userId={currentUser.id} visible={isWaiting} />
+                  )}
+                </div>
               </div>
               
               <div style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '20px', color: '#e0e0e0' }}>
                 <strong>Description:</strong><br />
                 {video.description}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0 0 0' }}>
-                <ShareButton />
               </div>
             </>
           )}
