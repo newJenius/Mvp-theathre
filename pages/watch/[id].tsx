@@ -394,7 +394,7 @@ export default function Watch(props: any) {
                   color: '#f3f3f3',
                   borderRadius: 16,
                   padding: '36px 28px 32px 28px',
-                  margin: '48px auto 32px auto',
+                  margin: '48px 10px 32px 10px',
                   maxWidth: 480,
                   textAlign: 'center',
                   fontSize: 20,
@@ -442,7 +442,7 @@ export default function Watch(props: any) {
                   onClick={() => setIsInfoExpanded(!isInfoExpanded)}
                   style={{
                     padding: '16px 20px',
-                    background: '#18181b',
+                    background: '#161618',
                     cursor: 'pointer',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -451,27 +451,44 @@ export default function Watch(props: any) {
                     transition: 'background 0.3s',
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.background = '#23232a'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = '#18181b'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#161618'}
                 >
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
                   }}>
-                    <div style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      background: '#23232a',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontWeight: 'bold',
-                      fontSize: '16px',
-                    }}>
-                      {authorUsername ? authorUsername.charAt(0).toUpperCase() : ''}
-                    </div>
+                    {video.avatar_url ? (
+                      <img
+                        src={video.avatar_url}
+                        alt="avatar"
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                          background: '#23232a',
+                          border: '1.5px solid #23232a',
+                          display: 'block',
+                        }}
+                        onError={e => { (e.currentTarget as HTMLImageElement).src = '/avatar-placeholder.png'; }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        background: '#23232a',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '16px',
+                      }}>
+                        {authorUsername ? authorUsername.charAt(0).toUpperCase() : ''}
+                      </div>
+                    )}
                     <div>
                       <div style={{ fontWeight: '600', fontSize: '16px', color: '#fff' }}>
                         {video.title}

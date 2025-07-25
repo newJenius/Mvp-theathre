@@ -68,7 +68,7 @@ export default function Register() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#111114',
+      background: '#0a0a0c',
       padding: isMobile ? '0' : '0',
     }}>
       <div style={{
@@ -93,8 +93,10 @@ export default function Register() {
             padding: '12px 10px',
             lineHeight: 1.5,
           }}>
-            <span style={{ color: '#22c55e', fontWeight: 600 }}>Private space.</span> Here reigns an atmosphere of trust and uniqueness. An invite code is required for registration.<br/>
-            If you don't have one — ask existing members or contact the administration.
+            Exclusive access. Only by invite.
+            <div style={{ color: '#888', fontSize: isMobile ? 12 : 13, marginTop: 6 }}>
+              Questions? <a href="mailto:nurlannapo@gmail.com" style={{ color: '#bdbdbd', textDecoration: 'underline' }}>nurlannapo@gmail.com</a>
+            </div>
           </div>
           <h1 style={{ 
             color: '#e0e0e0',
@@ -268,4 +270,8 @@ export default function Register() {
       </div>
     </div>
   );
+}
+
+export async function getServerSideProps() {
+  return { props: { hideHeader: true } };
 }

@@ -54,7 +54,7 @@ export default function Login() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#111114',
+      background: '#0a0a0c',
       padding: isMobile ? '0' : '0',
     }}>
       <div style={{
