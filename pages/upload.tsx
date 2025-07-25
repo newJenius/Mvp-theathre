@@ -22,6 +22,20 @@ export default function Upload() {
   const [user, setUser] = useState<any>(null);
   const [checkedAuth, setCheckedAuth] = useState(false);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.nermes.xyz';
+  const [username, setUsername] = useState<string | null>(null);
+
+  // Load username from users table
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('users')
+      .select('username')
+      .eq('id', user.id)
+      .single()
+      .then((res: { data: { username?: string } | null }) => {
+        setUsername(res.data?.username || null);
+      });
+  }, [user]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 600px)').matches);
@@ -172,6 +186,11 @@ export default function Upload() {
       return;
     }
 
+    if (!username || username.trim().length === 0) {
+      setMessage('Please set your username in your profile before uploading a video.');
+      setLoading(false);
+      return;
+    }
     try {
       const formData = new FormData();
       formData.append('video', video);
@@ -273,7 +292,7 @@ export default function Upload() {
       <div style={{
         minHeight: '100vh',
         width: '100vw',
-        background: '#111114',
+        background: '#0a0a0c',
         color: '#e0e0e0',
         display: 'flex',
         alignItems: 'center',
@@ -323,6 +342,45 @@ export default function Upload() {
           >
             Register
           </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Show warning if no username
+  if (user && (!username || username.trim().length === 0)) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        width: '100vw',
+        background: '#0a0a0c',
+        color: '#e57373',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: isMobile ? 17 : 20,
+        textAlign: 'center',
+        margin: 0,
+        padding: 0,
+        boxShadow: 'none',
+        borderRadius: 0,
+        letterSpacing: 0.2,
+        fontWeight: 500
+      }}>
+        <div style={{
+          maxWidth: 340,
+          width: '100%',
+          background: 'none',
+          borderRadius: 0,
+          padding: isMobile ? '24px 12px' : '36px 0',
+          margin: '0 auto',
+          border: 'none',
+          boxShadow: 'none',
+        }}>
+          <h1 style={{ color: '#e57373', fontSize: isMobile ? 20 : 22, fontWeight: 600, marginBottom: 10, letterSpacing: 0.2 }}>Требуется имя пользователя</h1>
+          <p style={{ color: '#bdbdbd', fontSize: isMobile ? 13 : 14, margin: 0, marginBottom: 0 }}>
+            Укажите имя пользователя в <a href="/profile" style={{ color: '#22c55e', textDecoration: 'underline' }}>профиле</a> перед загрузкой видео.
+          </p>
         </div>
       </div>
     );
