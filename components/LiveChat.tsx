@@ -322,7 +322,9 @@ export default function LiveChat({ videoId, currentUser, fakeMessages = [] }: Li
                         fontSize: 14,
                       }}>{getUserDisplayName(message)}</span>
                       <span style={{ fontSize: 15 }}>{message.message}</span>
-                      <span style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>{formatTime(message.created_at)}</span>
+                      <span style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>
+                        {isFake ? '' : formatTime(message.created_at)}
+                      </span>
                     </div>
                     {/* Like button TikTok style */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 38 }}>
