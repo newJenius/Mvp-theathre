@@ -71,17 +71,18 @@ export default function Watch(props: any) {
         { id: 'fake_user_5', username: 'MaxPrime' }
       ];
       
+      // Simple, topic-relevant, FOMO-inducing comments
       const fakeComments = [
-        "This video literally crashed the servers! 🔥",
-        "The traffic was insane, couldn't handle it",
-        "This premiere broke everything 😂",
-        "Never seen so many people watching at once",
-        "The servers couldn't take the hype",
-        "This was too powerful for the platform",
-        "Everyone was trying to watch this",
-        "The load was absolutely massive",
-        "This premiere was legendary",
-        "The servers are still recovering from this one"
+        "Missed the premiere, wish I saw it.",
+        "AI startups... not what I expected.",
+        "Anyone else shocked by the truth?",
+        "Wish I joined from the start.",
+        "This changed how I see AI companies.",
+        "So many secrets behind the scenes.",
+        "Why didn't I watch this live?",
+        "That part about the billion-dollar lie... wow.",
+        "Makes you think twice about AI hype.",
+        "Next time, I'm not missing the premiere."
       ];
       
       const messages = fakeUsers.map((user, index) => ({
