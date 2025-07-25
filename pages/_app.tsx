@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import MobileBottomBar from '../components/MobileBottomBar';
 import ErrorBoundary from '../components/ErrorBoundary';
 import InstallPWA from '../components/InstallPWA';
+import { Analytics } from '@vercel/analytics/react';
 
 export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -66,6 +67,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <ErrorBoundary>
         {!pageProps.hideHeader && <Header />}
         <Component {...pageProps} />
+        <Analytics />
         <MobileBottomBar />
         <InstallPWA />
       </ErrorBoundary>
