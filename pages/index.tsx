@@ -180,10 +180,10 @@ export default function Home() {
   }
 
   return (
-    <div style={{ padding: '64px 12px 60px 12px', background: '#111114', minHeight: '100vh', color: '#e0e0e0', boxSizing: 'border-box' }}>
+    <div style={{ padding: '64px 12px 60px 12px', background: '#0a0a0c', minHeight: '100vh', color: '#e0e0e0', boxSizing: 'border-box' }}>
       {/* Warning that videos disappear after premiere */}
       <div style={{
-        background: '#18181b',
+        background: '#141416',
         color: '#bdbdbd',
         padding: '12px 16px',
         margin: '0 0 16px 0',
@@ -197,7 +197,7 @@ export default function Home() {
       </div>
       
       {/* 'Now' section */}
-      <section style={{ marginBottom: 32 }}>
+      <section style={{ marginBottom: 8 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, margin: '18px 0 10px 8px', color: '#f3f3f3' }}>{hourLabel(nowHour)} (Now)</h2>
         <div style={{
           display: 'block',
@@ -209,8 +209,8 @@ export default function Home() {
               style={{
                 width: '100%',
                 maxWidth: 600,
-                margin: '0 auto 16px auto',
-                background: 'none',
+                margin: '0 auto 4px auto',
+                background: '#0a0a0c',
                 borderRadius: 8,
                 overflow: 'hidden',
                 display: 'flex',
@@ -378,13 +378,13 @@ export default function Home() {
       </section>
       {/* Other hour sections — always show */}
       {orderedHours.filter(h => h !== nowHour).map(hour => (
-        <section key={hour} style={{ marginBottom: 12 }}>
+        <section key={hour} style={{ marginBottom: 4 }}>
           <h2 style={{ fontSize: 20, fontWeight: 700, margin: '18px 0 10px 8px', color: '#f3f3f3' }}>{hourLabel(hour)}</h2>
           <div style={{
             display: 'flex',
             overflowX: 'auto',
             gap: 14,
-            padding: '4px 0 8px 8px',
+            padding: '4px 0 8px 0',
             scrollbarWidth: 'thin',
           }}>
             {(!videosByHour[hour] || videosByHour[hour].length === 0) && <div style={{ color: '#bdbdbd', fontSize: 16 }}>No videos</div>}
@@ -397,7 +397,7 @@ export default function Home() {
                   maxWidth: 340,
                   height: 360,
                   flex: '0 0 auto',
-                  background: 'none',
+                  background: '#0a0a0c',
                   border: 'none',
                   borderRadius: 8,
                   boxShadow: 'none',
@@ -405,7 +405,7 @@ export default function Home() {
                   display: 'flex',
                   flexDirection: 'column',
                   cursor: 'pointer',
-                  marginBottom: 8,
+                  marginBottom: 2,
                 }}
               >
                 <a href={`/watch/${video.id}`} style={{

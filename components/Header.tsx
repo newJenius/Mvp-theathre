@@ -62,8 +62,9 @@ export default function Header() {
     }}>
       <Link href="/" style={{
         display: 'flex',
+        flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        gap: isMobile ? 8 : 18,
         textDecoration: 'none',
         marginLeft: isMobile ? 24 : 48,
       }}>
@@ -73,15 +74,31 @@ export default function Header() {
             <circle cx="13" cy="13" r="3" fill="#bdbdbd" />
           </svg>
         </span>
-        <span style={{
-          fontWeight: 500,
-          fontSize: isMobile ? 16 : 18,
-          letterSpacing: 0.5,
-          color: '#bdbdbd',
-          textTransform: 'lowercase',
-          fontFamily: 'monospace',
-        }}>
-          onetimeshow
+        <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: isMobile ? 1 : 2 }}>
+          <span style={{
+            fontWeight: 500,
+            fontSize: isMobile ? 16 : 18,
+            letterSpacing: 0.5,
+            color: '#bdbdbd',
+            textTransform: 'lowercase',
+            fontFamily: 'monospace',
+          }}>
+            onetimeshow
+          </span>
+          <span style={{
+            fontSize: isMobile ? 11 : 14,
+            color: '#e57373',
+            fontWeight: 600,
+            letterSpacing: 0.2,
+            fontFamily: 'monospace',
+            opacity: 0.92,
+            textShadow: '0 1px 2px #000a',
+            whiteSpace: 'nowrap',
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}>
+            Don't miss it — premieres disappear forever!
+          </span>
         </span>
       </Link>
     </header>
