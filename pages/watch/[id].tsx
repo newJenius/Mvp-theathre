@@ -268,11 +268,11 @@ export default function Watch(props: any) {
       maxWidth: canWatch ? '100%' : '1200px',
       margin: '0 auto',
       paddingBottom: canWatch ? '60px' : '8px',
-      background: '#111114',
+      background: '#0a0a0c',
       minHeight: '100vh',
       color: '#f3f3f3',
-        fontFamily: `'JetBrains Mono', monospace`,
-        paddingTop: !canWatch ? 56 : 40 // уменьшен отступ сверху, если премьера не началась
+      fontFamily: `'JetBrains Mono', monospace`,
+      paddingTop: !canWatch ? 56 : 40
     }}>
       {/* Удаляю отображение названия ролика сверху, если премьера не началась */}
       {/* {!canWatch && (
@@ -284,7 +284,7 @@ export default function Watch(props: any) {
           {!canWatch && (
             <>
               <div style={{ width: '100%', aspectRatio: '40/28', overflow: 'hidden', margin: 0, padding: 0 }}>
-                <img src={video.cover_url} alt={video.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', margin: 0, padding: 0, borderRadius: 8, boxShadow: 'none', background: '#18181b' }} />
+                <img src={video.cover_url} alt={video.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', margin: 0, padding: 0, borderRadius: 8, boxShadow: 'none', background: '#0a0a0c' }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0 0 0' }}>
                 <ShareButton />
@@ -292,7 +292,7 @@ export default function Watch(props: any) {
               
               <div style={{ marginBottom: '20px', marginTop: '10px' }}>
                 <div style={{
-                  background: '#23232a',
+                  background: '#0a0a0c',
                   padding: '15px',
                   borderRadius: '8px',
                   marginBottom: '20px',
@@ -381,14 +381,59 @@ export default function Watch(props: any) {
           
           {canWatch && (
             <>
-              <VideoPlayerWithFullscreen videoUrl={video.video_url} premiereAt={video.premiere_at} />
-              <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0 0 0' }}>
-                <ShareButton />
-              </div>
-              
+              {video.video_url ? (
+                <>
+                  <VideoPlayerWithFullscreen videoUrl={video.video_url} premiereAt={video.premiere_at} />
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0 0 0' }}>
+                    <ShareButton />
+                  </div>
+                </>
+              ) : (
+                <div style={{
+                  background: 'linear-gradient(135deg, #18181b 60%, #23232a 100%)',
+                  color: '#f3f3f3',
+                  borderRadius: 16,
+                  padding: '36px 28px 32px 28px',
+                  margin: '48px auto 32px auto',
+                  maxWidth: 480,
+                  textAlign: 'center',
+                  fontSize: 20,
+                  fontWeight: 600,
+                  letterSpacing: 0.2,
+                  boxShadow: '0 4px 32px #000a',
+                  border: '1.5px solid #23232a',
+                  position: 'relative',
+                }}>
+                  <div style={{ fontSize: 44, marginBottom: 8, color: '#22c55e', lineHeight: 1 }}>
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2.5 2.5"/></svg>
+                  </div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#f3f3f3', marginBottom: 8 }}>
+                    The premiere has ended
+                  </div>
+                  <div style={{ fontSize: 16, color: '#bdbdbd', fontWeight: 400, marginBottom: 18 }}>
+                    This video is no longer available.<br/>
+                    But you can still catch new premieres on the main page!
+                  </div>
+                  <a href="/" style={{
+                    display: 'inline-block',
+                    background: 'linear-gradient(90deg, #22c55e 60%, #16a34a 100%)',
+                    color: '#18181b',
+                    fontWeight: 700,
+                    fontSize: 16,
+                    borderRadius: 8,
+                    padding: '12px 32px',
+                    textDecoration: 'none',
+                    boxShadow: '0 2px 8px #0004',
+                    marginTop: 8,
+                    transition: 'background 0.2s, color 0.2s',
+                  }}>
+                    Go to main page
+                  </a>
+                </div>
+              )}
               {/* Collapsible information tab */}
               <div style={{
-                background: '#23232a',
+                background: '#0a0a0c',
                 borderTop: '1px solid #23232a',
                 marginTop: '0',
               }}>
@@ -836,7 +881,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
         width: isPseudoFullscreen ? '100vw' : '100%',
         height: isPseudoFullscreen ? '100vh' : '100%',
         zIndex: isPseudoFullscreen ? 9999 : undefined,
-        background: '#000',
+        background: '#0a0a0c',
         overflow: isPseudoFullscreen ? 'hidden' : 'visible',
         aspectRatio: isPseudoFullscreen ? undefined : '4/2.8',
         display: isPseudoFullscreen ? 'flex' : undefined,

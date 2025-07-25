@@ -380,7 +380,7 @@ export default function Profile() {
     return (
       <div style={{ 
         minHeight: '100vh',
-        background: '#111114',
+        background: '#0a0a0c',
         color: '#d1d5db',
         display: 'flex',
         flexDirection: 'column',
@@ -425,7 +425,7 @@ export default function Profile() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#111114', color: '#e0e0e0', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 12px' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0c', color: '#e0e0e0', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 12px' }}>
       <div style={{ width: '100%', maxWidth: 400, margin: '0 auto', marginTop: 48, background: 'none', borderRadius: 0, boxShadow: 'none', padding: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28 }}>
         {/* Аватар */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
@@ -475,7 +475,7 @@ export default function Profile() {
             onClick={handleSaveChanges}
             disabled={loading || !!usernameError || !canUpdateProfile}
             style={{
-              background: loading ? '#23232a' : '#18181b',
+              background: loading ? '#0a0a0c' : '#0a0a0c',
               color: loading ? '#888' : '#e0e0e0',
               border: 'none',
               borderRadius: 6,

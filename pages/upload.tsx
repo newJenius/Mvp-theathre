@@ -329,7 +329,7 @@ export default function Upload() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#111114', padding: isMobile ? '16px' : '40px', paddingTop: isMobile ? '56px' : '48px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0c', padding: isMobile ? '16px' : '40px', paddingTop: isMobile ? '56px' : '48px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
       {jobId && (
         <div style={{
           position: 'fixed',
