@@ -3,24 +3,36 @@ import { supabase } from '../lib/supabaseClient';
 
 type ChatMessage = {
   id: number;
-  video_id: string;
+  video_id?: string;
   user_id: string;
   message: string;
   created_at: string;
+  username?: string; // для фейковых сообщений
 };
 
 type LiveChatProps = {
   videoId: string;
   currentUser: any;
+  fakeMessages?: Array<{
+    id: number;
+    user_id: string;
+    message: string;
+    created_at: string;
+    username: string;
+  }>;
 };
 
-export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
+export default function LiveChat({ videoId, currentUser, fakeMessages = [] }: LiveChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const MESSAGE_LIMIT = 500;
+  // Лайки для фейковых сообщений (id -> count)
+  const [fakeLikes, setFakeLikes] = useState<{ [id: number]: number }>({});
+  // Лайкнутые фейковые сообщения (id -> true)
+  const [likedFake, setLikedFake] = useState<{ [id: number]: boolean }>({});
 
   // Autoscroll is no longer needed, as new messages are at the top
 
@@ -52,6 +64,23 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
       console.error('Error subscribing to comments:', error);
     }
   }, [videoId]);
+
+  // Инициализация лайков для фейковых сообщений
+  useEffect(() => {
+    if (fakeMessages.length > 0) {
+      const initialLikes: { [id: number]: number } = {};
+      fakeMessages.forEach(msg => {
+        // Subtle number of likes for fake messages (1-5)
+        initialLikes[msg.id] = Math.floor(Math.random() * 5) + 1;
+      });
+      setFakeLikes(initialLikes);
+    }
+  }, [fakeMessages]);
+
+  const handleFakeLike = (id: number) => {
+    setFakeLikes(likes => ({ ...likes, [id]: (likes[id] || 0) + (likedFake[id] ? -1 : 1) }));
+    setLikedFake(liked => ({ ...liked, [id]: !liked[id] }));
+  };
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -131,10 +160,14 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
     return `hsl(${hue}, 70%, 60%)`;
   }
 
-  const getUserDisplayName = (message: ChatMessage) => {
+  const getUserDisplayName = (message: ChatMessage | any) => {
     // If this is the current user's message, show their email
     if (message.user_id === currentUser?.id && currentUser?.email) {
       return currentUser.email.split('@')[0];
+    }
+    // For fake messages, show the username
+    if (message.username) {
+      return message.username;
     }
     // For other users show short ID
     return `user_${message.user_id.slice(0, 4)}`;
@@ -245,15 +278,15 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
         padding: '12px',
         background: '#18181b',
         display: 'flex',
-        flexDirection: 'column-reverse',
+        flexDirection: 'column', // TikTok style: normal column, newest at top
       }}>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {messages.length === 0 && (
+          {messages.length === 0 && fakeMessages.length === 0 && (
             <div style={{ color: '#666', fontSize: 15, textAlign: 'center', margin: '24px 0' }}>
               No comments yet. Be the first to comment!
             </div>
           )}
-          {messages.length === 0 ? (
+          {(messages.length === 0 && fakeMessages.length === 0) ? (
             <div style={{
               textAlign: 'center',
               color: '#bdbdbd',
@@ -263,33 +296,63 @@ export default function LiveChat({ videoId, currentUser }: LiveChatProps) {
               Start the conversation first!
             </div>
           ) : (
-            [...messages].reverse().map((message, idx, arr) => (
-              <div key={message.id} style={{
-                marginBottom: '6px',
-                padding: '4px 8px',
-                fontSize: '14px',
-                color: '#f3f3f3',
-                wordBreak: 'break-word',
-                lineHeight: '1.4',
-              }}>
-                <span style={{
-                  fontWeight: '600',
-                  color: message.user_id === currentUser?.id ? '#2196f3' : getUserColor(message.user_id),
-                  marginRight: '8px',
-                  transition: 'color 0.2s',
-                }}>
-                  {getUserDisplayName(message)}:
-                </span>
-                <span>{
-                  message.message.match(/^https?:\/\/.*\.gif$/i)
-                    ? (
-                        <img src={message.message} alt="gif" style={{ maxWidth: '36px', maxHeight: '36px', verticalAlign: 'middle', borderRadius: '8px', background: '#23232a' }} />
-                      )
-                    : message.message
-                }</span>
-                {idx === 0 && <div ref={messagesEndRef} />}
-              </div>
-            ))
+            [...messages, ...fakeMessages]
+              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) // Newest first
+              .map((message, idx, arr) => {
+                const isFake = !!message.username;
+                return (
+                  <div key={message.id} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '10px',
+                    padding: '8px 0',
+                    borderBottom: '1px solid #23232a',
+                    fontSize: '15px',
+                    color: '#f3f3f3',
+                    wordBreak: 'break-word',
+                    lineHeight: '1.5',
+                    gap: 12,
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1 }}>
+                      <span style={{
+                        fontWeight: 600,
+                        color: message.user_id === currentUser?.id ? '#22c55e' : getUserColor(message.user_id),
+                        marginBottom: 2,
+                        fontSize: 14,
+                      }}>{getUserDisplayName(message)}</span>
+                      <span style={{ fontSize: 15 }}>{message.message}</span>
+                      <span style={{ fontSize: 12, color: '#bdbdbd', marginTop: 2 }}>{formatTime(message.created_at)}</span>
+                    </div>
+                    {/* Like button TikTok style */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 38 }}>
+                      <button
+                        type="button"
+                        onClick={isFake ? () => handleFakeLike(message.id) : undefined}
+                        disabled={!isFake}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: isFake ? 'pointer' : 'not-allowed',
+                          color: isFake && likedFake[message.id] ? '#e57373' : '#bdbdbd',
+                          fontSize: 22,
+                          marginBottom: 2,
+                          transition: 'color 0.2s',
+                          outline: 'none',
+                          padding: 0,
+                          userSelect: 'none',
+                        }}
+                      >
+                        ♥
+                      </button>
+                      <span style={{ fontSize: 13, color: '#bdbdbd', fontWeight: 600 }}>
+                        {isFake ? fakeLikes[message.id] || 0 : ''}
+                      </span>
+                    </div>
+                    {idx === 0 && <div ref={messagesEndRef} />}
+                  </div>
+                );
+              })
           )}
         </div>
       </div>

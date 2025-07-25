@@ -48,10 +48,55 @@ export default function Watch(props: any) {
   const [showChat, setShowChat] = useState(false);
   const [now, setNow] = useState(new Date());
   const [feedVideos, setFeedVideos] = useState<Video[]>([]);
+  const [fakeMessages, setFakeMessages] = useState<Array<{
+    id: number;
+    user_id: string;
+    message: string;
+    created_at: string;
+    username: string;
+  }>>([]);
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Generate fake messages for videos without video_url
+  useEffect(() => {
+    if (video && !video.video_url) {
+      const fakeUsers = [
+        { id: 'fake_user_1', username: 'AlexRider' },
+        { id: 'fake_user_2', username: 'MayaTech' },
+        { id: 'fake_user_3', username: 'SamViewer' },
+        { id: 'fake_user_4', username: 'LunaStream' },
+        { id: 'fake_user_5', username: 'MaxPrime' }
+      ];
+      
+      const fakeComments = [
+        "This video literally crashed the servers! 🔥",
+        "The traffic was insane, couldn't handle it",
+        "This premiere broke everything 😂",
+        "Never seen so many people watching at once",
+        "The servers couldn't take the hype",
+        "This was too powerful for the platform",
+        "Everyone was trying to watch this",
+        "The load was absolutely massive",
+        "This premiere was legendary",
+        "The servers are still recovering from this one"
+      ];
+      
+      const messages = fakeUsers.map((user, index) => ({
+        id: index + 1,
+        user_id: user.id,
+        message: fakeComments[index % fakeComments.length],
+        created_at: new Date(Date.now() - (fakeUsers.length - index) * 30000).toISOString(),
+        username: user.username
+      }));
+      
+      setFakeMessages(messages);
+    } else {
+      setFakeMessages([]);
+    }
+  }, [video]);
 
   useEffect(() => {
     // Get current user
@@ -389,47 +434,49 @@ export default function Watch(props: any) {
                   </div>
                 </>
               ) : (
-                <div style={{
-                  background: 'linear-gradient(135deg, #18181b 60%, #23232a 100%)',
-                  color: '#f3f3f3',
-                  borderRadius: 16,
-                  padding: '36px 28px 32px 28px',
-                  margin: '48px 10px 32px 10px',
-                  maxWidth: 480,
-                  textAlign: 'center',
-                  fontSize: 20,
-                  fontWeight: 600,
-                  letterSpacing: 0.2,
-                  boxShadow: '0 4px 32px #000a',
-                  border: '1.5px solid #23232a',
-                  position: 'relative',
-                }}>
-                  <div style={{ fontSize: 44, marginBottom: 8, color: '#22c55e', lineHeight: 1 }}>
-                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2.5 2.5"/></svg>
-                  </div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: '#f3f3f3', marginBottom: 8 }}>
-                    The premiere has ended
-                  </div>
-                  <div style={{ fontSize: 16, color: '#bdbdbd', fontWeight: 400, marginBottom: 18 }}>
-                    This video is no longer available.<br/>
-                    But you can still catch new premieres on the main page!
-                  </div>
-                  <a href="/" style={{
-                    display: 'inline-block',
-                    background: 'linear-gradient(90deg, #22c55e 60%, #16a34a 100%)',
-                    color: '#18181b',
-                    fontWeight: 700,
-                    fontSize: 16,
-                    borderRadius: 8,
-                    padding: '12px 32px',
-                    textDecoration: 'none',
-                    boxShadow: '0 2px 8px #0004',
-                    marginTop: 8,
-                    transition: 'background 0.2s, color 0.2s',
+                <>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #18181b 60%, #23232a 100%)',
+                    color: '#f3f3f3',
+                    borderRadius: 16,
+                    padding: '36px 28px 32px 28px',
+                    margin: '48px 10px 32px 10px',
+                    maxWidth: 480,
+                    textAlign: 'center',
+                    fontSize: 20,
+                    fontWeight: 600,
+                    letterSpacing: 0.2,
+                    boxShadow: '0 4px 32px #000a',
+                    border: '1.5px solid #23232a',
+                    position: 'relative',
                   }}>
-                    Go to main page
-                  </a>
-                </div>
+                    <div style={{ fontSize: 44, marginBottom: 8, color: '#22c55e', lineHeight: 1 }}>
+                      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2.5 2.5"/></svg>
+                    </div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: '#f3f3f3', marginBottom: 8 }}>
+                      The premiere has ended
+                    </div>
+                    <div style={{ fontSize: 16, color: '#bdbdbd', fontWeight: 400, marginBottom: 18 }}>
+                      This video is no longer available.<br/>
+                      But you can still catch new premieres on the main page!
+                    </div>
+                    <a href="/" style={{
+                      display: 'inline-block',
+                      background: 'linear-gradient(90deg, #22c55e 60%, #16a34a 100%)',
+                      color: '#18181b',
+                      fontWeight: 700,
+                      fontSize: 16,
+                      borderRadius: 8,
+                      padding: '12px 32px',
+                      textDecoration: 'none',
+                    }}>
+                      Go to main page
+                    </a>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0 0 0' }}>
+                    <ShareButton />
+                  </div>
+                </>
               )}
               {/* Collapsible information tab */}
               <div style={{
@@ -598,7 +645,7 @@ export default function Watch(props: any) {
         <>
           {showChat && (
             <div style={{ margin: '18px 0 0 0' }}>
-              <LiveChat videoId={video.id} currentUser={currentUser} />
+              <LiveChat videoId={video.id} currentUser={currentUser} fakeMessages={fakeMessages} />
             </div>
           )}
           
