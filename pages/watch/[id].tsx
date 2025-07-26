@@ -58,6 +58,10 @@ export default function Watch(props: any) {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [reportEmail, setReportEmail] = useState('');
+  const [reportReason, setReportReason] = useState('');
+  const [reportSubmitted, setReportSubmitted] = useState(false);
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
@@ -342,6 +346,30 @@ export default function Watch(props: any) {
       alert('Error saving email. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleReportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportEmail.trim() || !reportReason.trim() || !video) return;
+
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .insert({
+          video_id: video.id,
+          author_id: video.user_id,
+          reporter_email: reportEmail.trim(),
+          reason: reportReason.trim()
+        });
+
+      if (error) throw error;
+      
+      setReportSubmitted(true);
+      setReportEmail('');
+      setReportReason('');
+    } catch (error) {
+      console.error('Error submitting report:', error);
     }
   };
 
@@ -720,44 +748,215 @@ export default function Watch(props: any) {
                   </div>
                 )}
               </div>
-              <div style={{ display: 'flex', gap: 12, margin: '18px 10px 18px 10px', justifyContent: 'center', alignItems: 'center' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: '18px 10px 18px 10px' }}>
+                {/* Top row - Comments and Register */}
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center', alignItems: 'center' }}>
+                  <button
+                    onClick={() => setShowChat((v) => !v)}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+                      background: '#23232a', color: '#e5e7eb', border: 'none', borderRadius: 7,
+                      padding: '0 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer',
+                      transition: 'background 0.2s, color 0.2s', boxShadow: '0 1px 8px #0002',
+                      letterSpacing: 0.2, width: '100%', height: 40,
+                      fontFamily: `'JetBrains Mono', monospace`
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', display: 'inline-block' }}><path d="M21 11.5a8.38 8.38 0 0 1-1.9 5.4A8.5 8.5 0 0 1 12 21.5a8.38 8.38 0 0 1-5.4-1.9L3 21l1.4-3.6A8.38 8.38 0 0 1 2.5 12a8.5 8.5 0 1 1 17 0z"/></svg>
+                    {showChat ? 'Hide comments' : 'Show comments'}
+                  </button>
+                  <a href="/register" style={{
+                    display: 'inline-block',
+                    background: '#39FF14',
+                    color: '#18181b',
+                    border: 'none',
+                    borderRadius: 7,
+                    padding: '12px 24px',
+                    fontWeight: 700,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                    transition: 'background 0.2s, color 0.2s',
+                    boxShadow: 'none',
+                    letterSpacing: 0.2,
+                    textDecoration: 'none',
+                    fontFamily: `'JetBrains Mono', monospace`,
+                    textAlign: 'center',
+                    minWidth: 120,
+                    maxWidth: 180,
+                    width: '100%',
+                  }}>
+                    Register
+                  </a>
+                </div>
+                
+                {/* Bottom row - Report button */}
                 <button
-                  onClick={() => setShowChat((v) => !v)}
+                  onClick={() => setShowReportForm(true)}
                   style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-                    background: '#23232a', color: '#e5e7eb', border: 'none', borderRadius: 7,
-                    padding: '0 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    background: '#ff4444', color: '#ffffff', border: 'none', borderRadius: 7,
+                    padding: '12px 16px', fontWeight: 700, fontSize: 14, cursor: 'pointer',
                     transition: 'background 0.2s, color 0.2s', boxShadow: '0 1px 8px #0002',
-                    letterSpacing: 0.2, width: '100%', height: 40,
+                    letterSpacing: 0.2, width: '100%', height: 44,
                     fontFamily: `'JetBrains Mono', monospace`
                   }}
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', display: 'inline-block' }}><path d="M21 11.5a8.38 8.38 0 0 1-1.9 5.4A8.5 8.5 0 0 1 12 21.5a8.38 8.38 0 0 1-5.4-1.9L3 21l1.4-3.6A8.38 8.38 0 0 1 2.5 12a8.5 8.5 0 1 1 17 0z"/></svg>
-                  {showChat ? 'Hide comments' : 'Show comments'}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  Report this content
                 </button>
-                <a href="/register" style={{
-                  display: 'inline-block',
-                  background: '#39FF14',
-                  color: '#18181b',
-                  border: 'none',
-                  borderRadius: 7,
-                  padding: '12px 24px',
-                  fontWeight: 700,
-                  fontSize: 14,
-                  cursor: 'pointer',
-                  transition: 'background 0.2s, color 0.2s',
-                  boxShadow: 'none',
-                  letterSpacing: 0.2,
-                  textDecoration: 'none',
-                  fontFamily: `'JetBrains Mono', monospace`,
-                  textAlign: 'center',
-                  minWidth: 120,
-                  maxWidth: 180,
-                  width: '100%',
-                }}>
-                  Register
-                </a>
               </div>
+              
+              {/* Report Form Modal */}
+              {showReportForm && (
+                <div style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'rgba(0, 0, 0, 0.8)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 2000,
+                  padding: '20px'
+                }}>
+                  <div style={{
+                    background: '#000000',
+                    border: '1px solid #333',
+                    borderRadius: '12px',
+                    padding: '24px',
+                    maxWidth: '400px',
+                    width: '100%',
+                    maxHeight: '80vh',
+                    overflow: 'auto'
+                  }}>
+                    {reportSubmitted ? (
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '18px', color: '#39FF14', marginBottom: '12px', fontWeight: '600' }}>
+                          ✓ Report submitted
+                        </div>
+                        <div style={{ fontSize: '14px', color: '#bdbdbd', marginBottom: '20px' }}>
+                          Thank you for your report. We'll review it shortly.
+                        </div>
+                        <button
+                          onClick={() => {
+                            setShowReportForm(false);
+                            setReportSubmitted(false);
+                          }}
+                          style={{
+                            background: '#39FF14',
+                            color: '#000000',
+                            border: 'none',
+                            borderRadius: '7px',
+                            padding: '12px 24px',
+                            fontWeight: '700',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            fontFamily: `'JetBrains Mono', monospace`
+                          }}
+                        >
+                          Close
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div style={{ fontSize: '18px', color: '#ffffff', marginBottom: '20px', fontWeight: '600' }}>
+                          Report this content
+                        </div>
+                        <form onSubmit={handleReportSubmit}>
+                          <div style={{ marginBottom: '16px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', color: '#bdbdbd', marginBottom: '6px' }}>
+                              Your email *
+                            </label>
+                            <input
+                              type="email"
+                              value={reportEmail}
+                              onChange={(e) => setReportEmail(e.target.value)}
+                              required
+                              style={{
+                                width: '100%',
+                                padding: '12px',
+                                background: '#18181b',
+                                border: '1px solid #333',
+                                borderRadius: '7px',
+                                color: '#ffffff',
+                                fontSize: '14px',
+                                fontFamily: `'JetBrains Mono', monospace`
+                              }}
+                              placeholder="your@email.com"
+                            />
+                          </div>
+                          <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', color: '#bdbdbd', marginBottom: '6px' }}>
+                              Reason for report *
+                            </label>
+                            <textarea
+                              value={reportReason}
+                              onChange={(e) => setReportReason(e.target.value)}
+                              required
+                              rows={4}
+                              style={{
+                                width: '100%',
+                                padding: '12px',
+                                background: '#18181b',
+                                border: '1px solid #333',
+                                borderRadius: '7px',
+                                color: '#ffffff',
+                                fontSize: '14px',
+                                fontFamily: `'JetBrains Mono', monospace`,
+                                resize: 'vertical'
+                              }}
+                              placeholder="Please describe the issue..."
+                            />
+                          </div>
+                          <div style={{ display: 'flex', gap: '12px' }}>
+                            <button
+                              type="submit"
+                              style={{
+                                flex: 1,
+                                background: '#ff4444',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '7px',
+                                padding: '12px',
+                                fontWeight: '700',
+                                fontSize: '14px',
+                                cursor: 'pointer',
+                                fontFamily: `'JetBrains Mono', monospace`
+                              }}
+                            >
+                              Submit Report
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setShowReportForm(false)}
+                              style={{
+                                flex: 1,
+                                background: '#333',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '7px',
+                                padding: '12px',
+                                fontWeight: '700',
+                                fontSize: '14px',
+                                cursor: 'pointer',
+                                fontFamily: `'JetBrains Mono', monospace`
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
