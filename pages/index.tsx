@@ -318,8 +318,31 @@ export default function Home() {
                     position: 'absolute',
                     right: 8,
                     bottom: 8,
-                    background: 'rgba(0,0,0,0.65)',
-                    color: '#fff',
+                    background: (() => {
+                      const now = new Date();
+                      const premiere = new Date(video.premiere_at);
+                      if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
+                        // Live (up to 2 hours after premiere) - bright red background
+                        return '#ff4444';
+                      } else if (premiere > now) {
+                        // Expected - green background like upload button
+                        return '#39FF14';
+                      } else {
+                        // Completed - gray background
+                        return 'rgba(0,0,0,0.65)';
+                      }
+                    })(),
+                    color: (() => {
+                      const now = new Date();
+                      const premiere = new Date(video.premiere_at);
+                      if (premiere > now) {
+                        // Expected - dark text for green background
+                        return '#18181b';
+                      } else {
+                        // Live or completed - white text
+                        return '#fff';
+                      }
+                    })(),
                     fontSize: 13,
                     fontWeight: 600,
                     borderRadius: 12,
@@ -343,21 +366,6 @@ export default function Home() {
                         return 'Completed';
                       }
                     })()}
-                  </div>
-                  {/* Premiere date — bottom left corner */}
-                  <div style={{
-                    position: 'absolute',
-                    left: 8,
-                    bottom: 8,
-                    background: 'rgba(0,0,0,0.65)',
-                    color: '#fff',
-                    fontSize: 13,
-                    fontWeight: 500,
-                    borderRadius: 12,
-                    padding: '2px 12px',
-                    zIndex: 2,
-                  }}>
-                    {new Date(video.premiere_at).toLocaleString()}
                   </div>
                 </a>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '12px 12px 10px 12px' }}>
@@ -512,8 +520,31 @@ export default function Home() {
                       position: 'absolute',
                       right: 8,
                       bottom: 8,
-                      background: 'rgba(0,0,0,0.65)',
-                      color: '#fff',
+                      background: (() => {
+                        const now = new Date();
+                        const premiere = new Date(video.premiere_at);
+                        if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
+                          // Live (up to 2 hours after premiere) - bright red background
+                          return '#ff4444';
+                        } else if (premiere > now) {
+                          // Expected - green background like upload button
+                          return '#39FF14';
+                        } else {
+                          // Completed - gray background
+                          return 'rgba(0,0,0,0.65)';
+                        }
+                      })(),
+                      color: (() => {
+                        const now = new Date();
+                        const premiere = new Date(video.premiere_at);
+                        if (premiere > now) {
+                          // Expected - dark text for green background
+                          return '#18181b';
+                        } else {
+                          // Live or completed - white text
+                          return '#fff';
+                        }
+                      })(),
                       fontSize: 13,
                       fontWeight: 600,
                       borderRadius: 12,
@@ -537,21 +568,6 @@ export default function Home() {
                           return 'Completed';
                         }
                       })()}
-                    </div>
-                    {/* Premiere date — bottom left corner */}
-                    <div style={{
-                      position: 'absolute',
-                      left: 8,
-                      bottom: 8,
-                      background: 'rgba(0,0,0,0.65)',
-                      color: '#fff',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      borderRadius: 12,
-                      padding: '2px 12px',
-                      zIndex: 2,
-                    }}>
-                      {new Date(video.premiere_at).toLocaleString()}
                     </div>
                   </a>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '6px 10px 6px 10px', minHeight: 0 }}>
