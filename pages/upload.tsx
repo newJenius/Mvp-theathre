@@ -23,6 +23,9 @@ export default function Upload() {
   const [checkedAuth, setCheckedAuth] = useState(false);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.nermes.xyz';
   const [username, setUsername] = useState<string | null>(null);
+  const [showInviteEmail, setShowInviteEmail] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteLoading, setInviteLoading] = useState(false);
 
   // Load username from users table
   useEffect(() => {
@@ -153,75 +156,111 @@ export default function Upload() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage('');
     setLoading(true);
-    setJobId(null);
-    setProcessingStatus('');
-    setQueuePosition(null);
-    setEstimatedTime(null);
-
-    // File size limit (2 GB)
-    const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024;
-    if (video && video.size > MAX_FILE_SIZE) {
-      setMessage('Uploading files larger than 2 GB is not supported. Please select a smaller file.');
-      setLoading(false);
-      return;
-    }
-
-    // Check: premiere date is not more than 6 days in advance
-    if (premiereAt) {
-      const premiereDate = new Date(premiereAt);
-      const now = new Date();
-      const maxDate = new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000);
-      if (premiereDate > maxDate) {
-        setMessage('Premiere cannot be scheduled more than 6 days in advance.');
+    setMessage('');
+    
+    try {
+      // Check if user has username
+      if (!username || username.trim().length === 0) {
+        setMessage('Please set your username in profile first');
         setLoading(false);
         return;
       }
-    }
 
-    if (!video) {
-      setMessage('No video selected for upload.');
-      setLoading(false);
-      return;
-    }
-
-    if (!username || username.trim().length === 0) {
-      setMessage('Please set your username in your profile before uploading a video.');
-      setLoading(false);
-      return;
-    }
-    try {
-      const formData = new FormData();
-      formData.append('video', video);
-      if (cover) {
-        formData.append('cover', cover);
+      // Validate form
+      if (!title.trim()) {
+        setMessage('Please enter a title');
+        setLoading(false);
+        return;
       }
+      if (!premiereAt) {
+        setMessage('Please select premiere date and time');
+        setLoading(false);
+        return;
+      }
+      if (!cover) {
+        setMessage('Please select a cover image');
+        setLoading(false);
+        return;
+      }
+      if (!video) {
+        setMessage('Please select a video file');
+        setLoading(false);
+        return;
+      }
+
+      // Create FormData
+      const formData = new FormData();
       formData.append('title', title);
       formData.append('description', description);
-      formData.append('user_id', user?.id || '');
-      formData.append('premiere_at', premiereAt);
+      formData.append('premiereAt', premiereAt);
+      formData.append('cover', cover);
+      formData.append('video', video);
 
+      // Upload to server
       const response = await fetch(`${apiUrl}/upload`, {
         method: 'POST',
         body: formData,
+        headers: {
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setJobId(data.jobId);
-        setQueuePosition(data.queuePosition);
-        setEstimatedTime(data.estimatedTime);
-        setProcessingStatus('waiting');
-        setMessage(`Video added to queue! Position: ${data.queuePosition}, Estimated time: ${data.estimatedTime} minutes`);
-      } else {
-        setMessage('Error: ' + (data.error || 'Unknown error'));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
       }
-    } catch (err: any) {
-      setMessage('Upload error: ' + err.message);
+
+      const result = await response.json();
+      setJobId(result.jobId);
+      setProcessingStatus('waiting');
+      
+      // Save to localStorage
+      localStorage.setItem('uploadJobId', result.jobId);
+      localStorage.setItem('uploadProcessingStatus', 'waiting');
+      
+      // Clear form
+      setTitle('');
+      setDescription('');
+      setPremiereAt('');
+      setCover(null);
+      setVideo(null);
+      if (coverInputRef.current) coverInputRef.current.value = '';
+      if (videoInputRef.current) videoInputRef.current.value = '';
+      
+      setMessage('Upload started! Processing in background...');
+    } catch (error) {
+      console.error('Upload error:', error);
+      setMessage('Upload failed: ' + (error as Error).message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGetInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteLoading(true);
+    setMessage('');
+    
+    try {
+      const { error } = await supabase
+        .from('waitlist')
+        .insert([
+          { email: inviteEmail }
+        ]);
+
+      if (error) {
+        setMessage('Error: ' + error.message);
+      } else {
+        setMessage('Email added to waitlist! We\'ll contact you when invites are available.');
+        setInviteEmail('');
+        setShowInviteEmail(false);
+      }
+    } catch (error) {
+      console.error('Waitlist error:', error);
+      setMessage('Server connection error');
+    } finally {
+      setInviteLoading(false);
     }
   };
 
@@ -342,6 +381,129 @@ export default function Upload() {
           >
             Register
           </a>
+
+          {/* Get Invite Section */}
+          <div style={{ 
+            textAlign: 'center', 
+            marginTop: isMobile ? '20px' : '24px',
+            paddingTop: isMobile ? '16px' : '20px',
+            borderTop: '1px solid #23232a'
+          }}>
+            <p style={{ 
+              color: '#6b7280', 
+              fontSize: isMobile ? '12px' : '13px',
+              margin: '0 0 16px 0'
+            }}>
+              Don't have an invite?
+            </p>
+            
+            {!showInviteEmail ? (
+              <button 
+                type="button"
+                onClick={() => setShowInviteEmail(true)}
+                style={{
+                  display: 'block',
+                  margin: isMobile ? '0 auto' : '0 auto',
+                  background: '#39FF14',
+                  color: '#18181b',
+                  border: 'none',
+                  borderRadius: 6,
+                  fontSize: isMobile ? 16 : 18,
+                  fontWeight: 600,
+                  padding: isMobile ? '12px 0' : '14px 0',
+                  width: '280px',
+                  maxWidth: 'none',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s, color 0.2s',
+                  boxShadow: 'none',
+                  letterSpacing: '0.5px',
+                }}
+              >
+                Get Invite
+              </button>
+            ) : (
+              <form onSubmit={handleGetInvite} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: isMobile ? '10px 10px' : '12px 12px',
+                    fontSize: '15px',
+                    borderRadius: '0',
+                    border: '1.5px solid #23232a',
+                    background: '#18181b',
+                    color: '#e0e0e0',
+                    boxSizing: 'border-box',
+                    transition: 'border-color 0.2s',
+                    outline: 'none',
+                  }}
+                  onFocus={e => e.target.style.borderColor = '#444'}
+                  onBlur={e => e.target.style.borderColor = '#23232a'}
+                />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    type="submit"
+                    disabled={inviteLoading}
+                    style={{
+                      flex: 1,
+                      padding: isMobile ? '10px 0' : '11px 0',
+                      background: inviteLoading ? '#23232a' : '#39FF14',
+                      color: inviteLoading ? '#888' : '#18181b',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '600',
+                      fontSize: isMobile ? '14px' : '15px',
+                      cursor: inviteLoading ? 'default' : 'pointer',
+                      transition: 'background 0.2s, color 0.2s',
+                      letterSpacing: '0.5px',
+                    }}
+                  >
+                    {inviteLoading ? 'Sending...' : 'Submit'}
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setShowInviteEmail(false);
+                      setInviteEmail('');
+                    }}
+                    style={{
+                      padding: isMobile ? '10px 12px' : '11px 16px',
+                      background: '#23232a',
+                      color: '#bdbdbd',
+                      border: '1px solid #23232a',
+                      borderRadius: '6px',
+                      fontWeight: '500',
+                      fontSize: isMobile ? '14px' : '15px',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s, color 0.2s',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {message && (
+              <div style={{ 
+                padding: isMobile ? '10px 10px' : '12px 12px',
+                borderRadius: '0',
+                fontSize: isMobile ? '13px' : '14px',
+                textAlign: 'center',
+                background: message.includes('error') ? '#2a181b' : '#182a1b',
+                color: message.includes('error') ? '#ff5252' : '#22c55e',
+                border: `1px solid ${message.includes('error') ? '#3a232a' : '#233a2a'}`,
+                marginTop: '12px'
+              }}>
+                {message}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );

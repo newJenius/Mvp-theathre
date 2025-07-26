@@ -9,6 +9,9 @@ export default function Register() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showInviteEmail, setShowInviteEmail] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteLoading, setInviteLoading] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 600px)').matches);
@@ -59,6 +62,33 @@ export default function Register() {
       setMessage('Server connection error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGetInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteLoading(true);
+    setMessage('');
+    
+    try {
+      const { error } = await supabase
+        .from('waitlist')
+        .insert([
+          { email: inviteEmail }
+        ]);
+
+      if (error) {
+        setMessage('Error: ' + error.message);
+      } else {
+        setMessage('Email added to waitlist! We\'ll contact you when invites are available.');
+        setInviteEmail('');
+        setShowInviteEmail(false);
+      }
+    } catch (error) {
+      console.error('Waitlist error:', error);
+      setMessage('Server connection error');
+    } finally {
+      setInviteLoading(false);
     }
   };
 
@@ -267,6 +297,109 @@ export default function Register() {
             </p>
           </div>
         </form>
+
+        {/* Get Invite Section - Outside the main form */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: isMobile ? '20px' : '24px',
+          paddingTop: isMobile ? '16px' : '20px',
+          borderTop: '1px solid #23232a'
+        }}>
+          <p style={{ 
+            color: '#6b7280', 
+            fontSize: isMobile ? '12px' : '13px',
+            margin: '0 0 16px 0'
+          }}>
+            Don't have an invite?
+          </p>
+          
+          {!showInviteEmail ? (
+            <button 
+              type="button"
+              onClick={() => setShowInviteEmail(true)}
+              style={{
+                padding: isMobile ? '12px 20px' : '13px 24px',
+                background: '#39FF14',
+                color: '#18181b',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: '600',
+                fontSize: isMobile ? '14px' : '15px',
+                cursor: 'pointer',
+                transition: 'background 0.2s, color 0.2s',
+                letterSpacing: '0.5px',
+                width: '100%',
+              }}
+            >
+              Get Invite
+            </button>
+          ) : (
+            <form onSubmit={handleGetInvite} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={inviteEmail}
+                onChange={e => setInviteEmail(e.target.value)}
+                required
+                style={{
+                  width: '100%',
+                  padding: isMobile ? '10px 10px' : '12px 12px',
+                  fontSize: '15px',
+                  borderRadius: '0',
+                  border: '1.5px solid #23232a',
+                  background: '#18181b',
+                  color: '#e0e0e0',
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.2s',
+                  outline: 'none',
+                }}
+                onFocus={e => e.target.style.borderColor = '#444'}
+                onBlur={e => e.target.style.borderColor = '#23232a'}
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  type="submit"
+                  disabled={inviteLoading}
+                  style={{
+                    flex: 1,
+                    padding: isMobile ? '10px 0' : '11px 0',
+                    background: inviteLoading ? '#23232a' : '#39FF14',
+                    color: inviteLoading ? '#888' : '#18181b',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    fontSize: isMobile ? '14px' : '15px',
+                    cursor: inviteLoading ? 'default' : 'pointer',
+                    transition: 'background 0.2s, color 0.2s',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  {inviteLoading ? 'Sending...' : 'Submit'}
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setShowInviteEmail(false);
+                    setInviteEmail('');
+                  }}
+                  style={{
+                    padding: isMobile ? '10px 12px' : '11px 16px',
+                    background: '#23232a',
+                    color: '#bdbdbd',
+                    border: '1px solid #23232a',
+                    borderRadius: '6px',
+                    fontWeight: '500',
+                    fontSize: isMobile ? '14px' : '15px',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s, color 0.2s',
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
