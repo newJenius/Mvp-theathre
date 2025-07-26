@@ -55,6 +55,9 @@ export default function Watch(props: any) {
     created_at: string;
     username: string;
   }>>([]);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
@@ -124,13 +127,21 @@ export default function Watch(props: any) {
       .then(async ({ data }: any) => {
         setVideo(data);
         if (data?.user_id) {
-          // Load author username
+          // Load author username and avatar
           const { data: userData } = await supabase
             .from('users')
-            .select('username')
+            .select('username, avatar_url')
             .eq('id', data.user_id)
             .single();
           setAuthorUsername(userData?.username || null);
+          // Update video with avatar_url
+          setVideo({
+            ...data,
+            avatar_url: userData?.avatar_url || undefined,
+            username: userData?.username || undefined
+          });
+        } else {
+          setVideo(data);
         }
       });
 
@@ -240,8 +251,11 @@ export default function Watch(props: any) {
   };
 
   const toggleWaiting = async () => {
-    if (!id || !currentUser) {
-      alert('Please log in to wait for the premiere');
+    if (!id) return;
+
+    if (!currentUser) {
+      // Show email form for non-registered users
+      setShowEmailForm(true);
       return;
     }
 
@@ -297,6 +311,37 @@ export default function Watch(props: any) {
       });
     } catch (e) {
       // Add error handling
+    }
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !id) return;
+
+    setIsLoading(true);
+    try {
+      // Save email to Supabase
+      const { error } = await supabase
+        .from('premiere_notifications')
+        .insert({
+          video_id: id,
+          email: email,
+          created_at: new Date().toISOString()
+        });
+
+      if (!error) {
+        setEmailSubmitted(true);
+        setShowEmailForm(false);
+        setEmail('');
+      } else {
+        console.error('Error saving email:', error);
+        alert('Error saving email. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error saving email. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -365,55 +410,108 @@ export default function Watch(props: any) {
                 <div style={{ fontSize: '18px', marginBottom: '2px', color: '#e0e0e0', fontWeight: 700 }}>{video.title}</div>
                 <div style={{ fontSize: '15px', marginBottom: '10px', color: '#bdbdbd' }}>{authorUsername ? `@${authorUsername}` : ''}</div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                  <button
-                    onClick={toggleWaiting}
-                    disabled={isLoading}
-                    style={{
-                      background: '#bbf7d0',
+                  {emailSubmitted ? (
+                    <div style={{
+                      background: '#22c55e',
                       color: '#18181b',
                       border: 'none',
                       borderRadius: 7,
-                      padding: '12px 0',
+                      padding: '12px 24px',
                       fontWeight: 700,
                       fontSize: 15,
-                      cursor: isLoading ? 'default' : 'pointer',
-                      opacity: isLoading ? 0.7 : 1,
                       margin: 0,
                       width: '100%',
                       maxWidth: 420,
-                      transition: 'background 0.2s, color 0.2s',
-                      boxShadow: 'none',
-                      letterSpacing: 0.2,
+                      textAlign: 'center',
                       fontFamily: `'JetBrains Mono', monospace`
-                    }}
-                  >
-                    {isWaiting ? 'You are waiting for the premiere' : isLoading ? '...' : 'Wait for premiere'}
-                  </button>
-                  {/*
-                  <button
-                    disabled
-                    style={{
-                      background: '#bae6fd',
-                      color: '#18181b',
-                      border: 'none',
-                      borderRadius: 7,
-                      padding: '12px 0',
-                      fontWeight: 700,
-                      fontSize: 15,
-                      cursor: 'not-allowed',
-                      opacity: 1,
-                      margin: 0,
-                      width: '100%',
-                      maxWidth: 420,
-                      transition: 'background 0.2s, color 0.2s',
-                      boxShadow: 'none',
-                      letterSpacing: 0.2,
-                      fontFamily: `'JetBrains Mono', monospace`
-                    }}
-                  >
-                    Subscribe to author
-                  </button>
-                  */}
+                    }}>
+                      ✓ Email saved! We'll notify you
+                    </div>
+                  ) : showEmailForm ? (
+                    <form onSubmit={handleEmailSubmit} style={{ width: '100%', maxWidth: 420 }}>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter your email"
+                        required
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          border: '1px solid #23232a',
+                          borderRadius: 7,
+                          background: '#0a0a0c',
+                          color: '#fff',
+                          fontSize: 15,
+                          marginBottom: 8,
+                          fontFamily: `'JetBrains Mono', monospace`
+                        }}
+                      />
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          type="submit"
+                          disabled={isLoading}
+                          style={{
+                            background: '#39FF14',
+                            color: '#18181b',
+                            border: 'none',
+                            borderRadius: 7,
+                            padding: '12px 24px',
+                            fontWeight: 700,
+                            fontSize: 15,
+                            cursor: isLoading ? 'default' : 'pointer',
+                            opacity: isLoading ? 0.7 : 1,
+                            flex: 1,
+                            fontFamily: `'JetBrains Mono', monospace`
+                          }}
+                        >
+                          {isLoading ? 'Saving...' : 'Save Email'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowEmailForm(false)}
+                          style={{
+                            background: '#23232a',
+                            color: '#fff',
+                            border: '1px solid #23232a',
+                            borderRadius: 7,
+                            padding: '12px 16px',
+                            fontWeight: 700,
+                            fontSize: 15,
+                            cursor: 'pointer',
+                            fontFamily: `'JetBrains Mono', monospace`
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <button
+                      onClick={toggleWaiting}
+                      disabled={isLoading}
+                      style={{
+                        background: '#bbf7d0',
+                        color: '#18181b',
+                        border: 'none',
+                        borderRadius: 7,
+                        padding: '12px 0',
+                        fontWeight: 700,
+                        fontSize: 15,
+                        cursor: isLoading ? 'default' : 'pointer',
+                        opacity: isLoading ? 0.7 : 1,
+                        margin: 0,
+                        width: '100%',
+                        maxWidth: 420,
+                        transition: 'background 0.2s, color 0.2s',
+                        boxShadow: 'none',
+                        letterSpacing: 0.2,
+                        fontFamily: `'JetBrains Mono', monospace`
+                      }}
+                    >
+                      {isWaiting ? 'You are waiting for the premiere' : isLoading ? '...' : 'Wait for premiere'}
+                    </button>
+                  )}
                   {currentUser && (
                     <WatchSubscribePush premiereId={video.id} userId={currentUser.id} visible={isWaiting} />
                   )}
@@ -637,19 +735,28 @@ export default function Watch(props: any) {
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', display: 'inline-block' }}><path d="M21 11.5a8.38 8.38 0 0 1-1.9 5.4A8.5 8.5 0 0 1 12 21.5a8.38 8.38 0 0 1-5.4-1.9L3 21l1.4-3.6A8.38 8.38 0 0 1 2.5 12a8.5 8.5 0 1 1 17 0z"/></svg>
                   {showChat ? 'Hide comments' : 'Show comments'}
                 </button>
-                <button
-                  style={{
-                    background: '#d1d5db', color: '#18181b', border: 'none', borderRadius: 7,
-                    padding: '0 0', fontWeight: 700, fontSize: 12, cursor: 'pointer',
-                    transition: 'background 0.2s, color 0.2s', boxShadow: '0 1px 8px #0002',
-                    letterSpacing: 0.2, minWidth: 120, maxWidth: 180, width: '100%', justifyContent: 'center',
-                    height: 40,
-                    fontFamily: `'JetBrains Mono', monospace`
-                  }}
-                  disabled
-                >
-                  Subscribe to author
-                </button>
+                <a href="/register" style={{
+                  display: 'inline-block',
+                  background: '#39FF14',
+                  color: '#18181b',
+                  border: 'none',
+                  borderRadius: 7,
+                  padding: '12px 24px',
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  transition: 'background 0.2s, color 0.2s',
+                  boxShadow: 'none',
+                  letterSpacing: 0.2,
+                  textDecoration: 'none',
+                  fontFamily: `'JetBrains Mono', monospace`,
+                  textAlign: 'center',
+                  minWidth: 120,
+                  maxWidth: 180,
+                  width: '100%',
+                }}>
+                  Register
+                </a>
               </div>
             </>
           )}
