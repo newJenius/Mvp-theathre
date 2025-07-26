@@ -89,7 +89,7 @@ export default function Header({ disableScrollHide = false }: { disableScrollHid
           </span>
           <span style={{
             fontSize: isMobile ? 11 : 14,
-            color: '#e57373',
+            color: '#dc2626',
             fontWeight: 600,
             letterSpacing: 0.2,
             fontFamily: 'monospace',
