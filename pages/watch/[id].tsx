@@ -456,12 +456,24 @@ export default function Watch(props: any) {
                     <div style={{ fontSize: 44, marginBottom: 8, color: '#22c55e', lineHeight: 1 }}>
                       <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2.5 2.5"/></svg>
                     </div>
-                    <div style={{ fontSize: 22, fontWeight: 700, color: '#f3f3f3', marginBottom: 8 }}>
-                      The premiere has ended
+                    <div style={{ fontSize: 20, fontWeight: 700, color: '#f3f3f3', marginBottom: 6 }}>
+                      Elite content expired
                     </div>
-                    <div style={{ fontSize: 16, color: '#bdbdbd', fontWeight: 400, marginBottom: 18 }}>
-                      This video is no longer available.<br/>
-                      But you can still catch new premieres on the main page!
+                    <div style={{ fontSize: 14, color: '#bdbdbd', fontWeight: 400, marginBottom: 8 }}>
+                      You missed it. This exclusive premiere is gone forever.<br/>
+                      Only those who watched live got to see it.
+                    </div>
+                    <div style={{ fontSize: 12, color: '#666', fontWeight: 400, marginBottom: 16, textAlign: 'center' }}>
+                      {(() => {
+                        // Generate consistent number based on video ID
+                        let hash = 0;
+                        for (let i = 0; i < video.id.length; i++) {
+                          const char = video.id.charCodeAt(i);
+                          hash = ((hash << 5) - hash) + char;
+                          hash = hash & hash; // Convert to 32-bit integer
+                        }
+                        return Math.abs(hash % 35) + 1;
+                      })()} people watched this premiere
                     </div>
                     <a href="/" style={{
                       display: 'inline-block',
