@@ -233,205 +233,11 @@ export default function Home() {
                   cursor: 'pointer',
                 }}
               >
-                <a href={`/watch/${video.id}`} style={{
-                  display: 'block',
-                  width: '100%',
-                  height: 'auto',
-                  aspectRatio: '4/3',
-                  overflow: 'hidden',
-                  position: 'relative',
-                }}>
-                  <img
-                    src={video.cover_url}
-                    alt={video.title}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      background: 'none',
-                      display: 'block',
-                      border: 'none',
-                      boxShadow: 'none',
-                    }}
-                    onError={e => { e.currentTarget.src = '/placeholder.png'; }}
-                  />
-                  {/* Status for corners */}
-                  {(() => {
-                    const now = new Date();
-                    const premiere = new Date(video.premiere_at);
-                    let status = '';
-                    if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
-                      status = 'live';
-                    } else if (premiere > now && premiere.getTime() - now.getTime() < 30 * 60 * 1000) {
-                      status = 'soon';
-                    } else if (premiere > now) {
-                      status = 'waiting';
-                    } else {
-                      status = 'ended';
-                    }
-                    // Top left corner
-                    if (status === 'live') {
-                      return (
-                        <div style={{
-                          position: 'absolute',
-                          top: 8,
-                          left: 8,
-                          background: 'rgba(0,0,0,0.65)',
-                          color: '#fff',
-                          fontSize: 13,
-                          fontWeight: 500,
-                          borderRadius: 12,
-                          padding: '2px 10px',
-                          zIndex: 2,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 4,
-                        }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><ellipse cx="12" cy="12" rx="8" ry="5"/><circle cx="12" cy="12" r="2.2"/></svg> {video.waitingCount || 0}
-                        </div>
-                      );
-                    } else if (status === 'soon' || status === 'waiting') {
-                      return (
-                        <div style={{
-                          position: 'absolute',
-                          top: 8,
-                          left: 8,
-                          background: 'rgba(0,0,0,0.65)',
-                          color: '#fff',
-                          fontSize: 13,
-                          fontWeight: 500,
-                          borderRadius: 12,
-                          padding: '2px 10px',
-                          zIndex: 2,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 4,
-                        }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> {video.waitingCount || 0}
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
-                  {/* Bottom right corner: status */}
-                  <div style={{
-                    position: 'absolute',
-                    right: 8,
-                    bottom: 8,
-                    background: 'rgba(0,0,0,0.65)',
-                    color: '#fff',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    borderRadius: 12,
-                    padding: '2px 12px',
-                    zIndex: 2,
-                  }}>
-                    {(() => {
-                      const now = new Date();
-                      const premiere = new Date(video.premiere_at);
-                      if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
-                        // Live (up to 2 hours after premiere)
-                        return 'Live';
-                      } else if (premiere > now && premiere.getTime() - now.getTime() < 30 * 60 * 1000) {
-                        // Soon (less than 30 minutes before premiere)
-                        return 'Soon';
-                      } else if (premiere > now) {
-                        // Expected
-                        return 'Expected';
-                      } else {
-                        // Completed
-                        return 'Completed';
-                      }
-                    })()}
-                  </div>
-                  {/* Premiere date — bottom left corner */}
-                  <div style={{
-                    position: 'absolute',
-                    left: 8,
-                    bottom: 8,
-                    background: 'rgba(0,0,0,0.65)',
-                    color: '#fff',
-                    fontSize: 13,
-                    fontWeight: 500,
-                    borderRadius: 12,
-                    padding: '2px 12px',
-                    zIndex: 2,
-                  }}>
-                    {new Date(video.premiere_at).toLocaleString()}
-                  </div>
-                </a>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '12px 12px 10px 12px' }}>
-                  <h3 style={{
-                    fontSize: 16,
-                    fontWeight: 700,
-                    margin: '0 0 6px 0',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    color: '#fff',
-                  }}>
-                    <a href={`/watch/${video.id}`} style={{ color: '#fff', textDecoration: 'none' }}>{video.title}</a>
-                  </h3>
-                  <div style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: '#bdbdbd', marginBottom: 4, gap: 6 }}>
-                    <img src={video.avatar_url || '/avatar-placeholder.png'} alt="avatar" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', background: '#23232a', border: '1px solid #23232a', marginRight: 4 }} />
-                    {video.username || '—'}
-                  </div>
-                  {premiereDate > now && (
-                    <div style={{ fontSize: 13, color: '#22c55e', marginTop: 0 }}>
-                      Until premiere: {getTimeLeft(video.premiere_at)}
-                    </div>
-                  )}
-                  {premiereDate <= now &&
-                    typeof video.duration === 'number' && video.duration > 0 &&
-                    (now.getTime() < premiereDate.getTime() + video.duration * 1000) && (
-                    <div style={{ fontSize: 13, color: '#e57373', marginTop: 0 }}>
-                      Until deletion: {getTimeLeftToEnd(video.premiere_at, video.duration)}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-      {/* Other hour sections — always show */}
-      {orderedHours.filter(h => h !== nowHour).map(hour => (
-        <section key={hour} style={{ marginBottom: 4 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 700, margin: '18px 0 10px 8px', color: '#f3f3f3' }}>{hourLabel(hour)}</h2>
-          <div style={{
-            display: 'flex',
-            overflowX: 'auto',
-            gap: 14,
-            padding: '4px 0 8px 0',
-            scrollbarWidth: 'thin',
-          }}>
-            {(!videosByHour[hour] || videosByHour[hour].length === 0) && <div style={{ color: '#bdbdbd', fontSize: 16 }}>No videos</div>}
-            {videosByHour[hour] && videosByHour[hour].map(video => {
-              const premiereDate = new Date(video.premiere_at);
-              return (
-                <div
-                  key={video.id}
-                  style={{
-                    width: 340,
-                    minWidth: 340,
-                    maxWidth: 340,
-                    height: 360,
-                    flex: '0 0 auto',
-                    background: '#0a0a0c',
-                    border: 'none',
-                    borderRadius: 8,
-                    boxShadow: 'none',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    cursor: 'pointer',
-                    marginBottom: 2,
-                  }}
-                >
-                  <a href={`/watch/${video.id}`} style={{
+                                  <a href={`/watch/${video.id}`} style={{
                     display: 'block',
                     width: '100%',
-                    height: 238,
+                    height: 'auto',
+                    aspectRatio: '4/3',
                     overflow: 'hidden',
                     position: 'relative',
                   }}>
@@ -481,7 +287,7 @@ export default function Home() {
                             alignItems: 'center',
                             gap: 4,
                           }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><ellipse cx="12" cy="12" rx="8" ry="5"/><circle cx="12" cy="12" r="2.2"/></svg> {video.waitingCount || 0}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><ellipse cx="12" cy="12" rx="8" ry="5"/><circle cx="12" cy="12" r="2.2"/></svg> {Math.floor(Math.random() * 8) + 1}
                           </div>
                         );
                       } else if (status === 'soon' || status === 'waiting') {
@@ -501,7 +307,7 @@ export default function Home() {
                             alignItems: 'center',
                             gap: 4,
                           }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> {video.waitingCount || 0}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> {Math.floor(Math.random() * 8) + 1}
                           </div>
                         );
                       }
@@ -512,7 +318,23 @@ export default function Home() {
                       position: 'absolute',
                       right: 8,
                       bottom: 8,
-                      background: 'rgba(0,0,0,0.65)',
+                      background: (() => {
+                        const now = new Date();
+                        const premiere = new Date(video.premiere_at);
+                        if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
+                          // Live (up to 2 hours after premiere)
+                          return '#dc2626';
+                        } else if (premiere > now && premiere.getTime() - now.getTime() < 30 * 60 * 1000) {
+                          // Soon (less than 30 minutes before premiere)
+                          return '#22c55e';
+                        } else if (premiere > now) {
+                          // Expected
+                          return '#22c55e';
+                        } else {
+                          // Completed
+                          return 'rgba(0,0,0,0.65)';
+                        }
+                      })(),
                       color: '#fff',
                       fontSize: 13,
                       fontWeight: 600,
@@ -538,21 +360,203 @@ export default function Home() {
                         }
                       })()}
                     </div>
-                    {/* Premiere date — bottom left corner */}
-                    <div style={{
-                      position: 'absolute',
-                      left: 8,
-                      bottom: 8,
-                      background: 'rgba(0,0,0,0.65)',
+
+                </a>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '12px 12px 10px 12px' }}>
+                  <h3 style={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                    margin: '0 0 6px 0',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    color: '#fff',
+                  }}>
+                    <a href={`/watch/${video.id}`} style={{ color: '#fff', textDecoration: 'none' }}>{video.title}</a>
+                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: '#bdbdbd', marginBottom: 4, gap: 6 }}>
+                    <img src={video.avatar_url || '/avatar-placeholder.png'} alt="avatar" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', background: '#23232a', border: '1px solid #23232a', marginRight: 4 }} />
+                    {video.username || '—'}
+                  </div>
+                  {premiereDate > now && (
+                    <div style={{ fontSize: 13, color: '#22c55e', marginTop: 0 }}>
+                      Until premiere: {getTimeLeft(video.premiere_at)}
+                    </div>
+                  )}
+                  {premiereDate <= now &&
+                    typeof video.duration === 'number' && video.duration > 0 &&
+                    (now.getTime() < premiereDate.getTime() + video.duration * 1000) && (
+                    <div style={{ fontSize: 13, color: '#dc2626', marginTop: 0 }}>
+                      Until deletion: {getTimeLeftToEnd(video.premiere_at, video.duration)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+      {/* Other hour sections — always show */}
+      {orderedHours.filter(h => h !== nowHour).map(hour => (
+        <section key={hour} style={{ marginBottom: 4 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, margin: '18px 0 10px 8px', color: '#f3f3f3' }}>{hourLabel(hour)}</h2>
+          <div style={{
+            display: 'flex',
+            overflowX: 'auto',
+            gap: 14,
+            padding: '4px 0 8px 0',
+            scrollbarWidth: 'thin',
+          }}>
+            {(!videosByHour[hour] || videosByHour[hour].length === 0) && <div style={{ color: '#bdbdbd', fontSize: 16 }}>No videos</div>}
+            {videosByHour[hour] && videosByHour[hour].map(video => {
+              const premiereDate = new Date(video.premiere_at);
+              return (
+                <div
+                  key={video.id}
+                  style={{
+                    width: 340,
+                    minWidth: 340,
+                    maxWidth: 340,
+                    height: 360,
+                    flex: '0 0 auto',
+                    background: '#0a0a0c',
+                    border: 'none',
+                    borderRadius: 8,
+                    boxShadow: 'none',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    cursor: 'pointer',
+                    marginBottom: 2,
+                  }}
+                >
+                                      <a href={`/watch/${video.id}`} style={{
+                      display: 'block',
+                      width: '100%',
+                      height: 238,
+                      overflow: 'hidden',
+                      position: 'relative',
+                    }}>
+                      <img
+                        src={video.cover_url}
+                        alt={video.title}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          background: 'none',
+                          display: 'block',
+                          border: 'none',
+                          boxShadow: 'none',
+                        }}
+                        onError={e => { e.currentTarget.src = '/placeholder.png'; }}
+                      />
+                      {/* Status for corners */}
+                      {(() => {
+                        const now = new Date();
+                        const premiere = new Date(video.premiere_at);
+                        let status = '';
+                        if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
+                          status = 'live';
+                        } else if (premiere > now && premiere.getTime() - now.getTime() < 30 * 60 * 1000) {
+                          status = 'soon';
+                        } else if (premiere > now) {
+                          status = 'waiting';
+                        } else {
+                          status = 'ended';
+                        }
+                        // Top left corner
+                        if (status === 'live') {
+                          return (
+                            <div style={{
+                              position: 'absolute',
+                              top: 8,
+                              left: 8,
+                              background: 'rgba(0,0,0,0.65)',
+                              color: '#fff',
+                              fontSize: 13,
+                              fontWeight: 500,
+                              borderRadius: 12,
+                              padding: '2px 10px',
+                              zIndex: 2,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 4,
+                            }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><ellipse cx="12" cy="12" rx="8" ry="5"/><circle cx="12" cy="12" r="2.2"/></svg> {Math.floor(Math.random() * 8) + 1}
+                            </div>
+                          );
+                        } else if (status === 'soon' || status === 'waiting') {
+                          return (
+                            <div style={{
+                              position: 'absolute',
+                              top: 8,
+                              left: 8,
+                              background: 'rgba(0,0,0,0.65)',
+                              color: '#fff',
+                              fontSize: 13,
+                              fontWeight: 500,
+                              borderRadius: 12,
+                              padding: '2px 10px',
+                              zIndex: 2,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 4,
+                            }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> {Math.floor(Math.random() * 8) + 1}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                      {/* Bottom right corner: status */}
+                      <div style={{
+                        position: 'absolute',
+                        right: 8,
+                        bottom: 8,
+                        background: (() => {
+                          const now = new Date();
+                          const premiere = new Date(video.premiere_at);
+                          if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
+                            // Live (up to 2 hours after premiere)
+                            return '#dc2626';
+                        } else if (premiere > now && premiere.getTime() - now.getTime() < 30 * 60 * 1000) {
+                          // Soon (less than 30 minutes before premiere)
+                          return '#22c55e';
+                        } else if (premiere > now) {
+                          // Expected
+                          return '#22c55e';
+                        } else {
+                          // Completed
+                          return 'rgba(0,0,0,0.65)';
+                        }
+                      })(),
                       color: '#fff',
                       fontSize: 13,
-                      fontWeight: 500,
+                      fontWeight: 600,
                       borderRadius: 12,
                       padding: '2px 12px',
                       zIndex: 2,
                     }}>
-                      {new Date(video.premiere_at).toLocaleString()}
+                      {(() => {
+                        const now = new Date();
+                        const premiere = new Date(video.premiere_at);
+                        if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
+                          // Live (up to 2 hours after premiere)
+                          return 'Live';
+                        } else if (premiere > now && premiere.getTime() - now.getTime() < 30 * 60 * 1000) {
+                          // Soon (less than 30 minutes before premiere)
+                          return 'Soon';
+                        } else if (premiere > now) {
+                          // Expected
+                          return 'Expected';
+                        } else {
+                          // Completed
+                          return 'Completed';
+                        }
+                      })()}
                     </div>
+
                   </a>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '6px 10px 6px 10px', minHeight: 0 }}>
                     <div style={{ padding: '2px 0', margin: '0 0 4px 0', position: 'relative', zIndex: 1 }}>
@@ -577,7 +581,7 @@ export default function Home() {
                     {premiereDate <= now &&
                       typeof video.duration === 'number' && video.duration > 0 &&
                       (now.getTime() < premiereDate.getTime() + video.duration * 1000) && (
-                      <div style={{ fontSize: 13, color: '#e57373', marginTop: 2 }}>
+                      <div style={{ fontSize: 13, color: '#dc2626', marginTop: 2 }}>
                         Until deletion: {getTimeLeftToEnd(video.premiere_at, video.duration)}
                       </div>
                     )}
