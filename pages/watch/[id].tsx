@@ -308,17 +308,19 @@ export default function Watch(props: any) {
 
   return (
     <>
-      <Header />
+      <Header disableScrollHide={true} />
     <div style={{ 
       padding: canWatch ? '0' : '8px',
       maxWidth: canWatch ? '100%' : '1200px',
       margin: '0 auto',
       paddingBottom: canWatch ? '60px' : '8px',
-      background: '#0a0a0c',
+      background: '#000000',
       minHeight: '100vh',
       color: '#f3f3f3',
       fontFamily: `'JetBrains Mono', monospace`,
-      paddingTop: !canWatch ? 56 : 40
+      paddingTop: !canWatch ? 56 : 40,
+      // Add margin-top when video is live to account for fixed video
+      marginTop: canWatch && video.video_url ? '25vh' : '0'
     }}>
       {/* Удаляю отображение названия ролика сверху, если премьера не началась */}
       {/* {!canWatch && (
@@ -338,7 +340,7 @@ export default function Watch(props: any) {
               
               <div style={{ marginBottom: '20px', marginTop: '10px' }}>
                 <div style={{
-                  background: '#0a0a0c',
+                  background: '#000000',
                   padding: '15px',
                   borderRadius: '8px',
                   marginBottom: '20px',
@@ -481,7 +483,7 @@ export default function Watch(props: any) {
               )}
               {/* Collapsible information tab */}
               <div style={{
-                background: '#0a0a0c',
+                background: '#000000',
                 borderTop: '1px solid #23232a',
                 marginTop: '0',
               }}>
@@ -490,7 +492,7 @@ export default function Watch(props: any) {
                   onClick={() => setIsInfoExpanded(!isInfoExpanded)}
                   style={{
                     padding: '16px 20px',
-                    background: '#161618',
+                    background: '#000000',
                     cursor: 'pointer',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -498,8 +500,8 @@ export default function Watch(props: any) {
                     borderBottom: isInfoExpanded ? '1px solid #23232a' : 'none',
                     transition: 'background 0.3s',
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#23232a'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = '#161618'}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#111111'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#000000'}
                 >
                   <div style={{
                     display: 'flex',
@@ -560,7 +562,7 @@ export default function Watch(props: any) {
                 {isInfoExpanded && (
                   <div style={{
                     padding: '20px',
-                    background: '#23232a',
+                    background: '#000000',
                     borderBottom: '1px solid #23232a',
                   }}>
                     <div style={{ marginBottom: '16px' }}>
@@ -940,18 +942,18 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
     <div
       ref={containerRef}
       style={{
-        position: isPseudoFullscreen ? 'fixed' : 'relative',
-        top: isPseudoFullscreen ? 0 : undefined,
-        left: isPseudoFullscreen ? 0 : undefined,
+        position: isPseudoFullscreen ? 'fixed' : 'fixed',
+        top: isPseudoFullscreen ? 0 : 56,
+        left: isPseudoFullscreen ? 0 : 0,
         width: isPseudoFullscreen ? '100vw' : '100%',
-        height: isPseudoFullscreen ? '100vh' : '100%',
-        zIndex: isPseudoFullscreen ? 9999 : undefined,
-        background: '#0a0a0c',
-        overflow: isPseudoFullscreen ? 'hidden' : 'visible',
+        height: isPseudoFullscreen ? '100vh' : '25vh',
+        zIndex: isPseudoFullscreen ? 9999 : 1000,
+        background: '#000000',
+        overflow: isPseudoFullscreen ? 'hidden' : 'hidden',
         aspectRatio: isPseudoFullscreen ? undefined : '4/2.8',
-        display: isPseudoFullscreen ? 'flex' : undefined,
-        alignItems: isPseudoFullscreen ? 'center' : undefined,
-        justifyContent: isPseudoFullscreen ? 'center' : undefined,
+        display: isPseudoFullscreen ? 'flex' : 'flex',
+        alignItems: isPseudoFullscreen ? 'center' : 'center',
+        justifyContent: isPseudoFullscreen ? 'center' : 'center',
       }}
     >
       <video
@@ -972,6 +974,7 @@ function VideoPlayerWithFullscreen({ videoUrl, premiereAt }: { videoUrl: string,
           left: isPseudoFullscreen && isMobile ? '50%' : undefined,
           transform: isPseudoFullscreen && isMobile ? 'translate(-50%, -50%) rotate(90deg)' : undefined,
           background: '#000',
+          maxHeight: '100%',
         }}
         onContextMenu={e => e.preventDefault()}
       />

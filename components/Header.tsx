@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-export default function Header() {
+export default function Header({ disableScrollHide = false }: { disableScrollHide?: boolean }) {
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
   const [shouldHide, setShouldHide] = useState(false);
@@ -19,6 +19,8 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
+    if (disableScrollHide) return; // Don't hide header on scroll if disabled
+    
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -37,7 +39,7 @@ export default function Header() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, disableScrollHide]);
 
   // Remove useEffect that calculates shouldHide
 
@@ -58,7 +60,7 @@ export default function Header() {
       boxSizing: 'border-box',
       // boxShadow: '0 2px 8px #000a', // remove shadow
       transition: 'transform 0.3s cubic-bezier(.4,0,.2,1)',
-      transform: hideOnScroll ? 'translateY(-100%)' : 'translateY(0)',
+      transform: (disableScrollHide ? false : hideOnScroll) ? 'translateY(-100%)' : 'translateY(0)',
     }}>
       <Link href="/" style={{
         display: 'flex',
