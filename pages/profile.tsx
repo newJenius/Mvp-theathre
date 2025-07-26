@@ -393,29 +393,28 @@ export default function Profile() {
         <button 
           onClick={() => window.location.href = '/login'}
           style={{
-            padding: '10px 32px',
-            background: '#18181b',
-            color: '#d1d5db',
-            border: '1.5px solid #23232a',
-            borderRadius: 0,
-            fontWeight: 500,
+            padding: '12px 32px',
+            background: '#39FF14',
+            color: '#18181b',
+            border: 'none',
+            borderRadius: 6,
+            fontWeight: 600,
             fontSize: 15,
             cursor: 'pointer',
-            transition: 'background 0.2s, color 0.2s, border 0.2s',
+            transition: 'background 0.2s, color 0.2s',
             boxShadow: 'none',
             outline: 'none',
             letterSpacing: 0.2,
-            fontFamily: `'JetBrains Mono', monospace`
+            fontFamily: `'JetBrains Mono', monospace`,
+            margin: '0 10px',
+            width: '280px',
+            maxWidth: 'none'
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.background = '#23232a';
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.style.border = '1.5px solid #393a3f';
+            e.currentTarget.style.background = '#32d912';
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.background = '#18181b';
-            e.currentTarget.style.color = '#d1d5db';
-            e.currentTarget.style.border = '1.5px solid #23232a';
+            e.currentTarget.style.background = '#39FF14';
           }}
         >
           Login
