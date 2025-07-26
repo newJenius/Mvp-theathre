@@ -79,8 +79,6 @@ export default function Home() {
   };
 
   // Function to load waiting count for videos
-  // COMMENTED OUT: Using fake random numbers for activity illusion
-  /*
   const loadWaitingCounts = async (videoIds: string[], videosData: Video[]) => {
     if (videoIds.length === 0) return;
     
@@ -115,7 +113,6 @@ export default function Home() {
       console.error('Error in loadWaitingCounts:', error);
     }
   };
-  */
 
   useEffect(() => {
     let isMounted = true;
@@ -126,9 +123,9 @@ export default function Home() {
           .select('id, title, cover_url, premiere_at, user_id, duration');
         if (!error && isMounted) {
           const videosData = data || [];
-          // Load avatars only (waiting count is now fake random numbers)
-          const videosWithAvatars = await loadAvatars(videosData);
-          setVideos(videosWithAvatars);
+          // Load waiting count and avatars
+          const videoIds = videosData.map((v: any) => v.id);
+          await loadWaitingCounts(videoIds, videosData);
         }
       } catch (error) {
         console.error('Error loading videos:', error);
@@ -290,16 +287,7 @@ export default function Home() {
                           alignItems: 'center',
                           gap: 4,
                         }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><ellipse cx="12" cy="12" rx="8" ry="5"/><circle cx="12" cy="12" r="2.2"/></svg> {(() => {
-                            // Generate consistent random number based on video ID
-                            let hash = 0;
-                            for (let i = 0; i < video.id.length; i++) {
-                              const char = video.id.charCodeAt(i);
-                              hash = ((hash << 5) - hash) + char;
-                              hash = hash & hash;
-                            }
-                            return Math.abs(hash % 7) + 1;
-                          })()}
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><ellipse cx="12" cy="12" rx="8" ry="5"/><circle cx="12" cy="12" r="2.2"/></svg> {video.waitingCount || 0}
                         </div>
                       );
                     } else if (status === 'soon' || status === 'waiting') {
@@ -319,16 +307,7 @@ export default function Home() {
                           alignItems: 'center',
                           gap: 4,
                         }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> {(() => {
-                            // Generate consistent random number based on video ID
-                            let hash = 0;
-                            for (let i = 0; i < video.id.length; i++) {
-                              const char = video.id.charCodeAt(i);
-                              hash = ((hash << 5) - hash) + char;
-                              hash = hash & hash;
-                            }
-                            return Math.abs(hash % 7) + 1;
-                          })()}
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> {video.waitingCount || 0}
                         </div>
                       );
                     }
@@ -339,31 +318,8 @@ export default function Home() {
                     position: 'absolute',
                     right: 8,
                     bottom: 8,
-                    background: (() => {
-                      const now = new Date();
-                      const premiere = new Date(video.premiere_at);
-                      if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
-                        // Live (up to 2 hours after premiere) - bright red background
-                        return '#ff4444';
-                      } else if (premiere > now) {
-                        // Expected - green background like upload button
-                        return '#39FF14';
-                      } else {
-                        // Completed - gray background
-                        return 'rgba(0,0,0,0.65)';
-                      }
-                    })(),
-                    color: (() => {
-                      const now = new Date();
-                      const premiere = new Date(video.premiere_at);
-                      if (premiere > now) {
-                        // Expected - dark text for green background
-                        return '#18181b';
-                      } else {
-                        // Live or completed - white text
-                        return '#fff';
-                      }
-                    })(),
+                    background: 'rgba(0,0,0,0.65)',
+                    color: '#fff',
                     fontSize: 13,
                     fontWeight: 600,
                     borderRadius: 12,
@@ -388,39 +344,50 @@ export default function Home() {
                       }
                     })()}
                   </div>
-                </a>
-                <div style={{ flex: 1, display: 'flex', padding: '12px 12px 10px 12px', gap: 12 }}>
-                  <img src={video.avatar_url || '/avatar-placeholder.png'} alt="avatar" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', background: '#23232a', border: '1px solid #23232a', flexShrink: 0, marginTop: 2 }} />
-                  <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-                    <h3 style={{
-                      fontSize: 14,
-                      fontWeight: 700,
-                      margin: '0 0 6px 0',
-                      overflow: 'hidden',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      lineHeight: 1.3,
-                      color: '#fff',
-                    }}>
-                      <a href={`/watch/${video.id}`} style={{ color: '#fff', textDecoration: 'none' }}>{video.title}</a>
-                    </h3>
-                    {premiereDate > now && (
-                      <div style={{ fontSize: 11, color: '#22c55e', marginTop: 0, marginBottom: 4 }}>
-                        Until premiere: {getTimeLeft(video.premiere_at)}
-                      </div>
-                    )}
-                    {premiereDate <= now &&
-                      typeof video.duration === 'number' && video.duration > 0 &&
-                      (now.getTime() < premiereDate.getTime() + video.duration * 1000) && (
-                      <div style={{ fontSize: 11, color: '#e57373', marginTop: 0, marginBottom: 4 }}>
-                        Until deletion: {getTimeLeftToEnd(video.premiere_at, video.duration)}
-                      </div>
-                    )}
-                    <div style={{ fontSize: 11, color: '#bdbdbd', marginBottom: 4 }}>
-                      {video.username || '—'}
-                    </div>
+                  {/* Premiere date — bottom left corner */}
+                  <div style={{
+                    position: 'absolute',
+                    left: 8,
+                    bottom: 8,
+                    background: 'rgba(0,0,0,0.65)',
+                    color: '#fff',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    borderRadius: 12,
+                    padding: '2px 12px',
+                    zIndex: 2,
+                  }}>
+                    {new Date(video.premiere_at).toLocaleString()}
                   </div>
+                </a>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '12px 12px 10px 12px' }}>
+                  <h3 style={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                    margin: '0 0 6px 0',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    color: '#fff',
+                  }}>
+                    <a href={`/watch/${video.id}`} style={{ color: '#fff', textDecoration: 'none' }}>{video.title}</a>
+                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: '#bdbdbd', marginBottom: 4, gap: 6 }}>
+                    <img src={video.avatar_url || '/avatar-placeholder.png'} alt="avatar" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', background: '#23232a', border: '1px solid #23232a', marginRight: 4 }} />
+                    {video.username || '—'}
+                  </div>
+                  {premiereDate > now && (
+                    <div style={{ fontSize: 13, color: '#22c55e', marginTop: 0 }}>
+                      Until premiere: {getTimeLeft(video.premiere_at)}
+                    </div>
+                  )}
+                  {premiereDate <= now &&
+                    typeof video.duration === 'number' && video.duration > 0 &&
+                    (now.getTime() < premiereDate.getTime() + video.duration * 1000) && (
+                    <div style={{ fontSize: 13, color: '#e57373', marginTop: 0 }}>
+                      Until deletion: {getTimeLeftToEnd(video.premiere_at, video.duration)}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -514,16 +481,7 @@ export default function Home() {
                             alignItems: 'center',
                             gap: 4,
                           }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><ellipse cx="12" cy="12" rx="8" ry="5"/><circle cx="12" cy="12" r="2.2"/></svg> {(() => {
-                              // Generate consistent random number based on video ID
-                              let hash = 0;
-                              for (let i = 0; i < video.id.length; i++) {
-                                const char = video.id.charCodeAt(i);
-                                hash = ((hash << 5) - hash) + char;
-                                hash = hash & hash;
-                              }
-                              return Math.abs(hash % 7) + 1;
-                            })()}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><ellipse cx="12" cy="12" rx="8" ry="5"/><circle cx="12" cy="12" r="2.2"/></svg> {video.waitingCount || 0}
                           </div>
                         );
                       } else if (status === 'soon' || status === 'waiting') {
@@ -543,16 +501,7 @@ export default function Home() {
                             alignItems: 'center',
                             gap: 4,
                           }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> {(() => {
-                              // Generate consistent random number based on video ID
-                              let hash = 0;
-                              for (let i = 0; i < video.id.length; i++) {
-                                const char = video.id.charCodeAt(i);
-                                hash = ((hash << 5) - hash) + char;
-                                hash = hash & hash;
-                              }
-                              return Math.abs(hash % 7) + 1;
-                            })()}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:3}}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> {video.waitingCount || 0}
                           </div>
                         );
                       }
@@ -563,31 +512,8 @@ export default function Home() {
                       position: 'absolute',
                       right: 8,
                       bottom: 8,
-                      background: (() => {
-                        const now = new Date();
-                        const premiere = new Date(video.premiere_at);
-                        if (premiere <= now && now.getTime() - premiere.getTime() < 2 * 60 * 60 * 1000) {
-                          // Live (up to 2 hours after premiere) - bright red background
-                          return '#ff4444';
-                        } else if (premiere > now) {
-                          // Expected - green background like upload button
-                          return '#39FF14';
-                        } else {
-                          // Completed - gray background
-                          return 'rgba(0,0,0,0.65)';
-                        }
-                      })(),
-                      color: (() => {
-                        const now = new Date();
-                        const premiere = new Date(video.premiere_at);
-                        if (premiere > now) {
-                          // Expected - dark text for green background
-                          return '#18181b';
-                        } else {
-                          // Live or completed - white text
-                          return '#fff';
-                        }
-                      })(),
+                      background: 'rgba(0,0,0,0.65)',
+                      color: '#fff',
                       fontSize: 13,
                       fontWeight: 600,
                       borderRadius: 12,
@@ -612,40 +538,52 @@ export default function Home() {
                         }
                       })()}
                     </div>
+                    {/* Premiere date — bottom left corner */}
+                    <div style={{
+                      position: 'absolute',
+                      left: 8,
+                      bottom: 8,
+                      background: 'rgba(0,0,0,0.65)',
+                      color: '#fff',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      borderRadius: 12,
+                      padding: '2px 12px',
+                      zIndex: 2,
+                    }}>
+                      {new Date(video.premiere_at).toLocaleString()}
+                    </div>
                   </a>
-                  <div style={{ flex: 1, display: 'flex', padding: '6px 10px 6px 10px', minHeight: 0, gap: 8 }}>
-                    <img src={video.avatar_url || '/avatar-placeholder.png'} alt="avatar" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', background: '#23232a', border: '1px solid #23232a', flexShrink: 0, marginTop: 2 }} />
-                    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-                      <div style={{ padding: '2px 0', margin: '0 0 4px 0', position: 'relative', zIndex: 1 }}>
-                        <h3 style={{
-                          fontSize: 14,
-                          fontWeight: 700,
-                          margin: 0,
-                          overflow: 'hidden',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          lineHeight: 1.3,
-                          color: '#fff',
-                        }}>
-                          <a href={`/watch/${video.id}`} style={{ color: '#fff', textDecoration: 'none' }}>{video.title}</a>
-                        </h3>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '6px 10px 6px 10px', minHeight: 0 }}>
+                    <div style={{ padding: '2px 0', margin: '0 0 4px 0', position: 'relative', zIndex: 1 }}>
+                      <h3 style={{
+                        fontSize: 16,
+                        fontWeight: 700,
+                        margin: 0,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        color: '#fff',
+                        lineHeight: 1.2,
+                      }}>
+                        <a href={`/watch/${video.id}`} style={{ color: '#fff', textDecoration: 'none' }}>{video.title}</a>
+                      </h3>
+                    </div>
+                    {premiereDate > now && (
+                      <div style={{ fontSize: 13, color: '#22c55e', marginTop: 2 }}>
+                        Until premiere: {getTimeLeft(video.premiere_at)}
                       </div>
-                      {premiereDate > now && (
-                        <div style={{ fontSize: 11, color: '#22c55e', marginTop: 2, marginBottom: 2 }}>
-                          Until premiere: {getTimeLeft(video.premiere_at)}
-                        </div>
-                      )}
-                      {premiereDate <= now &&
-                        typeof video.duration === 'number' && video.duration > 0 &&
-                        (now.getTime() < premiereDate.getTime() + video.duration * 1000) && (
-                        <div style={{ fontSize: 11, color: '#e57373', marginTop: 2, marginBottom: 2 }}>
-                          Until deletion: {getTimeLeftToEnd(video.premiere_at, video.duration)}
-                        </div>
-                      )}
-                      <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>
-                        {video.username || '—'}
+                    )}
+                    {premiereDate <= now &&
+                      typeof video.duration === 'number' && video.duration > 0 &&
+                      (now.getTime() < premiereDate.getTime() + video.duration * 1000) && (
+                      <div style={{ fontSize: 13, color: '#e57373', marginTop: 2 }}>
+                        Until deletion: {getTimeLeftToEnd(video.premiere_at, video.duration)}
                       </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', fontSize: 13, color: '#666', marginTop: 2, gap: 6 }}>
+                      <img src={video.avatar_url || '/avatar-placeholder.png'} alt="avatar" style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', background: '#23232a', border: '1px solid #23232a', marginRight: 4 }} />
+                      {video.username || '—'}
                     </div>
                   </div>
                 </div>
