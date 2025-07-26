@@ -23,7 +23,7 @@ header {
   background: #0a0a0c !important;
 }
 nav {
-  background: #18181b !important;
+  background: #000000 !important;
 }
 
 /* Светлая иконка календаря для input[type=datetime-local] на тёмном фоне */

@@ -32,9 +32,9 @@ export default function MobileBottomBar() {
       right: 0,
       bottom: 0,
       zIndex: 200,
-      background: '#18181b',
+      background: '#000000',
       color: '#2196f3',
-      backgroundColor: '#18181b',
+      backgroundColor: '#000000',
       boxShadow: '0 -1px 4px #0006', // very soft shadow
       borderTop: '1px solid #23232a',
       WebkitBackdropFilter: 'none',
@@ -49,30 +49,30 @@ export default function MobileBottomBar() {
     }}>
       <Link href="/" style={{ textAlign: 'center', color: '#bdbdbd', textDecoration: 'none', flex: 1 }}>
         <div style={{ lineHeight: 1, display: 'flex', justifyContent: 'center', paddingTop: 2 }}>
-          {/* Minimalistic house */}
-          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#bdbdbd" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="7,20 7,12 17,12 17,20" />
-            <polyline points="3,12 12,4 21,12" />
+          {/* Modern home icon */}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#bdbdbd" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9,22 9,12 15,12 15,22"/>
           </svg>
         </div>
         <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Main</div>
       </Link>
-      <Link href="/upload" style={{ textAlign: 'center', color: '#bdbdbd', textDecoration: 'none', flex: 1 }}>
+      <Link href="/upload" style={{ textAlign: 'center', color: '#39FF14', textDecoration: 'none', flex: 1 }}>
         <div style={{ lineHeight: 1, display: 'flex', justifyContent: 'center', paddingTop: 2 }}>
-          {/* Minimalistic upload — arrow up in a circle */}
-          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#bdbdbd" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="9" />
-            <line x1="12" y1="16" x2="12" y2="8" />
-            <polyline points="9,11 12,8 15,11" />
+          {/* Modern plus icon */}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#39FF14" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
         </div>
-        <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Upload</div>
+        <div style={{ fontSize: 11, marginTop: 2, color: '#39FF14', fontWeight: '600' }}>Upload</div>
       </Link>
       <Link href="/profile" style={{ textAlign: 'center', color: '#bdbdbd', textDecoration: 'none', flex: 1 }}>
         <div style={{ lineHeight: 1, display: 'flex', justifyContent: 'center', paddingTop: 2 }}>
-          {/* Minimalistic profile — only circle */}
-          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#bdbdbd" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="8" />
+          {/* Modern user icon */}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#bdbdbd" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
           </svg>
         </div>
         <div style={{ fontSize: 11, marginTop: 2, color: '#bdbdbd' }}>Profile</div>
