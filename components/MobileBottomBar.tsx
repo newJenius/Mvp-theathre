@@ -41,9 +41,11 @@ export default function MobileBottomBar() {
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
-      height: `calc(50px + env(safe-area-inset-bottom))`,
-      paddingBottom: 'env(safe-area-inset-bottom)',
+      height: 'calc(50px + env(safe-area-inset-bottom, 0px))',
+      minHeight: 50,
+      paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       margin: 0,
+      backgroundClip: 'padding-box',
     }}>
       <Link href="/" style={{ textAlign: 'center', color: '#bdbdbd', textDecoration: 'none', flex: 1 }}>
         <div style={{ lineHeight: 1, display: 'flex', justifyContent: 'center', paddingTop: 2 }}>
