@@ -193,7 +193,7 @@ export default function Upload() {
       const formData = new FormData();
       formData.append('title', title);
       formData.append('description', description);
-      formData.append('premiereAt', premiereAt);
+      formData.append('premiere_at', premiereAt); // Fix: use premiere_at instead of premiereAt
       formData.append('cover', cover);
       formData.append('video', video);
 
