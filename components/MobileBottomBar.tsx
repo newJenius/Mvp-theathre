@@ -4,13 +4,12 @@ import { supabase } from '../lib/supabaseClient';
 
 export default function MobileBottomBar() {
   const [user, setUser] = useState<any>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  // const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 600px)').matches);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
+    // const checkMobile = () => setIsMobile(window.matchMedia('(max-width: 600px)').matches);
+    // checkMobile();
+    // window.addEventListener('resize', checkMobile);
     // Safe user check
     try {
       supabase.auth.getUser().then(({ data }: any) => setUser(data.user)).catch((error: any) => {
@@ -19,11 +18,10 @@ export default function MobileBottomBar() {
     } catch (error) {
       console.error('Supabase initialization error:', error);
     }
-    
-    return () => window.removeEventListener('resize', checkMobile);
+    // return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  if (!isMobile) return null;
+  // if (!isMobile) return null;
 
   return (
     <nav style={{
