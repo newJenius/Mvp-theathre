@@ -14,30 +14,11 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [unsupported, setUnsupported] = useState(false);
-  const [canShowButton, setCanShowButton] = useState(false);
-  const [pwaMode, setPwaMode] = useState(false);
 
   useEffect(() => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
       setUnsupported(true);
-      setCanShowButton(false);
-      return;
     }
-    // Проверка PWA режима
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
-    setPwaMode(isStandalone);
-    if (!isStandalone) {
-      setCanShowButton(false);
-      return;
-    }
-    // Проверка активного сервис-воркера
-    navigator.serviceWorker.getRegistration('/sw.js').then(reg => {
-      if (reg && reg.active) {
-        setCanShowButton(true);
-      } else {
-        setCanShowButton(false);
-      }
-    });
   }, []);
 
   if (!visible) return null;
@@ -82,19 +63,9 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
           Push notifications are not supported in your browser
         </div>
       )}
-      {!unsupported && !pwaMode && (
-        <div style={{ color: '#f87171', fontSize: 14, textAlign: 'center', marginTop: 8 }}>
-          Для получения уведомлений установите приложение на главный экран (PWA)
-        </div>
-      )}
-      {!unsupported && pwaMode && !canShowButton && (
-        <div style={{ color: '#f87171', fontSize: 14, textAlign: 'center', marginTop: 8 }}>
-          Сервис-воркер не активен. Перезапустите приложение или попробуйте позже.
-        </div>
-      )}
       <button
         onClick={handleSubscribe}
-        disabled={subscribed || loading || unsupported || !canShowButton}
+        disabled={subscribed || loading || unsupported}
         style={{
           background: subscribed ? '#fef9c3' : '#fef9c3',
           color: '#18181b',
@@ -103,8 +74,8 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
           padding: '12px 0',
           fontWeight: 700,
           fontSize: 15,
-          cursor: subscribed || unsupported || !canShowButton ? 'default' : 'pointer',
-          opacity: loading || unsupported || !canShowButton ? 0.7 : 1,
+          cursor: subscribed || unsupported ? 'default' : 'pointer',
+          opacity: loading || unsupported ? 0.7 : 1,
           marginTop: 0,
           width: '100%',
           maxWidth: 420,
@@ -119,4 +90,4 @@ export default function WatchSubscribePush({ premiereId, userId, visible = true 
       {error && <div style={{ color: '#f87171', marginTop: 8, fontSize: 14 }}>{error}</div>}
     </>
   );
-}
+} 
