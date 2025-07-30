@@ -194,8 +194,11 @@ export default function Upload() {
       formData.append('title', title);
       formData.append('description', description);
       formData.append('premiere_at', premiereAt); // Fix: use premiere_at instead of premiereAt
+      formData.append('user_id', user?.id || ''); // Add user_id
       formData.append('cover', cover);
       formData.append('video', video);
+      
+      console.log('Uploading with user_id:', user?.id);
 
       // Upload to server
       const response = await fetch(`${apiUrl}/upload`, {

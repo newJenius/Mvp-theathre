@@ -6,15 +6,13 @@ const Queue = require('bull');
 
 const app = express();
 
-// CORS settings
+// CORS настройки
 app.use(cors({
   origin: [
     'https://api.nermes.xyz',
     'http://localhost:3000',
     'https://mvp-theathre.vercel.app',
-    'https://vercel.app',
-    'https://www.onetimeshow.app',
-    'https://onetimeshow.app'
+    'https://vercel.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -23,7 +21,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Create queue for video processing
+// Создаём очередь для обработки видео
 const videoQueue = new Queue('video-processing', {
   redis: { 
     port: 6379, 
@@ -34,7 +32,7 @@ const videoQueue = new Queue('video-processing', {
 
 const upload = multer({ dest: 'uploads/' });
 
-// API for video upload
+// API для загрузки видео
 app.post('/upload', upload.fields([
   { name: 'video', maxCount: 1 },
   { name: 'cover', maxCount: 1 }
@@ -45,8 +43,10 @@ app.post('/upload', upload.fields([
     const inputPath = videoFile.path;
     const coverPath = coverFile.path;
     const { title, description, user_id, premiere_at } = req.body;
+    
+    console.log('Received upload request:', { title, user_id, premiere_at });
 
-    // Add task to queue
+    // Добавляем задачу в очередь
     const job = await videoQueue.add({
       inputPath,
       coverPath,
@@ -57,42 +57,42 @@ app.post('/upload', upload.fields([
       originalName: videoFile.originalname,
       originalNameCover: coverFile.originalname
     }, {
-      attempts: 3, // Number of retry attempts on error
+      attempts: 3, // Количество попыток при ошибке
       backoff: {
         type: 'exponential',
         delay: 2000
       }
     });
 
-    // Get information about queue position
+    // Получаем информацию о позиции в очереди
     const waitingJobs = await videoQueue.getWaiting();
     const position = waitingJobs.findIndex(j => j.id === job.id) + 1;
 
-    console.log(`Video added to queue. ID: ${job.id}, Position: ${position}`);
+    console.log(`Видео добавлено в очередь. ID: ${job.id}, Позиция: ${position}`);
 
     res.json({ 
-      message: 'Video added to processing queue',
+      message: 'Видео добавлено в очередь обработки',
       jobId: job.id,
       queuePosition: position,
-      estimatedTime: position * 10 // approximate time in minutes (10 min per video)
+      estimatedTime: position * 10 // примерное время в минутах (10 мин на видео)
     });
 
   } catch (error) {
-    console.error('Error adding to queue:', error);
+    console.error('Ошибка добавления в очередь:', error);
     res.status(500).json({ 
-      error: 'Error adding video to queue', 
+      error: 'Ошибка добавления видео в очередь', 
       details: error.message 
     });
   }
 });
 
-// API for checking processing status
+// API для проверки статуса обработки
 app.get('/status/:jobId', async (req, res) => {
   try {
     const job = await videoQueue.getJob(req.params.jobId);
     
     if (!job) {
-      return res.status(404).json({ error: 'Task not found' });
+      return res.status(404).json({ error: 'Задача не найдена' });
     }
 
     const state = await job.getState();
@@ -108,15 +108,15 @@ app.get('/status/:jobId', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error getting status:', error);
+    console.error('Ошибка получения статуса:', error);
     res.status(500).json({ 
-      error: 'Error getting status', 
+      error: 'Ошибка получения статуса', 
       details: error.message 
     });
   }
 });
 
-// API for getting queue information
+// API для получения информации об очереди
 app.get('/queue-info', async (req, res) => {
   try {
     const waiting = await videoQueue.getWaiting();
@@ -133,14 +133,14 @@ app.get('/queue-info', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error getting queue information:', error);
+    console.error('Ошибка получения информации об очереди:', error);
     res.status(500).json({ 
-      error: 'Error getting queue information', 
+      error: 'Ошибка получения информации об очереди', 
       details: error.message 
     });
   }
 });
 
 app.listen(4000, () => {
-  console.log('Backend server with queue started on port 4000');
+  console.log('Backend сервер с очередью запущен на порту 4000');
 }); 

@@ -246,6 +246,8 @@ videoQueue.process(async (job) => {
     }
 
     // Save link and metadata to Supabase
+    console.log('Saving to Supabase:', { user_id, title, premiere_at, duration });
+    
     const { error } = await supabase.from('videos').insert([
       {
         user_id: user_id || null,
